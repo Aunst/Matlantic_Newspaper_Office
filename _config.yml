@@ -24,7 +24,6 @@ description: >- # this means to ignore newlines until "baseurl:"
   储存 RIA Zeroth Minecraft 服务器中抹岚报社所有发行刊物的站点
 baseurl: "" # the subpath of your site, e.g. /blog
 url: "" # the base hostname & protocol for your site, e.g. http://example.com
-twitter_username: "Aunst_Rutilius"
 github_username:  "Aunst"
 
 # Build settings
@@ -53,6 +52,7 @@ plugins:
 #   - vendor/ruby/
 
 lang: "zh-Hans"
+timezone: "Asia/Shanghai"
 
 sass:
   style: "expanded"
