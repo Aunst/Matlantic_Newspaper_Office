@@ -1,0 +1,47 @@
+/**
+ * Site header
+ */
+.site-header {
+  border-top: 5px solid $color-grey-dark;
+  border-bottom: 1px solid $color-grey-light;
+}
+
+/**
+ * Site footer
+ */
+.site-footer {
+  padding: $spacing-unit 0;
+  border-top: 1px solid $color-grey-light;
+}
+
+.footer-col-container {
+  color: $color-grey;
+}
+
+/**
+ * Page content
+ */
+.page-content {
+  flex: 1 0 auto;
+  padding-top: $spacing-unit;
+  padding-bottom: $spacing-unit;
+}
+
+.post-content {
+  margin-bottom: $spacing-unit;
+}
+
+.post-list > li {
+  margin-bottom: $spacing-unit;
+}
+.post-meta {
+  font-size: 0.875em;
+  color: $color-grey;
+}
+
+/**
+ * Posts
+ */
+.post-header {
+  margin-bottom: $spacing-unit;
+}

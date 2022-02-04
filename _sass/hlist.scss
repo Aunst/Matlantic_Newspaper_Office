@@ -1,0 +1,86 @@
+.hlist {
+  /* Display list items inline 
+   以内联形式显示列表项 */
+  dl, ol, ul {
+    margin: 0;
+    padding: 0;
+
+    /* Display nested lists inline 
+       以内联形式显示嵌套列表 */
+    dl, ol, ul {
+      display: inline;
+    }
+  }
+
+  /* Display list items inline 
+     以内联形式显示列表项 */
+  dd, dt, li {
+    margin: 0;
+    display: inline;
+  }
+
+  /* Display nested lists inline 
+     以内联形式显示嵌套列表 */
+  &.inline {
+    display: inline;
+
+    dl, ol, ul {
+      display: inline;
+    }
+  }
+
+  /* Generate interpuncts 
+     生成冒号 */
+  dt::after {
+    content: ": ";
+  }
+
+  dd, li {
+    &::before {
+      content: " • ";
+      /* font-weight: bold; */
+    }
+  }
+
+  dd:first-of-type::before,
+  dt:last-child::after,
+  li:first-child::before {
+    content: none;
+  }
+
+  /* Add parentheses around nested lists 
+     在嵌套列表周围添加括号 */
+  dd, dt, li {
+    dd, dt, li {
+      &:first-child::before {
+        content: " (";
+        font-weight: normal;
+      }
+      
+      &:last-child::after {
+        content: ") ";
+        font-weight: normal;
+      }
+    }
+  }
+
+  /* Put ordinals in front of ordered list items
+     在有序列表项前生成序号 */
+  ol {
+    counter-reset: listitem;
+
+    & > li {
+      counter-increment: listitem;
+
+      &::before {
+        content: " " counter(listitem) "\a0";
+      }
+    }
+  }
+
+  dd, dt, li {
+    li:first-child::before {
+      content: " (" counter(listitem) "\a0";
+    }
+  }
+}

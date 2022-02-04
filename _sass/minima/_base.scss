@@ -1,0 +1,65 @@
+/**
+ * Basic styling
+ */
+body {
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+
+  background-color: $color-background;
+  color: $color-text;
+}
+
+/**
+ * Code formatting
+ */
+pre,
+code {
+  font-size: 0.9375em;
+  border: 1px solid $color-grey-light;
+  border-radius: 3px;
+  background-color: #eef;
+}
+ 
+code {
+  padding: 1px 5px;
+}
+ 
+pre {
+  padding: 8px 12px;
+  overflow-x: auto;
+ 
+  & > code {
+    border: none;
+    padding-right: 0;
+    padding-left: 0;
+  }
+}
+
+/**
+ * Tables
+ */
+table {
+  margin-bottom: $spacing-unit;
+  width: 100%;
+  text-align: $table-text-align;
+  color: lighten($color-text, 18%);
+  border-collapse: collapse;
+  border: 1px solid $color-grey-light;
+  tr {
+    &:nth-child(even) {
+      background-color: lighten($color-grey-light, 6%);
+    }
+  }
+  th, td {
+    padding: ($spacing-unit / 3) ($spacing-unit / 2);
+  }
+  th {
+    background-color: lighten($color-grey-light, 3%);
+    border: 1px solid darken($color-grey-light, 4%);
+    border-bottom-color: darken($color-grey-light, 12%);
+  }
+  td {
+    border: 1px solid $color-grey-light;
+  }
+}

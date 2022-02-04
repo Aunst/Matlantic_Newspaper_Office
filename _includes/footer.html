@@ -1,0 +1,53 @@
+<footer class="site-footer h-card">
+  <data class="u-url" href="{{ "/" | relative_url }}"></data>
+
+  <div class="container">
+
+    <h2 class="footer-heading">{{ site.title | escape }}</h2>
+
+    <div class="footer-col-container row">
+      <div class="col-md-4">
+        <ul class="contact-list list-unstyled">
+          <li class="p-name">
+            {%- if site.author -%}
+              {{ site.author | escape }}
+            {%- else -%}
+              {{ site.title | escape }}
+            {%- endif -%}
+            </li>
+            {%- if site.email -%}
+            <li><a class="u-email" href="mailto:{{ site.email }}">{{ site.email }}</a></li>
+            {%- endif -%}
+        </ul>
+      </div>
+
+      <div class="col-md-3">
+        {%- include social.html -%}
+      </div>
+
+      <div class="col-md-5">
+        <p>{{- site.description | escape -}}</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+<script src="https://cdn.staticfile.org/jquery/3.6.0/jquery.js"></script>
+<script src="https://cdn.staticfile.org/bootstrap/4.6.1/js/bootstrap.js"></script>
+<script src="https://unpkg.com/@popperjs/core@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@sliphua/pjax@2.4.0/dist/pjax.js"></script>
+<script src="https://unpkg.com/nprogress@0.2.0/nprogress.js"></script>
+<script>
+  const pjax = new Pjax({
+    selectors: [
+      'title',
+      'meta[name="description"]',
+      '.site-header',
+      '.page-content'
+    ],
+  });
+
+  document.addEventListener('pjax:send', function() { NProgress.start(); });
+  document.addEventListener('pjax:complete', function() { NProgress.done(); });
+</script>
