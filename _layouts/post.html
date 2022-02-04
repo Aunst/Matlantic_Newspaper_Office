@@ -7,12 +7,12 @@ layout: default
     <h1 class="post-title p-name" itemprop="name headline">{{ page.title | escape }}</h1>
     <div class="hlist">
       <ul class="post-meta">
-        <li><span class="mdi mdi-clock"></span><time class="dt-published" datetime="{{ page.date | date_to_xmlschema }}" itemprop="datePublished">
+        <li><span class="mdi mdi-clock" aria-label="发布时间: "></span><time class="dt-published" datetime="{{ page.date | date_to_xmlschema }}" itemprop="datePublished">
           {%- assign date_format = site.minima.date_format | default: "%b %-d, %Y" -%}
           {{ page.date | date: date_format }}
         </time></li>
         {%- if page.author -%}
-        <li><span class="mdi mdi-account"></span><span itemprop="author" itemscope="itemscope" itemtype="http://schema.org/Person"><span class="p-author h-card" itemprop="name">{{ page.author }}</span></span></li>
+        <li><span class="mdi mdi-account" aria-label="作者: "></span><span itemprop="author" itemscope="itemscope" itemtype="http://schema.org/Person"><span class="p-author h-card" itemprop="name">{{ page.author }}</span></span></li>
       {%- endif -%}
       </ul>
     </div>
