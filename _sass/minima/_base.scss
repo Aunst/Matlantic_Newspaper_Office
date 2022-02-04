@@ -15,14 +15,15 @@ body {
  */
 pre,
 code {
-  font-size: 0.9375em;
   border: 1px solid $color-grey-light;
   border-radius: 3px;
   background-color: #eef;
+  font-size: 0.9375em;
 }
  
 code {
   padding: 1px 5px;
+  color: inherit;
 }
  
 pre {
@@ -40,12 +41,14 @@ pre {
  * Tables
  */
 table {
-  margin-bottom: $spacing-unit;
   width: 100%;
+  margin-bottom: $spacing-unit;
+  border: 1px solid $color-grey-light;
+  border-collapse: collapse;
+
   text-align: $table-text-align;
   color: lighten($color-text, 18%);
-  border-collapse: collapse;
-  border: 1px solid $color-grey-light;
+
   tr {
     &:nth-child(even) {
       background-color: lighten($color-grey-light, 6%);
@@ -55,9 +58,10 @@ table {
     padding: ($spacing-unit / 3) ($spacing-unit / 2);
   }
   th {
-    background-color: lighten($color-grey-light, 3%);
     border: 1px solid darken($color-grey-light, 4%);
     border-bottom-color: darken($color-grey-light, 12%);
+
+    background-color: lighten($color-grey-light, 3%);
   }
   td {
     border: 1px solid $color-grey-light;

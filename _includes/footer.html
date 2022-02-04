@@ -6,7 +6,7 @@
     <h2 class="footer-heading">{{ site.title | escape }}</h2>
 
     <div class="footer-col-container row">
-      <div class="col-lg-4">
+      <div class="col-md-7 col-lg-4">
         <ul class="contact-list list-unstyled">
           <li class="p-name">
             {%- if site.author -%}
@@ -21,13 +21,13 @@
         </ul>
       </div>
 
-      <div class="col-lg-3">
+      <div class="col-md-5 col-lg-3">
         {%- include social.html -%}
       </div>
 
       <div class="col-lg-5">
         {% if page.description %}
-          {{ page.description }}
+          <p>{{ page.description }}</p>
         {% endif %}
         <p>{{- site.description | escape -}}</p>
       </div>
@@ -42,16 +42,4 @@
 <script src="https://unpkg.com/@popperjs/core@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/@sliphua/pjax@2.4.0/dist/pjax.js"></script>
 <script src="https://unpkg.com/nprogress@0.2.0/nprogress.js"></script>
-<script>
-  const pjax = new Pjax({
-    selectors: [
-      'title',
-      'meta[name="description"]',
-      '.site-header',
-      '.page-content'
-    ],
-  });
-
-  document.addEventListener('pjax:send', function() { NProgress.start(); });
-  document.addEventListener('pjax:complete', function() { NProgress.done(); });
-</script>
+<script src="{{ "/assets/js/pjax-initializer.js" | relative_url }}"></script>

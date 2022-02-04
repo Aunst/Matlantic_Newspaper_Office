@@ -18,18 +18,19 @@
 # You can create any custom variable you would like, and they will be accessible
 # in the templates via {{ site.myvariable }}.
 
-title: 莉亚晚报存档站
-email: a30266@qq.com
+title: "莉亚晚报档案馆"
+email: "a30266@qq.com"
 description: >- # this means to ignore newlines until "baseurl:"
-  存放 RIA Zeroth Minecraft 服务器中抹岚报社所发行刊物的站点
+  储存 RIA Zeroth Minecraft 服务器中抹岚报社所有发行刊物的站点
 baseurl: "/RIA_Nightly" # the subpath of your site, e.g. /blog
 url: "https://aunst.github.io" # the base hostname & protocol for your site, e.g. http://example.com
-github_username: Aunst
+twitter_username: "Aunst_Rutilius"
+github_username:  "Aunst"
 
 # Build settings
-theme: minima
+theme: "minima"
 plugins:
-  - jekyll-feed
+  - "jekyll-feed"
 
 # Exclude from processing.
 # The following items will not be processed, by default.
@@ -51,6 +52,11 @@ plugins:
 #   - vendor/gems/
 #   - vendor/ruby/
 
-lang: zh-Hans
+lang: "zh-Hans"
+timezong: "Asia/Shanghai"
+
+sass:
+  style: "expanded"
+
 minima:
   date_format: "%Y-%m-%d"
