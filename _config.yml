@@ -23,9 +23,9 @@ email: your-email@example.com
 description: >- # this means to ignore newlines until "baseurl:"
   一个普通的 Jekyll 站点
 baseurl: "/RIA_Nightly" # the subpath of your site, e.g. /blog
-url: https://aunst.github.io"" # the base hostname & protocol for your site, e.g. http://example.com
+url: "https://aunst.github.io" # the base hostname & protocol for your site, e.g. http://example.com
 twitter_username: Aunst_Rutilius
-github_username:  Aunst
+github_username: Aunst
 
 # Build settings
 theme: minima
