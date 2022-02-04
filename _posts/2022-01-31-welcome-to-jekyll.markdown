@@ -1,18 +1,18 @@
 ---
 layout: post
-title:  "Welcome to Jekyll!"
+title:  "欢迎来到 Jekyll!"
 date:   2022-01-31 23:04:04 +0800
 categories: jekyll update
 ---
-You’ll find this post in your `_posts` directory. Go ahead and edit it and re-build the site to see your changes. You can rebuild the site in many different ways, but the most common way is to run `jekyll serve`, which launches a web server and auto-regenerates your site when a file is updated.
+你可以在 `_posts` 文件夹中找到帖子。编辑保存它后重新构建站点, 就可以看到你的更改了。你可以用许多不同的方法重构站点, 但最常用的方法是运行 `jekyll serve`, 它将会启动一个网络服务器, 并自动在站点中文件更新时重新生成站点。
 
-Jekyll requires blog post files to be named according to the following format:
+Jekyll 需要用以下的格式命名帖子文件:
 
-`YEAR-MONTH-DAY-title.MARKUP`
+`YEAR-MONTH-DAY-标题.MARKUP`
 
-Where `YEAR` is a four-digit number, `MONTH` and `DAY` are both two-digit numbers, and `MARKUP` is the file extension representing the format used in the file. After that, include the necessary front matter. Take a look at the source for this post to get an idea about how it works.
+其中 `YEAR` 是四位数字, `MONTH` 和 `DAY` 是两位数字, `MARKUP` 是表示文件所使用格式的文件扩展名。在这之后, 添加需要的 <i>front-matter</i> (帖子前部信息) 。看看这篇文章的源代码，了解一下它是如何工作的。
 
-Jekyll also offers powerful support for code snippets:
+Jekyll 也为代码段提供了强大的支持:
 
 {% highlight ruby %}
 def print_hi(name)
@@ -22,7 +22,7 @@ print_hi('Tom')
 #=> prints 'Hi, Tom' to STDOUT.
 {% endhighlight %}
 
-Check out the [Jekyll docs][jekyll-docs] for more info on how to get the most out of Jekyll. File all bugs/feature requests at [Jekyll’s GitHub repo][jekyll-gh]. If you have questions, you can ask them on [Jekyll Talk][jekyll-talk].
+查看 [Jekyll 文档][jekyll-docs]以获取更多关于如何充分利用 Jekyll 的信息。所有的 bug 报告和特性请求都可以在 [Jekyll 的 GitHub repo][jekyll-gh] 中提出。如果有问题, 你可以在 [Jekyll Talk][jekyll-talk] 中提问。
 
 [jekyll-docs]: https://jekyllrb.com/docs/home
 [jekyll-gh]:   https://github.com/jekyll/jekyll

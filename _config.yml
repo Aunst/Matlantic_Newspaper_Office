@@ -52,7 +52,7 @@ plugins:
 #   - vendor/ruby/
 
 lang: "zh-Hans"
-timezone: "Asia/Shanghai"
+# timezone: Asia/Shanghai
 
 sass:
   style: "expanded"
