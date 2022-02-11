@@ -1,0 +1,25 @@
+/**
+ * Site header
+ */
+ .site-header {
+  border-top-color: transparent;
+  border-bottom-color: $color-darktheme-grey-light;
+}
+
+/**
+ * Site footer
+ */
+.site-footer {
+  border-top-color: $color-darktheme-grey-light;
+}
+
+.footer-col-container {
+  color: $color-darktheme-grey;
+}
+
+/**
+ * Page content
+ */
+.post-meta {
+  color: $color-darktheme-grey;
+}

@@ -1,0 +1,17 @@
+/* bootstrap-theme-dark.scss */
+$color-navbar-brand: #c9d1d9;
+$color-navbar-brand-hover: $color-navbar-brand;
+
+$color-navbar: rgba($color-navbar-brand, 0.75);
+$color-navbar-hover: rgba($color-navbar-brand, 0.9);
+$color-navbar-disabled: rgba($color-navbar-brand, 0.3);
+
+$color-navbar-active: $color-navbar-brand;
+
+$color-navbar-toggler-border: rgba($color-navbar-brand, 0.15);
+
+$navbar-toggler-icon-bg: "data:image/svg+xml;utf-8,<svg xmlns='http://www.w3.org/2000/svg' width='30' height='30' viewBox='0 0 30 30'><path stroke='#{$color-navbar}' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/></svg>";
+
+@media (prefers-color-scheme: dark) {
+  @import "bootstrap/bootstrap-auto-theme";
+}
