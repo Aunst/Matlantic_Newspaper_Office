@@ -1,0 +1,41 @@
+/* base_dark.scss */
+
+body {
+  background-color: $color-darktheme-background;
+  color: $color-darktheme-text;
+}
+
+pre, code {
+  border-color: $color-darktheme-grey-light;
+  background-color: #002b36;
+  color: #93a1a1;
+}
+
+table {
+  border-color: $color-darktheme-grey-light;
+
+  color: lighten($color-darktheme-text, 2%);
+
+  tr {
+    &:nth-child(even) {
+      background-color: darken($color-darktheme-grey-light, 6%);
+    }
+  }
+  th {
+    border-color: lighten($color-darktheme-grey-light, 4%);
+    border-bottom-color: lighten($color-darktheme-grey-light, 12%);
+
+    background-color: darken($color-darktheme-grey-light, 3%);
+  }
+  td {
+    border-color: $color-darktheme-grey-light;
+  }
+}
+
+a {
+  color: $color-darktheme-link;
+
+  &:hover {
+    color: darken($color-darktheme-link, 10%);
+  }
+}

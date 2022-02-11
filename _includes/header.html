@@ -1,5 +1,5 @@
 <header class="site-header" role="banner">
-  <nav class="container navbar navbar-expand-md navbar-light">
+  <nav class="container navbar navbar-expand-md navbar-theme-auto">
     {%- assign default_paths = site.pages | map: "path" -%}
     {%- assign page_paths = site.header_pages | default: default_paths -%}
     <a class="navbar-brand" rel="author" href="{{ "/" | relative_url }}">{{ site.title | escape }}</a>
