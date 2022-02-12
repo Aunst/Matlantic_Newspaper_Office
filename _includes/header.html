@@ -9,7 +9,7 @@
       <ul class="navbar-nav">
         {% for item in site.data.site-navigation %}
         <li class="nav-item{% if page.url == item.link %} active{% endif %}">
-          <a class="nav-link" href="{% if page.url == item.link %}javascript:void(0){% else %}{{ item.link }}{% endif %}">{{ item.name }}{% if page.url == item.link %}<span class="sr-only"> (当前页面)</span>{% endif %}</a>
+          <a class="nav-link" href="{% if page.url == item.link %}javascript:void(0){% else %}{{ item.link | relative_url }}{% endif %}">{{ item.name }}{% if page.url == item.link %}<span class="sr-only"> (当前页面)</span>{% endif %}</a>
         </li>
         {% endfor %} 
       </ul>
