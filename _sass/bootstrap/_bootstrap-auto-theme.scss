@@ -1,3 +1,11 @@
+.bg-theme-auto {
+  background-color: $color-bg;
+}
+
+.card-theme-auto {
+  border-color: $color-border-card;
+  background-color: $color-bg-card;
+}
 
 .navbar-theme-auto {
   .navbar-brand {

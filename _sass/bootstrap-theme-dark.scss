@@ -1,5 +1,10 @@
-/* bootstrap-theme-dark.scss */
-$color-navbar-brand: #c9d1d9;
+$color-bg: #0d1117;
+$color-text: #c9d1d9;
+
+$color-bg-card: lighten($color-bg, 2%);
+$color-border-card: rgba($color-text, 0.25);
+
+$color-navbar-brand: $color-text;
 $color-navbar-brand-hover: $color-navbar-brand;
 
 $color-navbar: rgba($color-navbar-brand, 0.75);

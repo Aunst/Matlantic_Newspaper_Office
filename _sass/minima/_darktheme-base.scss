@@ -32,6 +32,10 @@ table {
   }
 }
 
+img {
+  filter: brightness(0.75) contrast(1.2);
+}
+
 a {
   color: $color-darktheme-link;
 
