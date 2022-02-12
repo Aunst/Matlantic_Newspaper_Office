@@ -1,3 +1,8 @@
+:root {
+  --font-family-sans-serif: #{$font-family-sans-serif};
+  --font-family-monospace: #{$font-family-monospace};
+}
+
 /**
  * Basic styling
  */
@@ -8,6 +13,8 @@ body {
 
   background-color: $color-background;
   color: $color-text;
+
+  font-family: $font-family-sans-serif;
 }
 
 /**
@@ -35,6 +42,13 @@ pre {
     padding-right: 0;
     padding-left: 0;
   }
+}
+
+pre,
+code,
+kbd,
+samp {
+  font-family: $font-family-monospace;
 }
 
 /**
