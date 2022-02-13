@@ -1,7 +1,7 @@
 ---
 layout: page
 title: 成员
-perlink: /members/
+permalink: /members/
 ---
 
 # 成员
