@@ -45,3 +45,16 @@
 .post-header {
   margin-bottom: $spacing-unit;
 }
+
+/**
+ * Post sections
+ */
+.post-section-meta {
+  margin-bottom: $spacing-unit / 2;
+  color: $color-grey;
+  font-size: 0.875em;
+}
+
+.post-section-author {
+  font-style: normal;
+}
