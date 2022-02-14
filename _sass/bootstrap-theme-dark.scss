@@ -1,7 +1,7 @@
 $color-bg: #0d1117;
 $color-text: #c9d1d9;
 
-$color-bg-card: lighten($color-bg, 2%);
+$color-bg-card: mix(white, $color-bg, 5%);
 $color-border-card: rgba($color-text, 0.25);
 
 $color-navbar-brand: $color-text;
