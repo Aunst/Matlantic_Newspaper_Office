@@ -6,6 +6,7 @@
 # link: 链接
 # unique-id: 独特 ID, 不能和其他 ID 相同
 # items: 项目, 目前仅用于下拉菜单, 内部包含的是下拉菜单的链接
+
 - type: dropdown
   name: 导航
   unique-id: other
