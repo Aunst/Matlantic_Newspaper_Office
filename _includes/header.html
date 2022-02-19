@@ -15,10 +15,23 @@
     <div id="site-nav-collapsible" class="collapse navbar-collapse justify-content-md-end">
       <ul class="navbar-nav">
         {% for item in site.data.site-navigation %}
-        <li class="nav-item{% if page.url == item.link %} active{% endif %}">
-          <a class="nav-link" href="{% if page.url == item.link %}javascript:void(0){% else %}{{ item.link | relative_url }}{% endif %}">{{ item.name }}{% if page.url == item.link %}<span class="sr-only"> (当前页面)</span>{% endif %}</a>
-        </li>
-        {% endfor %} 
+          {% if item.type == "dropdown" %}
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="javascript:void(0)" id="site-nav-dropdown-menu-{{ item.unique-id }}" role="button" data-toggle="dropdown" aria-expanded="false">
+              {{ item.name }}
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="site-nav-dropdown-menu-{{ item.unique-id }}">
+              {% for subitem in item.items %}
+                <li class="dropdown-item"><a href="{% if page.url == subitem.link %}javascript:void(0){% else %}{{ subitem.link | relative_url }}{% endif %}">{{ subitem.name }}{% if page.url == subitem.link %}<span class="sr-only"> (当前页面)</span>{% endif %}</a></li>
+              {% endfor %}
+            </ul>
+          </li>
+          {% else %}
+          <li class="nav-item{% if page.url == item.link %} active{% endif %}">
+            <a class="nav-link" href="{% if page.url == item.link %}javascript:void(0){% else %}{{ item.link | relative_url }}{% endif %}">{{ item.name }}{% if page.url == item.link %}<span class="sr-only"> (当前页面)</span>{% endif %}</a>
+          </li>
+          {% endif %}
+        {% endfor %}
       </ul>
     </div>
   </nav>

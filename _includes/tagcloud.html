@@ -1,4 +1,3 @@
-<h2>标签云</h2>
 {% capture temptags %}
   {% for tag in site.tags %}
     {{ tag[1].size | plus: 1000 }}#{{ tag[0] }}#{{ tag[1].size }}
@@ -9,6 +8,6 @@
   {% for temptag in sortedtemptags %}
     {% assign tagitems = temptag | split: '#' %}
     {% capture tagname %}{{ tagitems[1] }}{% endcapture %}
-    <li class="post-tag-item"><span class="mdi mdi-tag-outline"></span><a href="{{ "/tag/" | append: tagname | relative_url }}">{{ tagname }}</a> <small class="post-tag-item-size"><span class="sr-only">共 </span>({{ site.tags[tagname].size }})<span class="sr-only"> 个页面</span></small></li>
+    <li class="post-tag-item"><span class="mdi mdi-tag-outline"></span><a href="{{ "/tag/" | append: tagname | relative_url }}">{{ tagname }}</a> <small class="post-tag-item-size">(<span class="sr-only">共 </span>{{ site.tags[tagname].size }}<span class="sr-only"> 个页面</span>)</small></li>
   {% endfor %}
 </ul>
