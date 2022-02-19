@@ -778,8 +778,8 @@
 
   .dropdown-menu {
     color: #c9d1d9;
-    background-color: #fff;
-    border-color: rgba(0, 0, 0, 0.15);
+    background-color: #171b20;
+    border-color: rgba(255, 255, 255, 0.15);
   }
 
   .dropdown-divider {
@@ -790,11 +790,11 @@
   }
 
   .dropdown-item {
-    color: #212529;
+    color: #c9d1d9;
   }
   .dropdown-item:hover, .dropdown-item:focus {
-    color: #16181b;
-    background-color: #e9ecef;
+    color: #e7ebee;
+    background-color: #2a2e33;
   }
   .dropdown-item.active, .dropdown-item:active {
     color: #fff;
@@ -809,7 +809,7 @@
   }
 
   .dropdown-item-text {
-    color: #212529;
+    color: #c9d1d9;
   }
 
   .input-group-text {

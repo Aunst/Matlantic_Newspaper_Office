@@ -3,3 +3,10 @@
 .tab-pane {
   display: inherit;
 }
+
+.navbar-expand-sm .navbar-nav .dropdown-menu,
+.navbar-expand-xl .navbar-nav .dropdown-menu,
+.navbar-expand-lg .navbar-nav .dropdown-menu,
+.navbar-expand-md .navbar-nav .dropdown-menu {
+  position: static;
+}
