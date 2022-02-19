@@ -4,10 +4,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   {%- seo -%}
   <link rel="stylesheet" href="https://cdn.staticfile.org/bootstrap/4.6.1/css/bootstrap.css" />
-  <link rel="stylesheet" media="(prefers-color-scheme: no-preference), (prefers-color-scheme: light)" href="{{ "/assets/css/bootstrap/bootstrap-theme-light.css" | relative_url }}" />
-  <link rel="stylesheet" media="(prefers-color-scheme: dark)" href="{{ "/assets/css/bootstrap/bootstrap-theme-dark.css" | relative_url }}" />
+  <noscript>
+    <link rel="stylesheet" href="{{ "/assets/css/bootstrap-custom/bootstrap-nojs.css" | relative_url }}" />
+  </noscript>
+  <link rel="stylesheet" href="{{ "/assets/css/bootstrap-custom/bootstrap-alert.css" | relative_url }}" />
+  <link rel="stylesheet" href="{{ "/assets/css/bootstrap-custom/bootstrap-fonts.css" | relative_url }}" />
+  <link rel="stylesheet" href="{{ "/assets/css/bootstrap-custom/bootstrap-custom-4.6.1.css" | relative_url }}" />
+  <link rel="stylesheet" media="(prefers-color-scheme: dark)" href="{{ "/assets/css/bootstrap-custom/bootstrap-custom-dark-4.6.1.css" | relative_url }}" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@6.5.95/css/materialdesignicons.css" media="all" />
-  <link rel='stylesheet' href='https://unpkg.com/nprogress@0.2.0/nprogress.css' />
+  <link rel='stylesheet' href='https://cdn.staticfile.org/nprogress/0.2.0/nprogress.css' />
   <link rel="stylesheet" href="{{ "/assets/css/main.css" | relative_url }}" />
   <link rel="stylesheet" media="(prefers-color-scheme: dark)" href="{{ "/assets/css/main-dark.css" | relative_url }}" />
   <link rel="stylesheet" media="(prefers-color-scheme: no-preference), (prefers-color-scheme: light)" href="{{ "/assets/css/syntax-highlight/syntax-highlight-light.css" | relative_url }}" />

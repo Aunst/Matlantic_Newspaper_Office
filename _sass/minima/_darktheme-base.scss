@@ -1,45 +1,37 @@
 /* base_dark.scss */
 
 body {
-  background-color: $color-darktheme-background;
-  color: $color-darktheme-text;
+  background-color: $color-background;
+  color: $color-text;
 }
 
 pre, code {
-  border-color: $color-darktheme-grey-light;
+  border-color: $color-grey-dark;
   background-color: #002b36;
   color: #93a1a1;
 }
 
 table {
-  border-color: $color-darktheme-grey-light;
+  border-color: $color-grey-dark;
 
-  color: lighten($color-darktheme-text, 2%);
+  color: lighten($color-text, 2%);
 
   tr {
     &:nth-child(even) {
-      background-color: darken($color-darktheme-grey-light, 6%);
+      background-color: darken($color-grey-dark, 6%);
     }
   }
   th {
-    border-color: lighten($color-darktheme-grey-light, 4%);
-    border-bottom-color: lighten($color-darktheme-grey-light, 12%);
+    border-color: lighten($color-grey-dark, 4%);
+    border-bottom-color: lighten($color-grey-dark, 12%);
 
-    background-color: darken($color-darktheme-grey-light, 3%);
+    background-color: darken($color-grey-dark, 3%);
   }
   td {
-    border-color: $color-darktheme-grey-light;
+    border-color: $color-grey-dark;
   }
 }
 
 img {
   filter: brightness(0.75) contrast(1.2);
-}
-
-a {
-  color: $color-darktheme-link;
-
-  &:hover {
-    color: darken($color-darktheme-link, 10%);
-  }
 }

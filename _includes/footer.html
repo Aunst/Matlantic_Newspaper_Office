@@ -1,3 +1,6 @@
+{% if site.tags != "" %}
+  {% include collecttags.html %}
+{% endif %}
 <footer class="site-footer h-card">
   <data class="u-url" href="{{ "/" | relative_url }}"></data>
 
@@ -51,5 +54,5 @@
 <script src="https://cdn.staticfile.org/bootstrap/4.6.1/js/bootstrap.js"></script>
 <script src="https://unpkg.com/@popperjs/core@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/@sliphua/pjax@2.4.0/dist/pjax.js"></script>
-<script src="https://unpkg.com/nprogress@0.2.0/nprogress.js"></script>
+<script src="https://cdn.staticfile.org/nprogress/0.2.0/nprogress.js"></script>
 <script src="{{ "/assets/js/pjax-initializer.js" | relative_url }}"></script>

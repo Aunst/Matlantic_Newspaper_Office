@@ -1,0 +1,5 @@
+.collapse:not(.show),
+.dropdown-menu,
+.tab-pane {
+  display: inherit;
+}

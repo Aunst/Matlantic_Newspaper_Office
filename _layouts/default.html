@@ -6,8 +6,10 @@
   <body>
 
     {%- include header.html -%}
-
-    <main class="page-content container" aria-label="Content">
+    <noscript>
+      <p class="container">您似乎禁用了 Javascript, 这会导致本网站的一些动态效果无法显示, 可以考虑启用 Javascript。</p>
+    </noscript>
+    <main class="page-content container" id="content" aria-label="内容">
       {{ content }}
     </main>
 
