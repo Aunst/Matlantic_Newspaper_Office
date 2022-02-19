@@ -35,7 +35,7 @@ layout: default
       <ul class="post-tags">
         {% for tag in page.tags %}
           {% capture tag_name %}{{ tag }}{% endcapture %}
-          <li class="post-tag-item"><span class="mdi mdi-tag-outline"></span><a href="/tag/{{ tag_name }}">{{ tag_name }}</a></li>
+          <li class="post-tag-item"><span class="mdi mdi-tag-outline"></span><a href="{{ "/tag/" | append: tag_name | relative_url }}">{{ tag_name }}</a></li>
         {% endfor %}
       </ul>
     </aside>
