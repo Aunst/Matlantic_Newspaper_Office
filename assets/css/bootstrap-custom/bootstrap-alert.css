@@ -1,0 +1,17 @@
+/* 移除最后一个段落的下外边距 */
+
+.alert p:last-child {
+  margin-bottom: 0;
+}
+
+
+/* 图标 */
+
+.alert-icon {
+  font-size: 1.5em;
+  margin-right: 0.5em;
+}
+
+.alert-icon.mdi::before {
+  display: block;
+}

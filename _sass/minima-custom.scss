@@ -1,15 +1,19 @@
-$font-family-sans-serif: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", "Arial", "Noto Sans", "Liberation Sans", "PingFang SC", "Microsoft YaHei", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-$font-family-monospace: "SFMono-Regular", "Menlo", "Monaco", "Consolas", "Liberation Mono", "Courier New", "PingFang SC", "Microsoft YaHei", "Source Han Sans SC", monospace;
+@import "minima/variables";
 
 $spacing-unit: 1.875rem !default;
 
 $color-text: #212529 !default;
 $color-background: #f8f9fa !default;
-$color-grey: #6f6f6f !default;
-$color-grey-dark: #3f3f3f !default;
-$color-grey-light: #ececec !default;
+
+$color-grey: $gray-900 !default;
+$color-grey-dark: $gray-1200 !default;
+$color-grey-light: $gray-100 !default;
 
 $table-text-align: left !default;
+
+$color-border-post-tag-item: $gray-300 !default;
+$color-background-post-tag-item: lighten($color-background, 4%) !default;
+$color-post-tag-item: $gray-1200 !default;
 
 @import
   "minima/base",

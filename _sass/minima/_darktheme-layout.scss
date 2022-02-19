@@ -3,30 +3,46 @@
  */
  .site-header {
   border-top-color: transparent;
-  border-bottom-color: $color-darktheme-grey-light;
+  border-bottom-color: $color-grey-dark;
 }
 
 /**
  * Site footer
  */
 .site-footer {
-  border-top-color: $color-darktheme-grey-light;
+  border-top-color: $color-grey-dark;
 }
 
 .footer-col-container {
-  color: $color-darktheme-grey;
+  color: $color-grey;
 }
 
 /**
  * Page content
  */
 .post-meta {
-  color: $color-darktheme-grey;
+  color: $color-grey;
 }
 
 /**
  * Post sections
  */
 .post-section-meta {
-  color: $color-darktheme-grey;
+  color: $color-grey;
+}
+
+/**
+ * Post footer
+ */
+
+// Post tags
+
+.post-tag-item {
+  border-color: $color-border-post-tag-item;
+  background-color: $color-background-post-tag-item;
+  color: $color-post-tag-item;
+
+  &:hover {
+    background-color: mix(white, $color-background-post-tag-item, 8%);
+  }
 }

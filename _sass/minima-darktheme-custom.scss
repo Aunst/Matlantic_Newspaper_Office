@@ -1,11 +1,15 @@
-$color-darktheme-background: #0d1117 !default;
-$color-darktheme-text: #c9d1d9 !default;
+@import "minima/variables";
 
-$color-darktheme-grey: #909090 !default;
-$color-darktheme-grey-dark: #c0c0c0 !default;
-$color-darktheme-grey-light: #373737 !default;
+$color-background: #0d1117 !default;
+$color-text: #c9d1d9 !default;
 
-$color-darktheme-link: #58a6ff;
+$color-grey: $gray-700 !default;
+$color-grey-light: $gray-400 !default;
+$color-grey-dark: $gray-1200 !default;
+
+$color-border-post-tag-item: $color-grey-dark !default;
+$color-background-post-tag-item: lighten($color-background, 4%) !default;
+$color-post-tag-item: inherit;
 
 @media (prefers-color-scheme: dark) {
   @import

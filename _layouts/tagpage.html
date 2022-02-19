@@ -1,0 +1,15 @@
+---
+layout: default
+---
+<article class="post">
+  <h1>标签: {{ page.tag }}</h1>
+  <h2>页面列表</h2>
+  <ul>
+    {% for post in site.tags[page.tag] %}
+      <li><a href="{{ post.url }}">{{ post.title }}</a> ({{ post.date | date: "%Y-%m-%d" }})
+      </li>
+    {% endfor %}
+  </ul>
+  {{ content }}
+  {% include tagcloud.html %}
+</article>

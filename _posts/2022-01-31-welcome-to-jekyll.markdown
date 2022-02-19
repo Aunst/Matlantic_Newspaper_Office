@@ -3,6 +3,9 @@ layout: post
 title:  "欢迎来到 Jekyll!"
 date:   2022-01-31 23:04:04 +0800
 categories: jekyll update
+tag:
+- jekyll
+- update
 ---
 
 你可以在 `_posts` 文件夹中找到帖子。编辑保存它后重新构建站点, 就可以看到你的更改了。你可以用许多不同的方法重构站点, 但最常用的方法是运行 `jekyll serve`, 它将会启动一个网络服务器, 并自动在站点中文件更新时重新生成站点。
