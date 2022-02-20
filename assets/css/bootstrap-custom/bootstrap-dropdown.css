@@ -1,3 +1,12 @@
+li.dropdown-item {
+  padding: 0;
+}
+
+li.dropdown-item a {
+  display: block;
+  padding: 0.25rem 1.5rem;
+}
+
 .dropdown-item a, .dropdown-item a:hover {
   color: inherit;
 }
