@@ -10,7 +10,7 @@
  * Site navigation
  */
 // "Skip to content" link
- .skip_to_content-nav:not(:focus-within) {
+ #skip_to_content-nav:not(:focus-within) {
   position: absolute;
   width: 1px;
   height: 1px;
@@ -101,7 +101,7 @@
 .post-tag-item {
   display: inline-block;
 
-  margin-right: 0.5em;
+  margin: 0 0 0.5em 0.5em;
   border: 1px solid $color-border-post-tag-item;
   border-radius: 0.5em;
   padding: 0 0.75em;
@@ -123,4 +123,18 @@
   a {
     color: inherit;
   }
+}
+
+/**
+ * Footnote
+ */
+.footnote::before {
+  content: "[";
+}
+.footnote::after {
+  content: "]";
+}
+
+.reversefootnote {
+  font-family: sans-serif; /* 覆盖 body 的 Emoji 字体 */
 }
