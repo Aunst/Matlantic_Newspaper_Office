@@ -37,8 +37,7 @@
 
   dd, li {
     &::before {
-      content: " • ";
-      /* font-weight: bold; */
+      content: " • "; /* U+2022 BULLET */
     }
   }
 
