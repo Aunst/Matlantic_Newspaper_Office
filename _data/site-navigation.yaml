@@ -1,6 +1,6 @@
 # 一些解释
 # type:
-# - common: 链接
+# - link: 链接
 # - dropdown: 下拉菜单
 # name: 在导航栏的显示名称
 # link: 链接
@@ -9,24 +9,24 @@
 
 - type: dropdown
   name: 导航
-  unique-id: other
+  unique-id: navigate
   items:
-  - type: common
+  - type: link
     name: 标签
     link: /tag/
-- type: common
+- type: link
   name: 关于
   link: /about/
-- type: common
+- type: link
   name: 成员
   link: /members/
-- type: common
+- type: link
   name: 友情链接
   link: /links/
 - type: dropdown
   name: 特性
-  unique-id: other
+  unique-id: features
   items:
-  - type: common
+  - type: link
     name: 可访问性
     link: /accessibility/
