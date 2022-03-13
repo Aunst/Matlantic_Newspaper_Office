@@ -43,7 +43,7 @@
   }
 
   hr {
-    border-top-color: rgba(0, 0, 0, 0.1);
+    border-top-color: rgba(255, 255, 255, 0.2);
   }
 
   mark,
@@ -57,7 +57,7 @@
   }
 
   .blockquote-footer {
-    color: #6c757d;
+    color: #adb5bd;
   }
 
   .img-thumbnail {
