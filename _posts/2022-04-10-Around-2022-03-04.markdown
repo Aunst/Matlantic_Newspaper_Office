@@ -6,9 +6,4 @@ author: 30266, HakumomoHacha, OpalcdfCat, Suzora_Rurion, BROWteam (OMG22k, bad, 
 tags: 方圆
 ---
 
-<nav class="hlist">
-  <ul>
-    <li><a href="/assets/pdf/Around-2022-03.pdf">下载 PDF 文件</a></li>
-    <li><a href="/assets/pdfjs/web/viewer.html?file=../../pdf/Around-2022-03.pdf">在线预览</a></li>
-  </ul>
-</nav>
+{% include post-components/pdf-navigation.html file="Around-2022-03-04.pdf" %}
