@@ -3,6 +3,7 @@ layout: default
 ---
 <article class="post">
   <h1>标签: {{ page.tag }}</h1>
+  {{ content }}
   <h2>页面列表</h2>
   <ul class="post-list list-unstyled">
     {%- for post in site.tags[page.tag] -%}
@@ -20,7 +21,6 @@ layout: default
       </li>
       {%- endfor -%}
   </ul>
-  {{ content }}
   <h2>标签云</h2>
   {% include tagcloud.html %}
 </article>
