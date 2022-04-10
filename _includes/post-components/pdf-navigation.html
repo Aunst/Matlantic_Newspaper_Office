@@ -1,7 +1,7 @@
 
 <nav class="hlist">
   <ul>
-    <li><a href="{% link /assets/pdf/{{ include.file }} %}">下载 PDF 文件</a></li>
+    <li><a href="{% link assets/pdf/{{ include.file }} %}">下载 PDF 文件</a></li>
     <li><a href="{{ "/assets/pdfjs/web/viewer.html?file=../../pdf/" | append: include.file | relative_url }}">在线预览</a></li>
   </ul>
 </nav>
