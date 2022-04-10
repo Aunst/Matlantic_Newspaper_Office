@@ -6,9 +6,4 @@ author: 30266, Aunst, Dissolute_YN, Spring_Love, _ToKino
 tags: 方圆
 ---
 
-<nav class="hlist">
-  <ul>
-    <li><a href="/assets/pdf/Around-2022-02.pdf">下载 PDF 文件</a></li>
-    <li><a href="/assets/pdfjs/web/viewer.html?file=../../pdf/Around-2022-02.pdf">在线预览</a></li>
-  </ul>
-</nav>
+{% include post-components/pdf-navigation.html file="Around-2022-02.pdf" %}
