@@ -4,5 +4,5 @@ title: "标签:莉亚晚报"
 tag: 莉亚晚报
 ---
 
-原名[《抹岚日报》]({{ site.baseurl }}/{% link tag/抹岚日报.markdown %}), 在 2021 年 7 月 27 日更改为现名。
+原名[《抹岚日报》]({{ site.baseurl }}{% link tag/抹岚日报.markdown %}), 在 2021 年 7 月 27 日更改为现名。
 
