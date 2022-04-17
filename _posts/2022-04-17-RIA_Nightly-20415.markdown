@@ -1,0 +1,35 @@
+---
+layout: post
+title: "莉亚晚报 - 2022 年 4 月 12 日"
+date: 2022-04-17 14:55:00 +0800
+author: 30266, Aunst
+tags: 莉亚晚报
+---
+
+## 横穿莉亚的赛马企划
+{% include post-components/section-meta.html author="30266" %}
+
+今日下午， _king_zy_ 在红群内提议搞一个横跨莉亚世界的 SBR 大赛，经群内充分讨论，一个横穿莉亚的神必赛马企划正式出炉！
+
+项目名为“RRR 大赛”，即“Round Ria Run”。考虑到线路过长，大赛以 Stage 为单位分为几天进行。Stage 之间，以“检查点”进行分隔。“途径点”在 Stage 之中，玩家需经过“检查点”和“途径点”，但在“途径点”无需停留。
+
+参赛玩家需要自带一顶皮革帽子，一根栓绳和一匹带鞍的马匹。在整个比赛过程中，不得更换马匹、不得进行 PVP，也不得使用药水和辅助性模组。
+
+比赛预计在暑假期间举办。各项事宜详见牌子群。
+
+## 奈落在建炸雪机连续爆炸
+{% include post-components/section-meta.html author="30266" %}
+今天下午，Sidne7_ 和 cangXuann_ 正在奈落建造一台炸雪机。与其说是建造，不如说是重修，因为在建造的过程中，已经发生了 4 次爆炸。记者赶来时目睹了第 5 次爆炸。
+
+当记者采访 Sidne7_ 关于炸雪机爆炸的感想时， Sidne7_ 称：“无法用言语表达。”
+
+## RIA Zeroth Wiki收录范围草案今日编写完成
+{% include post-components/section-meta.html author="Aunst" %}
+
+抹岚报社抹岚本社2022 年 4 月 15 日 20 时电。RIA Zeroth Wiki 收录范围草案已于今日 18 时 25 分编写完成。
+
+收录范围是一个 wiki 的基础方针，但 RIA Zeroth Wiki 一直没有此方针，给 wiki 和编者带来了很多问题。收录范围的建立有助于编者确定“能不能收录进 wiki？”问题，也给 wiki 条目的删除方针打下了基础。
+
+据悉，目前收录范围方针依旧处于草案阶段，所有编者都可以在其讨论页提出建议。
+
+[Project:收录范围 | RIA Zeroth Wiki](https://wiki.ria.red/wiki/Project:收录范围)
