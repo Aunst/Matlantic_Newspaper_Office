@@ -15,11 +15,11 @@
   <link rel="stylesheet" href="{{ "/assets/css/bootstrap-custom/bootstrap-custom-4.6.1.css" | relative_url }}" />
   <link rel="stylesheet" media="(prefers-color-scheme: dark)" href="{{ "/assets/css/bootstrap-custom/bootstrap-custom-dark-4.6.1.css" | relative_url }}" />
   <!-- Material Design Icons (Webfont) -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@6.5.95/css/materialdesignicons.css" media="all" />
+  <link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/@mdi/font@6.5.95/css/materialdesignicons.css" media="all" />
   <!-- NProgress, 用于 Pjax -->
   <link rel='stylesheet' href="https://cdn.staticfile.org/nprogress/0.2.0/nprogress.css" />
   <!-- KaTeX CSS -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.15.2/dist/katex.css">
+  <link rel="stylesheet" href="https://cdn.staticfile.org/KaTeX/0.15.6/katex.css">
   <!-- 主 CSS -->
   <link rel="stylesheet" href="{{ "/assets/css/main.css" | relative_url }}" />
   <link rel="stylesheet" media="(prefers-color-scheme: dark)" href="{{ "/assets/css/main-dark.css" | relative_url }}" />
@@ -33,9 +33,9 @@
     {%- include google-analytics.html -%}
   {%- endif -%}
   <!-- KaTex JavaScript -->
-  <script defer="defer" src="https://cdn.jsdelivr.net/npm/katex@0.15.2/dist/katex.js"></script>
-  <script defer="defer" src="https://cdn.jsdelivr.net/npm/katex@0.15.2/dist/contrib/auto-render.js"
+  <script defer="defer" src="https://cdn.staticfile.org/KaTeX/0.15.6/katex.js"></script>
+  <script defer="defer" src="https://cdn.staticfile.org/KaTeX/0.15.6/contrib/auto-render.js"
     onload="renderMathInElement(document.body);"></script>
   <!-- 不支持 prefer-color-schema 时加载的明亮模式 CSS 样式 -->
-  <script src="{{ "/assets/js/color_schema-fallback.js" | relative_url }}"></script>
+  <script src="{{ '/assets/js/color_schema-fallback.js' | relative_url }}"></script>
 </head>
