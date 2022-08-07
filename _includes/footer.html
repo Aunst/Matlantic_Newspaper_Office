@@ -37,12 +37,14 @@
     </div>
     <div class="footer-col-container row">
       <div class="col-12">
-        <p>除非另有声明, 本网站内容采用 <a href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International (知识共享 署名 4.0 国际) (CC BY 4.0)</a> 授权。</p>
+        <p>除非另有声明, 本网站内容采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">知识共享 署名-非商业性使用-相同方式共享 4.0 国际 (CC BY-NC-SA 4.0)</a> 授权。</p>
         <div class="hlist">
           <ul>
             <li>Powered by <a href="https://jekyllrb.com/">Jekyll</a></li>
             <li>Theme <a href="https://github.com/jekyll/minima">Minima</a></li>
-            <li><a href="https://github.com/Aunst/Matlantic_Newspaper_Office">GitHub 仓库</a></li>
+            {% if site.github_repository %}
+              <li><a href="https://github.com/{{ site.github_repository }}">GitHub 仓库</a></li>
+            {% endif %}
           </ul>
         </div>
         <p><a href="https://icp.gov.moe/?keyword=20220349" target="_blank">萌ICP备20220349号</a></p>
@@ -55,7 +57,7 @@
 <script src="https://cdn.staticfile.org/jquery/3.6.0/jquery.js"></script>
 <script src="https://cdn.staticfile.org/bootstrap/4.6.1/js/bootstrap.js"></script>
 <script src="https://unpkg.com/@popperjs/core@2"></script>
-<script src="https://fastly.jsdelivr.net/npm/@sliphua/pjax@2.4.0/dist/pjax.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@sliphua/pjax@2.4.0/dist/pjax.js"></script>
 <script src="https://cdn.staticfile.org/nprogress/0.2.0/nprogress.js"></script>
 <script src="{{ "/assets/js/pjax-initializer.js" | relative_url }}"></script>
 <script src="{{ "/assets/js/internet_explorer-compatible.js" | relative_url }}"></script>
