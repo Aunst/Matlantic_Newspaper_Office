@@ -1,0 +1,9 @@
+---
+layout: post
+title: "方圆 - 2022 年 8 月刊"
+date: 2022-08-10 22:49:00 +0800
+author: 24Kgule, 30266, Arthals, Aunst, Feltlin, Maki_Nishikino, _king_zy_, nuo_mi_, send_9, yitiaoyu, Everyone
+tags: 方圆
+---
+
+{% include post-components/pdf-navigation.html file="Around-2022-08.pdf" %}
