@@ -4,4 +4,4 @@ title: "标签:方圆"
 tag: 方圆
 ---
 
-原名[《莉亚晚报非日常刊》]({% link tag/莉亚晚报非日常刊.markdown | prepend: site.baseurl %}), 在 2022 年 1 月 1 日更改为现名。
+原名[《莉亚晚报非日常刊》]({{ site.baseurl }}{% link tag/莉亚晚报非日常刊.markdown %}), 在 2022 年 1 月 1 日更改为现名。
