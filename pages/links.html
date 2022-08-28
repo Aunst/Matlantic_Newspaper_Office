@@ -3,7 +3,21 @@ layout: page
 title: 友情链接
 permalink: /links/
 ---
-
+<script>
+function copyToClip(content, message){
+  var aux = document.createElement("input");
+  aux.setAttribute("value",content);
+  document.body.appendChild(aux);
+  aux.select();
+  document.execCommand("copy");
+  document.body.removeChild(aux);
+  if(message == null){
+    alert("复制成功");
+  }else{
+    alert(message);
+  }
+}
+</script>
 <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3">
   <div class="col">
     <div class="card card-theme-auto">
@@ -12,7 +26,7 @@ permalink: /links/
         <h2 class="card-title h5">莉亚红报社</h2>
         <p class="card-text">莉亚红报社是 RIA 的官方报社，致力于搭建一个讲述与倾听的平台，讲述莉亚大家的故事、创作与想法。</p>
         <p class="card-text">如果访问时出现了 403 错误, 等待一段时间后刷新页面即可。</p>
-        <a href="https://ria.red/" class="btn btn-primary">前往莉亚红报社</a><!-- https://tva2.sinaimg.cn/large/0072Vf1pgy1foxkihz4b4j31hc0u0wux.jpg -->
+        <button onclick="copyToClip('https://ria.red/')"> Copy </button>><!-- https://tva2.sinaimg.cn/large/0072Vf1pgy1foxkihz4b4j31hc0u0wux.jpg -->
       </div>
     </div>
   </div>
