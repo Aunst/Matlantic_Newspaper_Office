@@ -12,7 +12,7 @@ function copyToClip(content, message){
   document.execCommand("copy");
   document.body.removeChild(aux);
   if(message == null){
-    alert("复制成功");
+    alert("复制成功！");
   }else{
     alert(message);
   }
@@ -25,8 +25,8 @@ function copyToClip(content, message){
       <div class="card-body">
         <h2 class="card-title h5">莉亚红报社</h2>
         <p class="card-text">莉亚红报社是 RIA 的官方报社，致力于搭建一个讲述与倾听的平台，讲述莉亚大家的故事、创作与想法。</p>
-        <p class="card-text">如果访问时出现了 403 错误, 等待一段时间后刷新页面即可。</p>
-        <button onclick="copyToClip('https://ria.red/')"> Copy </button>><!-- https://tva2.sinaimg.cn/large/0072Vf1pgy1foxkihz4b4j31hc0u0wux.jpg -->
+        <p class="card-text">请点击下方按钮复制网址，并手动粘贴到地址栏中访问。</p>
+        <button onclick="copyToClip('https://ria.red/')" style="background-color:(13,17,23);"> 点我复制网址 </button><!-- https://tva2.sinaimg.cn/large/0072Vf1pgy1foxkihz4b4j31hc0u0wux.jpg -->
       </div>
     </div>
   </div>
