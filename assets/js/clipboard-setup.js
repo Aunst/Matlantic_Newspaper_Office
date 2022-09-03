@@ -1,4 +1,4 @@
-jQuery( document ).ready(function() {
+function whenDOMReady () {
   var clipboard = new ClipboardJS( '.click_to_copy' );
 
   jQuery( '.click_to_copy' ).attr( 'title', '复制成功!' );
@@ -24,4 +24,10 @@ jQuery( document ).ready(function() {
     console.error('Action:', el.action);
     console.error('Trigger:', el.trigger);
   });
-});
+}
+
+document.addEventListener('DOMContentLoaded', whenDOMReady);
+
+document.addEventListener('pjax:success', whenDOMReady);
+
+document.addEventListener('pjax:send', function() { clipboard.destroy(); });
