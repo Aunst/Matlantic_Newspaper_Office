@@ -2,4 +2,14 @@
 # Only the main Sass file needs front matter (the dashes are enough)
 ---
 
-@import "minima-custom";
+.client-javascript {
+  .js-not_available-only {
+    display: none;
+  }
+}
+
+.client-no_javascript {
+  .js-available-only {
+    display: none;
+  }
+}
