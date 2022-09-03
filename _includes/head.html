@@ -4,38 +4,5 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="supported-color-schemes" content="light dark" />
   {%- seo -%}
-  <!-- Bootstrap CSS -->
-  <link rel="stylesheet" href="https://cdn.staticfile.org/bootstrap/4.6.1/css/bootstrap.css" />
-  <noscript>
-    <link rel="stylesheet" href="{{ "/assets/css/bootstrap-custom/bootstrap-nojs.css" | relative_url }}" />
-  </noscript>
-  <link rel="stylesheet" href="{{ "/assets/css/bootstrap-custom/bootstrap-alert.css" | relative_url }}" />
-  <link rel="stylesheet" href="{{ "/assets/css/bootstrap-custom/bootstrap-dropdown.css" | relative_url }}" />
-  <link rel="stylesheet" href="{{ "/assets/css/bootstrap-custom/bootstrap-fonts.css" | relative_url }}" />
-  <link rel="stylesheet" href="{{ "/assets/css/bootstrap-custom/bootstrap-custom-4.6.1.css" | relative_url }}" />
-  <link rel="stylesheet" media="(prefers-color-scheme: dark)" href="{{ "/assets/css/bootstrap-custom/bootstrap-custom-dark-4.6.1.css" | relative_url }}" />
-  <!-- Material Design Icons (Webfont) -->
-  <link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/@mdi/font@6.5.95/css/materialdesignicons.css" media="all" />
-  <!-- NProgress, 用于 Pjax -->
-  <link rel='stylesheet' href="https://cdn.staticfile.org/nprogress/0.2.0/nprogress.css" />
-  <!-- KaTeX CSS -->
-  <link rel="stylesheet" href="https://cdn.staticfile.org/KaTeX/0.15.6/katex.css">
-  <!-- 主 CSS -->
-  <link rel="stylesheet" href="{{ "/assets/css/main.css" | relative_url }}" />
-  <link rel="stylesheet" media="(prefers-color-scheme: dark)" href="{{ "/assets/css/main-dark.css" | relative_url }}" />
-  <!-- 语法高亮 -->
-  <link rel="stylesheet" media="(prefers-color-scheme: no-preference), (prefers-color-scheme: light)" href="{{ "/assets/css/syntax-highlight/syntax-highlight-light.css" | relative_url }}" />
-  <link rel="stylesheet" media="(prefers-color-scheme: dark)" href="{{ "/assets/css/syntax-highlight/syntax-highlight-dark.css" | relative_url }}" />
-  <!-- 水平链接 -->
-  <link rel="stylesheet" href="{{ "/assets/css/components/hlist.css" | relative_url }}" />
-  {%- feed_meta -%}
-  {%- if jekyll.environment == 'production' and site.google_analytics -%}
-    {%- include google-analytics.html -%}
-  {%- endif -%}
-  <!-- KaTex JavaScript -->
-  <script defer="defer" src="https://cdn.staticfile.org/KaTeX/0.15.6/katex.js"></script>
-  <script defer="defer" src="https://cdn.staticfile.org/KaTeX/0.15.6/contrib/auto-render.js"
-    onload="renderMathInElement(document.body);"></script>
-  <!-- 不支持 prefer-color-schema 时加载的明亮模式 CSS 样式 -->
-  <script src="{{ '/assets/js/color_schema-fallback.js' | relative_url }}"></script>
+  {%- include head_resources.html -%}
 </head>
