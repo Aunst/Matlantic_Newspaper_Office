@@ -1,0 +1,29 @@
+# 一些解释
+# name: 名称
+# job: 职位
+
+- name: 30266
+  job:
+  - 社长
+  - 《莉亚晚报》执行主编
+  - 编辑
+- name: SareEyre_ 
+  job:
+  - 人事
+- name: send_9
+  job:
+  - 财务
+  - 编辑
+- name: 24Kgule
+  job:
+  - 数字与信息化
+  - 《方圆》执行主编
+- name: Hdr_Bridge
+  job:
+  - 杂务管理
+  - 版式
+  - 美编
+- name: Lin_HL
+  job:
+  - 《方圆》协调员
+  - 编辑
