@@ -1,0 +1,12 @@
+---
+layout: post
+title: "方圆 - 2022 年 11 月刊"
+date: 2022-10-13 20:00:00 +0800
+author: 24Kgule, 30266, CHEN_Y1WE1, Feltlin, HoshikMtain, WaifuRei, send_9
+tags: 方圆
+---
+
+{% include post-components/pdf-navigation.html file="Around-2022-11.pdf" %}
+
+## 探究由游戏衍生的新型社交关系<br />——以 Minecraft 为例研究青年人在兴趣导向下的人际交往实例
+{% include post-components/pdf-navigation.html file="Paper_from_24.pdf" %}
