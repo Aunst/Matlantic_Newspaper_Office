@@ -14,6 +14,12 @@
   - type: link
     name: 标签
     link: /tag/
+  - type: link
+    name: 维护提示
+    link: /website_point/
+  - type: link
+    name: 《方圆》排版提示
+    link: /around_point/
 - type: link
   name: 关于
   link: /about/

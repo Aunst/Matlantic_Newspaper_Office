@@ -1,8 +1,7 @@
 ---
-layout: post
-title: "抹岚报社档案馆维护提示"
-date: 2022-09-17 21:38:14 +08:00
-author: Aunst
+layout: page
+title: 抹岚报社档案馆维护提示
+permalink: /website_point/
 ---
 
 **本文仍在编写中**
