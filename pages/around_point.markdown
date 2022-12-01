@@ -1,9 +1,7 @@
 ---
-layout: post
-title: "《方圆》排版提示"
-date: 2022-07-09 17:30:00 +0800
-author: Aunst
-tags: 方圆
+layout: page
+title: 《方圆》排版提示
+permalink: /around_point/
 ---
 
 **本文仍在编写中**
