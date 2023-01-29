@@ -3,13 +3,13 @@
 ---
 @import 'main';
 
-.client-javascript {
+.client-js {
   .js-not_available-only {
     display: none;
   }
 }
 
-.client-no_javascript {
+.client-nojs {
   .js-available-only {
     display: none;
   }
