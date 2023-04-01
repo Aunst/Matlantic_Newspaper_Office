@@ -2,7 +2,7 @@
 layout: post
 title: "莉亚晚报 - 2022 年 8 月 18 日"
 date: 2022-08-21 18:30:00 +0800
-author: 30266,24Kgule
+author: 30266, 24Kgule
 tags: 莉亚晚报
 ---
 
@@ -14,8 +14,13 @@ tags: 莉亚晚报
 据悉，本届社博会共有上下两层AB两个会场，会场之间通过传送阵往来。同时，除了需要报名认领建设的正式摊位，本届社博会还在A区的石砖区域划为了面向所有玩家的自由摆摊区，届时每位玩家都可以在该区域自由摆摊。除了社博会基础活动之外，本次还将会举办八方群岛飞行大赛，敬请期待！
 
 ## 小雨中的堇叶、黑石与沐雨
-{% include post-components/section-meta.html author="30266,24Kgule" %}
->当时大家也不是很熟，比起志趣相投更像是一起玩了之后有了共同目标。   ——MuYu_Ame
+{% include post-components/section-meta.html author="30266, 24Kgule" %}
+<figure class="blockquote">
+  <blockquote>
+    <p>当时大家也不是很熟，比起志趣相投更像是一起玩了之后有了共同目标。</p>
+  </blockquote>
+  <figcaption class="blockquote-footer">MuYu_Ame</figcaption>
+</figure>
 
 雨中的堇叶城像是蒙上了一层纱。抹岚报社的记者被沐雨热情邀请到家中，在淅沥的雨声中，沐雨向记者介绍了堇叶的过去，现在与未来。
 
@@ -29,4 +34,9 @@ tags: 莉亚晚报
 
 在采访的最后，沐雨诚挚的邀请大家前往堇叶参观。
 
->欢迎各位来堇叶玩，烂尾楼在修了（   ——MuYu_Ame
+<figure class="blockquote">
+  <blockquote>
+    <p>欢迎各位来堇叶玩，烂尾楼在修了</p>
+  </blockquote>
+  <figcaption class="blockquote-footer">MuYu_Ame</figcaption>
+</figure>

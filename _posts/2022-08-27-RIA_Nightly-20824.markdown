@@ -2,12 +2,11 @@
 layout: post
 title: "莉亚午报 - 2022 年 8 月 24 日"
 date: 2022-08-27 14:30:00 +0800
-author: 30266,YeZhe2209,Latte_Clf,oliver28181
+author: 30266, YeZhe2209, Latte_Clf, oliver28181
 tags: 莉亚晚报
 ---
 
 ## 社营新野线全线完工
-
 {% include post-components/section-meta.html author="YeZhe2209" %}
 
 22日，社营新野线宣布竣工，并于当日全线通车。该线连接了西北大陆与新郊地区，使得新郊野有了主世界对外快速交通，同时加强了西北，西南，远西地区的联系，方便了玩家们的通行。
@@ -17,17 +16,19 @@ tags: 莉亚晚报
 据悉，该条铁路主要负责人为GHZCreeper，由轨交社西北局与轨交社西南局共同规划，GHZCreeper，kkjjvjk，XiuRanYun等玩家共同建设，在此对全体建设者致敬。
 
 ## 倒立的水瓶，禾子与世界
+{% include post-components/section-meta.html author="30266, oliver28181" %}
 
-{% include post-components/section-meta.html author="30266,oliver28181" %}
-
-昨天下午，禾子带着慕斯一行人参观了各处月建[^1] 景点，回到家后，巧遇本报记者，整理了一下自己的所思所想。
+昨天下午，禾子带着慕斯一行人参观了各处月建[^1]景点，回到家后，巧遇本报记者，整理了一下自己的所思所想。
 禾子认为月建活动十分有趣，很期待再次举办，且要加大力度，提高社群的参与热情。当谈及社群对建筑活动参与热情不高的问题时，禾子认为如果将题材放宽松一些，提高参赛奖励，亦或是提供一些特殊材料，或可缓解此类问题。
 
 ## 法谚
-
 {% include post-components/section-meta.html author="Latte_Clf" %}
-
-**风能进，雨能进，国王不能进。  ——[英]威廉·皮特**
+<figure class="blockquote">
+  <blockquote>
+    <p>风能进，雨能进，国王不能进。</p>
+  </blockquote>
+  <figcaption class="blockquote-footer">[英] 威廉·皮特</figcaption>
+</figure>
 
 解释：顾名思义，就算是最底层的人，在他的小破屋里也拥有着能对抗国王的权威。现在往往用来指公权力应当受制在私权利界线之外，不能越界。
 

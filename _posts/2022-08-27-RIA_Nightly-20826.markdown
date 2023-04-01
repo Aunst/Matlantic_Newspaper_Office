@@ -2,12 +2,11 @@
 layout: post
 title: "莉亚晚报 - 2022 年 8 月 26 日"
 date: 2022-08-27 14:30:00 +0800
-author: 24Kgule,Latte_Clf
+author: 24Kgule, Latte_Clf
 tags: 莉亚晚报
 ---
 
 ## 暑假终的龙战 三零获得龙蛋
-
 {% include post-components/section-meta.html author="24Kgule" %}
 
 今日晚八点，零洲末地照常刷新，虽然本次小黑的消失和莫名其妙出现的凋零骷髅令众人万分不解，但末影龙还是没能躲过数十人的炮火齐射，在此期间，亦有人观察到了天空中的猫猫和地上散落的头颅等超自然现象。
@@ -21,9 +20,12 @@ tags: 莉亚晚报
 暑假结束后，Zth将进入滑行时期，在此期间，末地刷新次数将调整为每月一次。祝各位秋天愉快。
 
 ## 法谚
-
 {% include post-components/section-meta.html author="Latte_Clf" %}
-
-**规外求圆,无圆矣;法外求平,无平矣。  ——[宋]宋祁**
+<figure class="blockquote">
+  <blockquote>
+    <p>规外求圆，无圆矣；法外求平，无平矣。</p>
+  </blockquote>
+  <figcaption class="blockquote-footer">[宋] 宋祁</figcaption>
+</figure>
 
 释义：用圆规之外的工具去追求圆，就没有圆了；在法律之外去追求公平，就没有公平了。强调了规则的重要性，想要通过规则之外的方式来寻求良好稳定的秩序，是不切实际的。

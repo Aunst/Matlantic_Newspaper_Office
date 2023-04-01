@@ -7,9 +7,7 @@ tags: 莉亚晚报
 ---
 
 ## 东陆航空堂堂成立 飞上天真的能上天
-{% include post-components/section-meta.html author="30266" %}
-
-抹岚报社飞上天分社12月14日18时电。零五成立了东陆航空，向全服(Fst)玩家提供交通服务。
+抹岚报社飞上天分社12月14日18时电。零五成立了东陆航空，向全服（Fst）玩家提供交通服务。
 
 据悉，Fst中加入了Simple Plane模组，该模组为MC中添加了三种飞行器，分别是：小飞机、大飞机和直升机。大飞机可以乘坐最多4人，或搭载炸弹仓或人形自走重机枪。
 
@@ -24,11 +22,15 @@ tags: 莉亚晚报
 最后，零五称东陆即将实现量产轨道，进入轨交时代。
 
 ## 近日回归的老玩家 -30〇神教的残党
-{% include post-components/section-meta.html author="30266" %}
->回来前，我是菜鸡，回来后，我还是菜鸡。        ——sdorica
+<figure class="blockquote">
+  <blockquote>
+    <p>回来前，我是菜鸡，回来后，我还是菜鸡。</p>
+  </blockquote>
+  <figcaption class="blockquote-footer">sdorica</figcaption>
+</figure>
 
 sdorica是一位近日才回归的20年老玩家。当时被小片吸引而来，但种种原因未能在Zth继续游玩下去，时隔许久再度上线，ta感觉周围的一切都格外亲切，环境和运营水平都比往日要高上不少。
 
-sdorica回归时，兜里只剩-7〇。这是因为当时Zth可以欠债30〇，于是-30〇神教就应运而生了（见论坛554号帖）。 sdorica也似乎是-30〇神教中的一员。
+sdorica回归时，兜里只剩-7〇。这是因为当时Zth可以欠债30〇，于是-30〇神教就应运而生了（见论坛554号帖）。sdorica也似乎是-30〇神教中的一员。
 
-最后， sdorica希望和大家愉快的唠嗑，需要苦力也可以找ta。
+最后，sdorica希望和大家愉快的唠嗑，需要苦力也可以找ta。
