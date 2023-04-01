@@ -32,4 +32,4 @@ tags: 莉亚晚报
 
 据悉，目前收录范围方针依旧处于草案阶段，所有编者都可以在其讨论页提出建议。
 
-[Project:收录范围 | RIA Zeroth Wiki](https://wiki.ria.red/wiki/Project:收录范围)
+[Project:收录范围 \| RIA Zeroth Wiki](https://wiki.ria.red/wiki/Project:收录范围)
