@@ -47,7 +47,7 @@ permalink: /members/
 
 |ID|昵称|入社时间|
 |--|--|--|
-|**AiuRFAR**|Aiu|20220715|
+|**AiuRFAR**|老A|20220715|
 |2332132||20220427|
 |Dong_Bo_Jue_233|伯爵|20221218|
 |HuanAn_SAMA|幻安|20220814|
