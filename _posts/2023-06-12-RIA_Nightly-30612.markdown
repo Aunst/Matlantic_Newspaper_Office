@@ -17,9 +17,13 @@ tags: 莉亚晚报
 
 然而，此咕非佊咕。萌鱼透露，咕咕是为了开新坑。在萌鱼的计划中，一座现代风格的小镇将会在零洲的某个角落拔地而起。
 
->希望每一个玩家都在现实和游戏当中完成自己想要的事情，请不要为任何事情感到遗憾。
-最后祝福每一个看到的人能够坚持自己的内心，不要被任何事情影响到你自己。
- ——MoeFish314
+<figure class="blockquote">
+  <blockquote>
+     <p>希望每一个玩家都在现实和游戏当中完成自己想要的事情，请不要为任何事情感到遗憾。</p>
+     <p>最后祝福每一个看到的人能够坚持自己的内心，不要被任何事情影响到你自己。</p>
+   </blockquote>
+   <figcaption class="blockquote-footer">MoeFish314</figcaption>
+ </figure>
 
 小镇Wiki条目：[维缇亚兰小镇](https://wiki.ria.red/wiki/维缇亚兰小镇)
 
