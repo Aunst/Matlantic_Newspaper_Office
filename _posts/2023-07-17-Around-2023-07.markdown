@@ -1,0 +1,9 @@
+---
+layout: post
+title: "方圆 - 2023 年 7 月刊"
+date: 2023-07-17 20:35:00 +0800
+author: 24Kgule, 30266, A_lavender, BCMonomial, Feltlin, Fanti, Hanabi, Meapuchino, mousseinga, pika_ning, send_9, Everyone
+tags: 方圆
+---
+
+{% include post-components/pdf-navigation.html file="Around-2023-07.pdf" %}
