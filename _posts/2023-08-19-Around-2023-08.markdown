@@ -2,7 +2,7 @@
 layout: post
 title: "方圆 - 2023 年 8 月刊"
 date: 2023-08-19 16:10:00 +0800
-author: 24Kgule, 30266, Meapuchino, send_9, Everyone
+author: 24Kgule, 30266, A_lavender, Meapuchino, send_9, Everyone
 tags: 方圆
 ---
 
