@@ -1,0 +1,9 @@
+---
+layout: post
+title: "方圆 - 2023 年 10 月刊"
+date: 2023-10-21 13:10:00 +0800
+author: 24Kgule, 30266, A_lavender, BCMonomial, Lin_HL, send_9, Venti_Lynn
+tags: 方圆
+---
+
+{% include post-components/pdf-navigation.html file="Around-2023-09.pdf" %}
