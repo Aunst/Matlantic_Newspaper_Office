@@ -1,9 +1,9 @@
 ---
 layout: post
-title: "方圆 - 2023 年 9 月刊"
-date: 2023-09-16 13:10:00 +0800
-author: 24Kgule, 30266, A_lavender, BCMonomial, Hdr_Bridge, Immutable__, Lin_HL, RedMansion, send_9, Venti_Lynn
+title: "方圆 - 2023 年 10 月刊"
+date: 2023-10-21 11:10:00 +0800
+author: 24Kgule, 30266, A_lavender, BCMonomial, Code_C431, Hdr_Bridge, Lin_HL, magic_owl233, Meapuchino, RedMansion, send_9, Venti_Lynn
 tags: 方圆
 ---
 
-{% include post-components/pdf-navigation.html file="Around-2023-09.pdf" %}
+{% include post-components/pdf-navigation.html file="Around-2023-10.pdf" %}
