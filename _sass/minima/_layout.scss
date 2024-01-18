@@ -63,7 +63,7 @@
 
 /* 某一章节 */
 .post-section-meta {
-  margin-bottom: math.div($spacing-unit, 2);
+  margin-bottom: $spacing-unit / 2;
   color: $color-grey;
   font-size: 0.875em;
 }
@@ -85,7 +85,7 @@
 }
 
 .post-tags-caption {
-  margin-right: math.div($spacing-unit, 2);
+  margin-right: $spacing-unit / 2;
 }
 
 .post-tags {
