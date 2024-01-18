@@ -1,0 +1,52 @@
+/* 页眉 */
+.site-header {
+  border-top-color: transparent;
+  border-bottom-color: $color-grey-dark;
+}
+
+/* 页脚 */
+.site-footer {
+  border-top-color: $color-grey-dark;
+}
+
+.footer-col-container {
+  color: $color-grey;
+}
+
+/* 内容 */
+.post-meta {
+  color: $color-grey;
+}
+
+/* 帖子的某一部分 */
+.post-section-meta {
+  color: $color-grey;
+}
+
+/* 帖子的页脚 */
+// 站点标签
+.post-tag-item {
+  border-color: $color-border-post-tag-item;
+  background-color: $color-background-post-tag-item;
+  color: $color-post-tag-item;
+
+  &:hover {
+    background-color: mix(white, $color-background-post-tag-item, 8%);
+  }
+}
+
+.fab {
+  border: 1px solid $color-grey-dark;
+  background-color: $color-background;
+  box-shadow: none;
+}
+
+.fab:hover {
+  background-color: darken($color-primary-light, 50%);
+}
+
+.fab-theme-popup {
+  border-color: $color-grey-dark;
+  background-color: $color-background;
+  box-shadow: none;
+}

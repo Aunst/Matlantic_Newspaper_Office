@@ -15,7 +15,8 @@ $color-border-post-tag-item: $gray-300 !default;
 $color-background-post-tag-item: lighten($color-background, 4%) !default;
 $color-post-tag-item: $gray-1200 !default;
 
+$color-primary-light: rgb(179, 229, 252);
+
 @import
   "minima/base",
-  "minima/layout",
-  "minima/mdi-margin";
+  "minima/layout"

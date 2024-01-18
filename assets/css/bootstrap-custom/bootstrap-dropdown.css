@@ -7,6 +7,7 @@ li.dropdown-item a {
   padding: 0.25rem 1.5rem;
 }
 
-.dropdown-item a, .dropdown-item a:hover {
+li.dropdown-item a,
+li.dropdown-item a:hover {
   color: inherit;
 }

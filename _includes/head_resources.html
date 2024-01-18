@@ -7,23 +7,23 @@
 <link rel="stylesheet" href="{{ "/assets/css/bootstrap-custom/bootstrap-dropdown.css" | relative_url }}" />
 <link rel="stylesheet" href="{{ "/assets/css/bootstrap-custom/bootstrap-fonts.css" | relative_url }}" />
 <link rel="stylesheet" href="{{ "/assets/css/bootstrap-custom/bootstrap-custom-4.6.1.css" | relative_url }}" />
-<link rel="stylesheet" media="(prefers-color-scheme: dark)" href="{{ "/assets/css/bootstrap-custom/bootstrap-custom-dark-4.6.1.css" | relative_url }}" />
+<noscript>
+  <link rel="stylesheet" media="(prefers-color-scheme: dark)" href="{{ "/assets/css/bootstrap-custom/bootstrap-custom-dark-4.6.1.css" | relative_url }}" />
+</noscript>
 <!-- Material Design Icons (Webfont) -->
-<link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/@mdi/font@6.5.95/css/materialdesignicons.css" media="all" />
+<link rel="stylesheet" href="https://fastly.jsdelivr.net/npm/@mdi/font@7/css/materialdesignicons.css" media="all" />
 <!-- NProgress, 用于 Pjax -->
 <link rel='stylesheet' href="https://cdn.staticfile.org/nprogress/0.2.0/nprogress.css" />
 <!-- KaTeX CSS -->
 <link rel="stylesheet" href="https://cdn.staticfile.org/KaTeX/0.15.6/katex.css">
 <!-- 主 CSS -->
-<link rel="stylesheet" href="{{ "/assets/css/minimal.css" | relative_url }}" />
-<link rel="stylesheet" media="(prefers-color-scheme: dark)" href="{{ "/assets/css/minimal-dark.css" | relative_url }}" />
+<link rel="stylesheet" name="main-stylesheet" href="{{ "/assets/css/minimal.css" | relative_url }}" />
+<noscript>
+  <link rel="stylesheet" media="(prefers-color-scheme: dark)" href="{{ "/assets/css/minimal-dark.css" | relative_url }}" />
+</noscript>
 <link rel="stylesheet" href="{{ "/assets/css/main.css" | relative_url }}" />
-<!-- 语法高亮 -->
-<link rel="stylesheet" media="(prefers-color-scheme: no-preference), (prefers-color-scheme: light)" href="{{ "/assets/css/syntax-highlight/syntax-highlight-light.css" | relative_url }}" />
-<link rel="stylesheet" media="(prefers-color-scheme: dark)" href="{{ "/assets/css/syntax-highlight/syntax-highlight-dark.css" | relative_url }}" />
 <!-- 水平链接 -->
 <link rel="stylesheet" href="{{ "/assets/css/components/hlist.css" | relative_url }}" />
-{{ page.styles }}
 {%- feed_meta -%}
 {%- if jekyll.environment == 'production' and site.google_analytics -%}
   {%- include google-analytics.html -%}
