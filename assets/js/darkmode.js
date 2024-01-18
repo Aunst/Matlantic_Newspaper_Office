@@ -154,7 +154,7 @@ function addStyleSheet(src) {
   const landmark = document.querySelector('link[name="main-stylesheet"]');
   let stylesheet = document.createElement('link');
   stylesheet.setAttribute('rel', 'stylesheet');
-  stylesheet.setAttribute('href', baseurl, '/assets/css/' + src + '.css');
+  stylesheet.setAttribute('href', baseurl + '/assets/css/' + src + '.css');
 
   head.insertBefore(stylesheet, landmark);
 }
