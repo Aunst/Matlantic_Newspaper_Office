@@ -2,4 +2,13 @@
 # Only the main Sass file needs front matter (the dashes are enough)
 ---
 
-@import "minima-darktheme-custom";
+body.theme-dark {
+  background-color: #0d1117;
+  color: #c9d1d9;
+}
+
+
+.theme-dark {
+  @import "minima-dark";
+  @import "syntax-highlight-dark";
+}

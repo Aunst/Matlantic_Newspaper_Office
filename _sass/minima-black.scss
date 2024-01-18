@@ -1,0 +1,18 @@
+@import "minima/variables";
+
+$color-background: black !default;
+$color-text: #c9d1d9 !default;
+
+$color-grey: $gray-800 !default;
+$color-grey-light: $gray-600 !default;
+$color-grey-dark: $gray-1300 !default;
+
+$color-border-post-tag-item: $color-grey-dark !default;
+$color-background-post-tag-item: lighten($color-background, 4%) !default;
+$color-post-tag-item: inherit;
+
+$color-primary-light: rgb(2, 106, 153);
+
+@import
+  "minima/darktheme-base",
+  "minima/blacktheme-layout"

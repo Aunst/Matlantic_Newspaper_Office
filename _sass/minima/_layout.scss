@@ -1,15 +1,13 @@
-/**
- * Site header
- */
+@use "sass:math";
+
+/* 页眉 */
 .site-header {
   border-top: 5px solid $color-grey-dark;
   border-bottom: 1px solid $color-grey-light;
 }
 
-/**
- * Site navigation
- */
-// "Skip to content" link
+/* 页脚 */
+// 跳到内容链接
  #skip_to_content-nav:not(:focus-within) {
   position: absolute;
   width: 1px;
@@ -22,9 +20,7 @@
   border: 0;
 }
 
-/**
- * Site footer
- */
+/* 帖子的某一部分 */
 .site-footer {
   padding: $spacing-unit 0;
   border-top: 1px solid $color-grey-light;
@@ -34,9 +30,7 @@
   color: $color-grey;
 }
 
-/**
- * Page content
- */
+/* 页面内容 */
 .page-content {
   flex: 1 0 auto;
   padding-top: $spacing-unit;
@@ -55,9 +49,7 @@
   color: $color-grey;
 }
 
-/**
- * Posts
- */
+/* 帖子 */
 .post-header {
   margin-bottom: $spacing-unit;
 }
@@ -69,11 +61,9 @@
   }
 }
 
-/**
- * Post sections
- */
+/* 某一章节 */
 .post-section-meta {
-  margin-bottom: $spacing-unit / 2;
+  margin-bottom: math.div($spacing-unit, 2);
   color: $color-grey;
   font-size: 0.875em;
 }
@@ -82,9 +72,7 @@
   font-style: normal;
 }
 
-/**
- * Post footer
- */
+/* 帖子底部 */
 
 // Post tags
 .post-tags-container {
@@ -97,7 +85,7 @@
 }
 
 .post-tags-caption {
-  margin-right: $spacing-unit / 2;
+  margin-right: math.div($spacing-unit, 2);
 }
 
 .post-tags {
@@ -128,6 +116,10 @@
 
   a {
     color: inherit;
+
+    &:hover {
+      color: inherit;
+    }
   }
 }
 
@@ -136,9 +128,7 @@
   padding: 0 0.75em;
 }
 
-/**
- * Footnote
- */
+/* 注释 */
 .footnote::before {
   content: "[";
 }
@@ -148,4 +138,78 @@
 
 .reversefootnote {
   font-family: sans-serif; /* 覆盖 body 的 Emoji 字体 */
+}
+
+/* 图标边距 */
+.post-meta, .post-section-meta, .social-media-list {
+  .mdi {
+    margin-right: 0.5em;
+  }
+}
+
+/* 浮动按钮 */
+.fab-container {
+  position: fixed;
+  right: 1rem;
+  bottom: 1rem;
+}
+
+.fab {
+  margin: 0;
+  border: none;
+  padding: 0;
+  width: 3.375rem;
+  height: 3.375rem;
+
+  background-color: $color-primary-light;
+  border-radius: 1rem;
+  box-shadow: 0 3px 5px -1px rgba(0, 0, 0, 0.2), 0 6px 10px 0 rgba(0, 0, 0, 0.14), 0 1px 18px 0 rgba(0, 0, 0, 0.12);
+
+  color: inherit;
+  font-size: 1.5rem;
+  line-height: 1;
+
+  transition-property: border, background-color, color;
+  transition-duration: 200ms;
+
+  &:hover {
+    background-color: lighten($color-primary-light, 8%);
+  }
+}
+
+.fab-theme-popup {
+  position: fixed;
+  display: none;
+  bottom: 1rem;
+  right: 6rem;
+
+  padding: 0.5rem 1rem;
+
+  border: 1px solid $color-grey-light;
+  border-radius: 0.5em;
+  background-color: $color-background;
+  box-shadow: 0 3px 5px -1px rgba(0, 0, 0, 0.2), 0 6px 10px 0 rgba(0, 0, 0, 0.14), 0 1px 18px 0 rgba(0, 0, 0, 0.12);
+
+  opacity: 0;
+  transform: translateX(1em);
+
+  transition-property: border, transform, opacity;
+  transition-duration: 300ms;
+}
+
+.fab-theme-popup.open {
+  opacity: 1;
+  transform: none;
+}
+
+.fab-popup-close {
+  margin: 0;
+  border: none;
+  padding: 0;
+  width: 100%;
+
+  background-color: unset;
+  color: inherit;
+  text-align: right;
+  line-height: 1;
 }

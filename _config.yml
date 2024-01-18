@@ -58,6 +58,7 @@ timezong: "Asia/Shanghai"
 
 sass:
   style: "expanded"
+  # load_paths: "."
 
 minima:
   date_format: "%Y-%m-%d"

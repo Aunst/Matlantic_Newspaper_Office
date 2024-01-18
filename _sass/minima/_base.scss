@@ -1,6 +1,6 @@
-/**
- * Basic styling
- */
+@use "sass:math";
+
+/* 基本样式 */
 body {
   display: flex;
   min-height: 100vh;
@@ -8,11 +8,12 @@ body {
 
   background-color: $color-background;
   color: $color-text;
+
+  transition-property: background-color, color;
+  transition-duration: 300ms;
 }
 
-/**
- * Code formatting
- */
+/* 代码 */
 pre,
 code {
   border: 1px solid $color-grey-light;
@@ -37,9 +38,7 @@ pre {
   }
 }
 
-/**
- * Tables
- */
+/* 表格 */
 table {
   width: 100%;
   margin-bottom: $spacing-unit;
@@ -55,7 +54,7 @@ table {
     }
   }
   th, td {
-    padding: ($spacing-unit / 3) ($spacing-unit / 2);
+    padding: math.div($spacing-unit, 3) math.div($spacing-unit, 2);
   }
   th {
     border: 1px solid darken($color-grey-light, 4%);
