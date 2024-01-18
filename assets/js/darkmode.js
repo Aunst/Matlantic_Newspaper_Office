@@ -113,7 +113,7 @@ function enableTheme(newTheme = 'light', save = true) {
 
   root.classList.add('theme-' + newTheme);
   root.classList.remove('theme-' + otherTheme);
-  document.documentElement.setAttribute('data-color-scheme', newTheme);
+  root.setAttribute('data-color-scheme', newTheme);
 
   let radio = document.getElementById('radio-' + otherTheme + '-theme');
   radio.checked = false;
