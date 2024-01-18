@@ -1,3 +1,5 @@
+const baseurl = '/Matlantic_Newspaper_Office'
+
 if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", initializeTheme);
 } else {
@@ -152,7 +154,7 @@ function addStyleSheet(src) {
   const landmark = document.querySelector('link[name="main-stylesheet"]');
   let stylesheet = document.createElement('link');
   stylesheet.setAttribute('rel', 'stylesheet');
-  stylesheet.setAttribute('href', '/assets/css/' + src + '.css');
+  stylesheet.setAttribute('href', baseurl, '/assets/css/' + src + '.css');
 
   head.insertBefore(stylesheet, landmark);
 }
