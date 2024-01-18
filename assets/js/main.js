@@ -17,7 +17,7 @@ if (document.readyState === 'loading') {
 }
 document.addEventListener('pjax:send', () => {
   NProgress.start();
-  clipboard.destroy();
+  // clipboard.destroy();
 });
 document.addEventListener('pjax:complete', () => {
   NProgress.done();
