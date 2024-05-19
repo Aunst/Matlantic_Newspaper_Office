@@ -22,7 +22,7 @@
 
 /******/ var __webpack_modules__ = ({
 
-/***/ 640:
+/***/ 976:
 /***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
 
 
@@ -35,11 +35,11 @@ __webpack_require__.d(__webpack_exports__, {
 });
 
 // EXTERNAL MODULE: ./src/shared/util.js
-var util = __webpack_require__(266);
+var util = __webpack_require__(292);
 // EXTERNAL MODULE: ./src/display/display_utils.js
-var display_utils = __webpack_require__(473);
+var display_utils = __webpack_require__(419);
 // EXTERNAL MODULE: ./src/display/annotation_storage.js
-var annotation_storage = __webpack_require__(780);
+var annotation_storage = __webpack_require__(792);
 ;// CONCATENATED MODULE: ./src/shared/scripting_utils.js
 function makeColorComp(n) {
   return Math.floor(Math.max(0, Math.min(1, n)) * 255).toString(16).padStart(2, "0");
@@ -100,7 +100,7 @@ class ColorConverters {
 }
 
 // EXTERNAL MODULE: ./src/display/xfa_layer.js
-var xfa_layer = __webpack_require__(160);
+var xfa_layer = __webpack_require__(284);
 ;// CONCATENATED MODULE: ./src/display/annotation_layer.js
 
 
@@ -178,6 +178,7 @@ class AnnotationElementFactory {
   }
 }
 class AnnotationElement {
+  #updates = null;
   #hasBorder = false;
   constructor(parameters, {
     isRenderable = false,
@@ -214,6 +215,61 @@ class AnnotationElement {
   get hasPopupData() {
     return AnnotationElement._hasPopupData(this.data);
   }
+  updateEdited(params) {
+    if (!this.container) {
+      return;
+    }
+    this.#updates ||= {
+      rect: this.data.rect.slice(0)
+    };
+    const {
+      rect
+    } = params;
+    if (rect) {
+      this.#setRectEdited(rect);
+    }
+  }
+  resetEdited() {
+    if (!this.#updates) {
+      return;
+    }
+    this.#setRectEdited(this.#updates.rect);
+    this.#updates = null;
+  }
+  #setRectEdited(rect) {
+    const {
+      container: {
+        style
+      },
+      data: {
+        rect: currentRect,
+        rotation
+      },
+      parent: {
+        viewport: {
+          rawDims: {
+            pageWidth,
+            pageHeight,
+            pageX,
+            pageY
+          }
+        }
+      }
+    } = this;
+    currentRect?.splice(0, 4, ...rect);
+    const {
+      width,
+      height
+    } = getRectDims(rect);
+    style.left = `${100 * (rect[0] - pageX) / pageWidth}%`;
+    style.top = `${100 * (pageHeight - rect[3] + pageY) / pageHeight}%`;
+    if (rotation === 0) {
+      style.width = `${100 * width / pageWidth}%`;
+      style.height = `${100 * height / pageHeight}%`;
+    } else {
+      this.setRotation(rotation);
+    }
+  }
   _createContainer(ignoreBorder) {
     const {
       data,
@@ -227,19 +283,19 @@ class AnnotationElement {
     if (!(this instanceof WidgetAnnotationElement)) {
       container.tabIndex = DEFAULT_TAB_INDEX;
     }
-    container.style.zIndex = this.parent.zIndex++;
-    if (this.data.popupRef) {
+    const {
+      style
+    } = container;
+    style.zIndex = this.parent.zIndex++;
+    if (data.popupRef) {
       container.setAttribute("aria-haspopup", "dialog");
+    }
+    if (data.alternativeText) {
+      container.title = data.alternativeText;
     }
     if (data.noRotate) {
       container.classList.add("norotate");
     }
-    const {
-      pageWidth,
-      pageHeight,
-      pageX,
-      pageY
-    } = viewport.rawDims;
     if (!data.rect || this instanceof PopupAnnotationElement) {
       const {
         rotation
@@ -253,24 +309,23 @@ class AnnotationElement {
       width,
       height
     } = getRectDims(data.rect);
-    const rect = util.Util.normalizeRect([data.rect[0], page.view[3] - data.rect[1] + page.view[1], data.rect[2], page.view[3] - data.rect[3] + page.view[1]]);
     if (!ignoreBorder && data.borderStyle.width > 0) {
-      container.style.borderWidth = `${data.borderStyle.width}px`;
+      style.borderWidth = `${data.borderStyle.width}px`;
       const horizontalRadius = data.borderStyle.horizontalCornerRadius;
       const verticalRadius = data.borderStyle.verticalCornerRadius;
       if (horizontalRadius > 0 || verticalRadius > 0) {
         const radius = `calc(${horizontalRadius}px * var(--scale-factor)) / calc(${verticalRadius}px * var(--scale-factor))`;
-        container.style.borderRadius = radius;
+        style.borderRadius = radius;
       } else if (this instanceof RadioButtonWidgetAnnotationElement) {
         const radius = `calc(${width}px * var(--scale-factor)) / calc(${height}px * var(--scale-factor))`;
-        container.style.borderRadius = radius;
+        style.borderRadius = radius;
       }
       switch (data.borderStyle.style) {
         case util.AnnotationBorderStyleType.SOLID:
-          container.style.borderStyle = "solid";
+          style.borderStyle = "solid";
           break;
         case util.AnnotationBorderStyleType.DASHED:
-          container.style.borderStyle = "dashed";
+          style.borderStyle = "dashed";
           break;
         case util.AnnotationBorderStyleType.BEVELED:
           (0,util.warn)("Unimplemented border style: beveled");
@@ -279,7 +334,7 @@ class AnnotationElement {
           (0,util.warn)("Unimplemented border style: inset");
           break;
         case util.AnnotationBorderStyleType.UNDERLINE:
-          container.style.borderBottomStyle = "solid";
+          style.borderBottomStyle = "solid";
           break;
         default:
           break;
@@ -287,19 +342,26 @@ class AnnotationElement {
       const borderColor = data.borderColor || null;
       if (borderColor) {
         this.#hasBorder = true;
-        container.style.borderColor = util.Util.makeHexColor(borderColor[0] | 0, borderColor[1] | 0, borderColor[2] | 0);
+        style.borderColor = util.Util.makeHexColor(borderColor[0] | 0, borderColor[1] | 0, borderColor[2] | 0);
       } else {
-        container.style.borderWidth = 0;
+        style.borderWidth = 0;
       }
     }
-    container.style.left = `${100 * (rect[0] - pageX) / pageWidth}%`;
-    container.style.top = `${100 * (rect[1] - pageY) / pageHeight}%`;
+    const rect = util.Util.normalizeRect([data.rect[0], page.view[3] - data.rect[1] + page.view[1], data.rect[2], page.view[3] - data.rect[3] + page.view[1]]);
+    const {
+      pageWidth,
+      pageHeight,
+      pageX,
+      pageY
+    } = viewport.rawDims;
+    style.left = `${100 * (rect[0] - pageX) / pageWidth}%`;
+    style.top = `${100 * (rect[1] - pageY) / pageHeight}%`;
     const {
       rotation
     } = data;
     if (data.hasOwnCanvas || rotation === 0) {
-      container.style.width = `${100 * width / pageWidth}%`;
-      container.style.height = `${100 * height / pageHeight}%`;
+      style.width = `${100 * width / pageWidth}%`;
+      style.height = `${100 * height / pageHeight}%`;
     } else {
       this.setRotation(rotation, container);
     }
@@ -878,9 +940,6 @@ class TextAnnotationElement extends AnnotationElement {
 }
 class WidgetAnnotationElement extends AnnotationElement {
   render() {
-    if (this.data.alternativeText) {
-      this.container.title = this.data.alternativeText;
-    }
     return this.container;
   }
   showElementAndHideCanvas(element) {
@@ -1481,9 +1540,6 @@ class PushButtonWidgetAnnotationElement extends LinkAnnotationElement {
   render() {
     const container = super.render();
     container.classList.add("buttonWidgetAnnotation", "pushButton");
-    if (this.data.alternativeText) {
-      container.title = this.data.alternativeText;
-    }
     const linkElement = container.lastChild;
     if (this.enableScripting && this.hasJSActions && linkElement) {
       this._setDefaultPropertiesFromJS(linkElement);
@@ -1565,12 +1621,10 @@ class ChoiceWidgetAnnotationElement extends WidgetAnnotationElement {
     let selectedValues = getValue(false);
     const getItems = event => {
       const options = event.target.options;
-      return Array.prototype.map.call(options, option => {
-        return {
-          displayValue: option.textContent,
-          exportValue: option.value
-        };
-      });
+      return Array.prototype.map.call(options, option => ({
+        displayValue: option.textContent,
+        exportValue: option.value
+      }));
     };
     if (this.enableScripting && this.hasJSActions) {
       selectElement.addEventListener("updatefromsandbox", jsEvent => {
@@ -1682,6 +1736,7 @@ class ChoiceWidgetAnnotationElement extends WidgetAnnotationElement {
       });
       selectElement.addEventListener("input", event => {
         const exportValue = getValue(true);
+        const change = getValue(false);
         storage.setValue(id, {
           value: exportValue
         });
@@ -1692,6 +1747,7 @@ class ChoiceWidgetAnnotationElement extends WidgetAnnotationElement {
             id,
             name: "Keystroke",
             value: selectedValues,
+            change,
             changeEx: exportValue,
             willCommit: false,
             commitKey: 1,
@@ -2375,6 +2431,7 @@ class AnnotationLayer {
     div,
     accessibilityManager,
     annotationCanvasMap,
+    annotationEditorUIManager,
     page,
     viewport
   }) {
@@ -2384,6 +2441,7 @@ class AnnotationLayer {
     this.page = page;
     this.viewport = viewport;
     this.zIndex = 0;
+    this._annotationEditorUIManager = annotationEditorUIManager;
   }
   #appendElement(element, id) {
     const contentElement = element.firstChild || element;
@@ -2446,14 +2504,15 @@ class AnnotationLayer {
           elements.push(element);
         }
       }
-      if (element.annotationEditorType > 0) {
-        this.#editableAnnotations.set(element.data.id, element);
-      }
       const rendered = element.render();
       if (data.hidden) {
         rendered.style.visibility = "hidden";
       }
       this.#appendElement(rendered, data.id);
+      if (element.annotationEditorType > 0) {
+        this.#editableAnnotations.set(element.data.id, element);
+        this._annotationEditorUIManager?.renderAnnotationElement(element);
+      }
     }
     this.#setAnnotationCanvasMap();
   }
@@ -2478,6 +2537,7 @@ class AnnotationLayer {
       if (!element) {
         continue;
       }
+      canvas.className = "annotationContent";
       const {
         firstChild
       } = element;
@@ -2485,8 +2545,10 @@ class AnnotationLayer {
         element.append(canvas);
       } else if (firstChild.nodeName === "CANVAS") {
         firstChild.replaceWith(canvas);
-      } else {
+      } else if (!firstChild.classList.contains("annotationContent")) {
         firstChild.before(canvas);
+      } else {
+        firstChild.after(canvas);
       }
     }
     this.#annotationCanvasMap.clear();
@@ -2502,7 +2564,7 @@ class AnnotationLayer {
 
 /***/ }),
 
-/***/ 780:
+/***/ 792:
 /***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
 
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -2510,9 +2572,9 @@ class AnnotationLayer {
 /* harmony export */   PrintAnnotationStorage: () => (/* binding */ PrintAnnotationStorage),
 /* harmony export */   SerializableEmpty: () => (/* binding */ SerializableEmpty)
 /* harmony export */ });
-/* harmony import */ var _shared_util_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(266);
-/* harmony import */ var _editor_editor_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(115);
-/* harmony import */ var _shared_murmurhash3_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(825);
+/* harmony import */ var _shared_util_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(292);
+/* harmony import */ var _editor_editor_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(310);
+/* harmony import */ var _shared_murmurhash3_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(651);
 
 
 
@@ -2637,6 +2699,43 @@ class AnnotationStorage {
       transfer
     } : SerializableEmpty;
   }
+  get editorStats() {
+    let stats = null;
+    const typeToEditor = new Map();
+    for (const value of this.#storage.values()) {
+      if (!(value instanceof _editor_editor_js__WEBPACK_IMPORTED_MODULE_1__.AnnotationEditor)) {
+        continue;
+      }
+      const editorStats = value.telemetryFinalData;
+      if (!editorStats) {
+        continue;
+      }
+      const {
+        type
+      } = editorStats;
+      if (!typeToEditor.has(type)) {
+        typeToEditor.set(type, Object.getPrototypeOf(value).constructor);
+      }
+      stats ||= Object.create(null);
+      const map = stats[type] ||= new Map();
+      for (const [key, val] of Object.entries(editorStats)) {
+        if (key === "type") {
+          continue;
+        }
+        let counters = map.get(key);
+        if (!counters) {
+          counters = new Map();
+          map.set(key, counters);
+        }
+        const count = counters.get(val) ?? 0;
+        counters.set(val, count + 1);
+      }
+    }
+    for (const [type, editor] of typeToEditor) {
+      stats[type] = editor.computeTelemetryFinalData(stats[type]);
+    }
+    return stats;
+  }
 }
 class PrintAnnotationStorage extends AnnotationStorage {
   #serializable;
@@ -2667,7 +2766,7 @@ class PrintAnnotationStorage extends AnnotationStorage {
 
 /***/ }),
 
-/***/ 406:
+/***/ 831:
 /***/ ((__webpack_module__, __webpack_exports__, __webpack_require__) => {
 
 __webpack_require__.a(__webpack_module__, async (__webpack_handle_async_dependencies__, __webpack_async_result__) => { try {
@@ -2679,23 +2778,25 @@ __webpack_require__.a(__webpack_module__, async (__webpack_handle_async_dependen
 /* harmony export */   version: () => (/* binding */ version)
 /* harmony export */ });
 /* unused harmony exports DefaultCanvasFactory, DefaultCMapReaderFactory, DefaultFilterFactory, DefaultStandardFontDataFactory, LoopbackPort, PDFDocumentLoadingTask, PDFDocumentProxy, PDFPageProxy, PDFWorkerUtil, RenderTask */
-/* harmony import */ var _shared_util_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(266);
-/* harmony import */ var _annotation_storage_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(780);
-/* harmony import */ var _display_utils_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(473);
-/* harmony import */ var _font_loader_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(742);
-/* harmony import */ var display_node_utils__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(738);
-/* harmony import */ var _canvas_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(250);
-/* harmony import */ var _worker_options_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(368);
-/* harmony import */ var _shared_message_handler_js__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(694);
-/* harmony import */ var _metadata_js__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(472);
-/* harmony import */ var _optional_content_config_js__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(890);
-/* harmony import */ var _transport_stream_js__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(92);
-/* harmony import */ var display_fetch_stream__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(171);
-/* harmony import */ var display_network__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(474);
-/* harmony import */ var display_node_stream__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(498);
-/* harmony import */ var _xfa_text_js__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(521);
+/* harmony import */ var _shared_util_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(292);
+/* harmony import */ var _annotation_storage_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(792);
+/* harmony import */ var _display_utils_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(419);
+/* harmony import */ var _font_loader_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(10);
+/* harmony import */ var display_node_utils__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(573);
+/* harmony import */ var _canvas_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(923);
+/* harmony import */ var _text_layer_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(814);
+/* harmony import */ var _worker_options_js__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(164);
+/* harmony import */ var _shared_message_handler_js__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(178);
+/* harmony import */ var _metadata_js__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(62);
+/* harmony import */ var _optional_content_config_js__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(626);
+/* harmony import */ var _transport_stream_js__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(585);
+/* harmony import */ var display_fetch_stream__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(94);
+/* harmony import */ var display_network__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(457);
+/* harmony import */ var display_node_stream__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(786);
+/* harmony import */ var _xfa_text_js__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(50);
 var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([display_node_utils__WEBPACK_IMPORTED_MODULE_4__, display_node_stream__WEBPACK_IMPORTED_MODULE_13__]);
 ([display_node_utils__WEBPACK_IMPORTED_MODULE_4__, display_node_stream__WEBPACK_IMPORTED_MODULE_13__] = __webpack_async_dependencies__.then ? (await __webpack_async_dependencies__)() : __webpack_async_dependencies__);
+
 
 
 
@@ -2723,7 +2824,7 @@ function getDocument(src) {
     src = {
       url: src
     };
-  } else if ((0,_shared_util_js__WEBPACK_IMPORTED_MODULE_0__.isArrayBuffer)(src)) {
+  } else if (src instanceof ArrayBuffer || ArrayBuffer.isView(src)) {
     src = {
       data: src
     };
@@ -2794,14 +2895,14 @@ function getDocument(src) {
   if (!worker) {
     const workerParams = {
       verbosity,
-      port: _worker_options_js__WEBPACK_IMPORTED_MODULE_6__.GlobalWorkerOptions.workerPort
+      port: _worker_options_js__WEBPACK_IMPORTED_MODULE_14__.GlobalWorkerOptions.workerPort
     };
     worker = workerParams.port ? PDFWorker.fromPort(workerParams) : new PDFWorker(workerParams);
     task._worker = worker;
   }
   const fetchDocParams = {
     docId,
-    apiVersion: '4.0.379',
+    apiVersion: "4.2.67",
     data,
     password,
     disableAutoFetch,
@@ -2824,7 +2925,6 @@ function getDocument(src) {
   };
   const transportParams = {
     ignoreErrors,
-    isEvalSupported,
     disableFontFace,
     fontExtraProperties,
     enableXfa,
@@ -2841,18 +2941,17 @@ function getDocument(src) {
     const networkStreamPromise = new Promise(function (resolve) {
       let networkStream;
       if (rangeTransport) {
-        networkStream = new _transport_stream_js__WEBPACK_IMPORTED_MODULE_10__.PDFDataTransportStream({
-          length,
-          initialData: rangeTransport.initialData,
-          progressiveDone: rangeTransport.progressiveDone,
-          contentDispositionFilename: rangeTransport.contentDispositionFilename,
+        networkStream = new _transport_stream_js__WEBPACK_IMPORTED_MODULE_10__.PDFDataTransportStream(rangeTransport, {
           disableRange,
           disableStream
-        }, rangeTransport);
+        });
       } else if (!data) {
         const createPDFNetworkStream = params => {
           if (_shared_util_js__WEBPACK_IMPORTED_MODULE_0__.isNodeJS) {
-            return new display_node_stream__WEBPACK_IMPORTED_MODULE_13__.PDFNodeStream(params);
+            const isFetchSupported = function () {
+              return typeof fetch !== "undefined" && typeof Response !== "undefined" && "body" in Response.prototype;
+            };
+            return isFetchSupported() && (0,_display_utils_js__WEBPACK_IMPORTED_MODULE_2__.isValidFetchUrl)(params.url) ? new display_fetch_stream__WEBPACK_IMPORTED_MODULE_11__.PDFFetchStream(params) : new display_node_stream__WEBPACK_IMPORTED_MODULE_13__.PDFNodeStream(params);
           }
           return (0,_display_utils_js__WEBPACK_IMPORTED_MODULE_2__.isValidFetchUrl)(params.url) ? new display_fetch_stream__WEBPACK_IMPORTED_MODULE_11__.PDFFetchStream(params) : new display_network__WEBPACK_IMPORTED_MODULE_12__.PDFNetworkStream(params);
         };
@@ -2913,15 +3012,18 @@ function getDataProp(val) {
   if (typeof val === "string") {
     return (0,_shared_util_js__WEBPACK_IMPORTED_MODULE_0__.stringToBytes)(val);
   }
-  if (typeof val === "object" && !isNaN(val?.length) || (0,_shared_util_js__WEBPACK_IMPORTED_MODULE_0__.isArrayBuffer)(val)) {
+  if (val instanceof ArrayBuffer || ArrayBuffer.isView(val) || typeof val === "object" && !isNaN(val?.length)) {
     return new Uint8Array(val);
   }
   throw new Error("Invalid PDF binary data: either TypedArray, " + "string, or array-like object is expected in the data property.");
 }
+function isRefProxy(ref) {
+  return typeof ref === "object" && Number.isInteger(ref?.num) && ref.num >= 0 && Number.isInteger(ref?.gen) && ref.gen >= 0;
+}
 class PDFDocumentLoadingTask {
   static #docId = 0;
   constructor() {
-    this._capability = new _shared_util_js__WEBPACK_IMPORTED_MODULE_0__.PromiseCapability();
+    this._capability = Promise.withResolvers();
     this._transport = null;
     this._worker = null;
     this.docId = `d${PDFDocumentLoadingTask.#docId++}`;
@@ -2962,7 +3064,7 @@ class PDFDataRangeTransport {
     this._progressListeners = [];
     this._progressiveReadListeners = [];
     this._progressiveDoneListeners = [];
-    this._readyCapability = new _shared_util_js__WEBPACK_IMPORTED_MODULE_0__.PromiseCapability();
+    this._readyCapability = Promise.withResolvers();
   }
   addRangeListener(listener) {
     this._rangeListeners.push(listener);
@@ -3069,8 +3171,13 @@ class PDFDocumentProxy {
   getOutline() {
     return this._transport.getOutline();
   }
-  getOptionalContentConfig() {
-    return this._transport.getOptionalContentConfig();
+  getOptionalContentConfig({
+    intent = "display"
+  } = {}) {
+    const {
+      renderingIntent
+    } = this._transport.getRenderingIntent(intent);
+    return this._transport.getOptionalContentConfig(renderingIntent);
   }
   getPermissions() {
     return this._transport.getPermissions();
@@ -3095,6 +3202,9 @@ class PDFDocumentProxy {
   }
   destroy() {
     return this.loadingTask.destroy();
+  }
+  cachedPageNumber(ref) {
+    return this._transport.cachedPageNumber(ref);
   }
   get loadingParams() {
     return this._transport.loadingParams;
@@ -3161,8 +3271,10 @@ class PDFPageProxy {
   getAnnotations({
     intent = "display"
   } = {}) {
-    const intentArgs = this._transport.getRenderingIntent(intent);
-    return this._transport.getAnnotations(this._pageIndex, intentArgs.renderingIntent);
+    const {
+      renderingIntent
+    } = this._transport.getRenderingIntent(intent);
+    return this._transport.getAnnotations(this._pageIndex, renderingIntent);
   }
   getJSActions() {
     return this._transport.getPageJSActions(this._pageIndex);
@@ -3190,23 +3302,25 @@ class PDFPageProxy {
   }) {
     this._stats?.time("Overall");
     const intentArgs = this._transport.getRenderingIntent(intent, annotationMode, printAnnotationStorage);
+    const {
+      renderingIntent,
+      cacheKey
+    } = intentArgs;
     this.#pendingCleanup = false;
     this.#abortDelayedCleanup();
-    if (!optionalContentConfigPromise) {
-      optionalContentConfigPromise = this._transport.getOptionalContentConfig();
-    }
-    let intentState = this._intentStates.get(intentArgs.cacheKey);
+    optionalContentConfigPromise ||= this._transport.getOptionalContentConfig(renderingIntent);
+    let intentState = this._intentStates.get(cacheKey);
     if (!intentState) {
       intentState = Object.create(null);
-      this._intentStates.set(intentArgs.cacheKey, intentState);
+      this._intentStates.set(cacheKey, intentState);
     }
     if (intentState.streamReaderCancelTimeout) {
       clearTimeout(intentState.streamReaderCancelTimeout);
       intentState.streamReaderCancelTimeout = null;
     }
-    const intentPrint = !!(intentArgs.renderingIntent & _shared_util_js__WEBPACK_IMPORTED_MODULE_0__.RenderingIntentFlag.PRINT);
+    const intentPrint = !!(renderingIntent & _shared_util_js__WEBPACK_IMPORTED_MODULE_0__.RenderingIntentFlag.PRINT);
     if (!intentState.displayReadyCapability) {
-      intentState.displayReadyCapability = new _shared_util_js__WEBPACK_IMPORTED_MODULE_0__.PromiseCapability();
+      intentState.displayReadyCapability = Promise.withResolvers();
       intentState.operatorList = {
         fnArray: [],
         argsArray: [],
@@ -3261,6 +3375,9 @@ class PDFPageProxy {
         return;
       }
       this._stats?.time("Rendering");
+      if (!(optionalContentConfig.renderingIntent & renderingIntent)) {
+        throw new Error("Must use the same `intent`-argument when calling the `PDFPageProxy.render` " + "and `PDFDocumentProxy.getOptionalContentConfig` methods.");
+      }
       internalRenderTask.initializeGraphics({
         transparency,
         optionalContentConfig
@@ -3290,7 +3407,7 @@ class PDFPageProxy {
     if (!intentState.opListReadCapability) {
       opListTask = Object.create(null);
       opListTask.operatorListChanged = operatorListChanged;
-      intentState.opListReadCapability = new _shared_util_js__WEBPACK_IMPORTED_MODULE_0__.PromiseCapability();
+      intentState.opListReadCapability = Promise.withResolvers();
       (intentState.renderTasks ||= new Set()).add(opListTask);
       intentState.operatorList = {
         fnArray: [],
@@ -3321,9 +3438,7 @@ class PDFPageProxy {
   }
   getTextContent(params = {}) {
     if (this._transport._htmlForXfa) {
-      return this.getXfa().then(xfa => {
-        return _xfa_text_js__WEBPACK_IMPORTED_MODULE_14__.XfaText.textContent(xfa);
-      });
+      return this.getXfa().then(xfa => _xfa_text_js__WEBPACK_IMPORTED_MODULE_15__.XfaText.textContent(xfa));
     }
     const readableStream = this.streamTextContent(params);
     return new Promise(function (resolve, reject) {
@@ -3571,7 +3686,7 @@ const PDFWorkerUtil = {
 {
   if (_shared_util_js__WEBPACK_IMPORTED_MODULE_0__.isNodeJS) {
     PDFWorkerUtil.isWorkerDisabled = true;
-    _worker_options_js__WEBPACK_IMPORTED_MODULE_6__.GlobalWorkerOptions.workerSrc ||= "./pdf.worker.mjs";
+    _worker_options_js__WEBPACK_IMPORTED_MODULE_14__.GlobalWorkerOptions.workerSrc ||= "./pdf.worker.mjs";
   }
   PDFWorkerUtil.isSameOrigin = function (baseUrl, otherUrl) {
     let base;
@@ -3603,7 +3718,7 @@ class PDFWorker {
     this.name = name;
     this.destroyed = false;
     this.verbosity = verbosity;
-    this._readyCapability = new _shared_util_js__WEBPACK_IMPORTED_MODULE_0__.PromiseCapability();
+    this._readyCapability = Promise.withResolvers();
     this._port = null;
     this._webWorker = null;
     this._messageHandler = null;
@@ -3760,8 +3875,8 @@ class PDFWorker {
     return new PDFWorker(params);
   }
   static get workerSrc() {
-    if (_worker_options_js__WEBPACK_IMPORTED_MODULE_6__.GlobalWorkerOptions.workerSrc) {
-      return _worker_options_js__WEBPACK_IMPORTED_MODULE_6__.GlobalWorkerOptions.workerSrc;
+    if (_worker_options_js__WEBPACK_IMPORTED_MODULE_14__.GlobalWorkerOptions.workerSrc) {
+      return _worker_options_js__WEBPACK_IMPORTED_MODULE_14__.GlobalWorkerOptions.workerSrc;
     }
     throw new Error('No "GlobalWorkerOptions.workerSrc" specified.');
   }
@@ -3777,7 +3892,7 @@ class PDFWorker {
       if (this.#mainThreadWorkerMessageHandler) {
         return this.#mainThreadWorkerMessageHandler;
       }
-      const worker = await import(/* webpackIgnore: true */ this.workerSrc);
+      const worker = await import( /*webpackIgnore: true*/this.workerSrc);
       return worker.WorkerMessageHandler;
     };
     return (0,_shared_util_js__WEBPACK_IMPORTED_MODULE_0__.shadow)(this, "_setupFakeWorkerGlobal", loader());
@@ -3787,6 +3902,7 @@ class WorkerTransport {
   #methodPromises = new Map();
   #pageCache = new Map();
   #pagePromises = new Map();
+  #pageRefCache = new Map();
   #passwordCapability = null;
   constructor(messageHandler, loadingTask, networkStream, params, factory) {
     this.messageHandler = messageHandler;
@@ -3806,7 +3922,7 @@ class WorkerTransport {
     this._networkStream = networkStream;
     this._fullReader = null;
     this._lastProgress = null;
-    this.downloadInfoCapability = new _shared_util_js__WEBPACK_IMPORTED_MODULE_0__.PromiseCapability();
+    this.downloadInfoCapability = Promise.withResolvers();
     this.setupMessageHandler();
   }
   #cacheSimpleMethod(name, data = null) {
@@ -3867,7 +3983,7 @@ class WorkerTransport {
       return this.destroyCapability.promise;
     }
     this.destroyed = true;
-    this.destroyCapability = new _shared_util_js__WEBPACK_IMPORTED_MODULE_0__.PromiseCapability();
+    this.destroyCapability = Promise.withResolvers();
     this.#passwordCapability?.reject(new Error("Worker was destroyed during onPassword callback"));
     const waitOn = [];
     for (const page of this.#pageCache.values()) {
@@ -3875,6 +3991,7 @@ class WorkerTransport {
     }
     this.#pageCache.clear();
     this.#pagePromises.clear();
+    this.#pageRefCache.clear();
     if (this.hasOwnProperty("annotationStorage")) {
       this.annotationStorage.resetModified();
     }
@@ -3885,6 +4002,7 @@ class WorkerTransport {
       this.fontLoader.clear();
       this.#methodPromises.clear();
       this.filterFactory.destroy();
+      (0,_text_layer_js__WEBPACK_IMPORTED_MODULE_6__.cleanupTextLayer)();
       this._networkStream?.cancelAllRequests(new _shared_util_js__WEBPACK_IMPORTED_MODULE_0__.AbortException("Worker was terminated."));
       if (this.messageHandler) {
         this.messageHandler.destroy();
@@ -3934,7 +4052,7 @@ class WorkerTransport {
       };
     });
     messageHandler.on("ReaderHeadersReady", data => {
-      const headersCapability = new _shared_util_js__WEBPACK_IMPORTED_MODULE_0__.PromiseCapability();
+      const headersCapability = Promise.withResolvers();
       const fullReader = this._fullReader;
       fullReader.headersReady.then(() => {
         if (!fullReader.isStreamingSupported || !fullReader.isRangeSupported) {
@@ -4020,7 +4138,7 @@ class WorkerTransport {
       loadingTask._capability.reject(reason);
     });
     messageHandler.on("PasswordRequest", exception => {
-      this.#passwordCapability = new _shared_util_js__WEBPACK_IMPORTED_MODULE_0__.PromiseCapability();
+      this.#passwordCapability = Promise.withResolvers();
       if (loadingTask.onPassword) {
         const updatePassword = password => {
           if (password instanceof Error) {
@@ -4073,16 +4191,13 @@ class WorkerTransport {
           }
           const inspectFont = params.pdfBug && globalThis.FontInspector?.enabled ? (font, url) => globalThis.FontInspector.fontAdded(font, url) : null;
           const font = new _font_loader_js__WEBPACK_IMPORTED_MODULE_3__.FontFaceObject(exportedData, {
-            isEvalSupported: params.isEvalSupported,
             disableFontFace: params.disableFontFace,
             ignoreErrors: params.ignoreErrors,
             inspectFont
           });
-          this.fontLoader.bind(font).catch(reason => {
-            return messageHandler.sendWithPromise("FontFallback", {
-              id
-            });
-          }).finally(() => {
+          this.fontLoader.bind(font).catch(() => messageHandler.sendWithPromise("FontFallback", {
+            id
+          })).finally(() => {
             if (!params.fontExtraProperties && font.data) {
               font.data = null;
             }
@@ -4206,6 +4321,9 @@ class WorkerTransport {
       if (this.destroyed) {
         throw new Error("Transport destroyed");
       }
+      if (pageInfo.refStr) {
+        this.#pageRefCache.set(pageInfo.refStr, pageNumber);
+      }
       const page = new PDFPageProxy(pageIndex, pageInfo, this, this._params.pdfBug);
       this.#pageCache.set(pageIndex, page);
       return page;
@@ -4214,7 +4332,7 @@ class WorkerTransport {
     return promise;
   }
   getPageIndex(ref) {
-    if (typeof ref !== "object" || ref === null || !Number.isInteger(ref.num) || ref.num < 0 || !Number.isInteger(ref.gen) || ref.gen < 0) {
+    if (!isRefProxy(ref)) {
       return Promise.reject(new Error("Invalid pageIndex request."));
     }
     return this.messageHandler.sendWithPromise("GetPageIndex", {
@@ -4282,10 +4400,8 @@ class WorkerTransport {
   getOutline() {
     return this.messageHandler.sendWithPromise("GetOutline", null);
   }
-  getOptionalContentConfig() {
-    return this.messageHandler.sendWithPromise("GetOptionalContentConfig", null).then(results => {
-      return new _optional_content_config_js__WEBPACK_IMPORTED_MODULE_9__.OptionalContentConfig(results);
-    });
+  getOptionalContentConfig(renderingIntent) {
+    return this.#cacheSimpleMethod("GetOptionalContentConfig").then(data => new _optional_content_config_js__WEBPACK_IMPORTED_MODULE_9__.OptionalContentConfig(data, renderingIntent));
   }
   getPermissions() {
     return this.messageHandler.sendWithPromise("GetPermissions", null);
@@ -4296,14 +4412,12 @@ class WorkerTransport {
     if (cachedPromise) {
       return cachedPromise;
     }
-    const promise = this.messageHandler.sendWithPromise(name, null).then(results => {
-      return {
-        info: results[0],
-        metadata: results[1] ? new _metadata_js__WEBPACK_IMPORTED_MODULE_8__.Metadata(results[1]) : null,
-        contentDispositionFilename: this._fullReader?.filename ?? null,
-        contentLength: this._fullReader?.contentLength ?? null
-      };
-    });
+    const promise = this.messageHandler.sendWithPromise(name, null).then(results => ({
+      info: results[0],
+      metadata: results[1] ? new _metadata_js__WEBPACK_IMPORTED_MODULE_8__.Metadata(results[1]) : null,
+      contentDispositionFilename: this._fullReader?.filename ?? null,
+      contentLength: this._fullReader?.contentLength ?? null
+    }));
     this.#methodPromises.set(name, promise);
     return promise;
   }
@@ -4327,6 +4441,14 @@ class WorkerTransport {
     }
     this.#methodPromises.clear();
     this.filterFactory.destroy(true);
+    (0,_text_layer_js__WEBPACK_IMPORTED_MODULE_6__.cleanupTextLayer)();
+  }
+  cachedPageNumber(ref) {
+    if (!isRefProxy(ref)) {
+      return null;
+    }
+    const refStr = ref.gen === 0 ? `${ref.num}R` : `${ref.num}R${ref.gen}`;
+    return this.#pageRefCache.get(refStr) ?? null;
   }
   get loadingParams() {
     const {
@@ -4339,34 +4461,35 @@ class WorkerTransport {
     });
   }
 }
+const INITIAL_DATA = Symbol("INITIAL_DATA");
 class PDFObjects {
   #objs = Object.create(null);
   #ensureObj(objId) {
     return this.#objs[objId] ||= {
-      capability: new _shared_util_js__WEBPACK_IMPORTED_MODULE_0__.PromiseCapability(),
-      data: null
+      ...Promise.withResolvers(),
+      data: INITIAL_DATA
     };
   }
   get(objId, callback = null) {
     if (callback) {
       const obj = this.#ensureObj(objId);
-      obj.capability.promise.then(() => callback(obj.data));
+      obj.promise.then(() => callback(obj.data));
       return null;
     }
     const obj = this.#objs[objId];
-    if (!obj?.capability.settled) {
+    if (!obj || obj.data === INITIAL_DATA) {
       throw new Error(`Requesting object that isn't resolved yet ${objId}.`);
     }
     return obj.data;
   }
   has(objId) {
     const obj = this.#objs[objId];
-    return obj?.capability.settled ?? false;
+    return !!obj && obj.data !== INITIAL_DATA;
   }
   resolve(objId, data = null) {
     const obj = this.#ensureObj(objId);
     obj.data = data;
-    obj.capability.resolve();
+    obj.resolve();
   }
   clear() {
     for (const objId in this.#objs) {
@@ -4380,10 +4503,9 @@ class PDFObjects {
   *[Symbol.iterator]() {
     for (const objId in this.#objs) {
       const {
-        capability,
         data
       } = this.#objs[objId];
-      if (!capability.settled) {
+      if (data === INITIAL_DATA) {
         continue;
       }
       yield [objId, data];
@@ -4448,7 +4570,7 @@ class InternalRenderTask {
     this.graphicsReady = false;
     this._useRequestAnimationFrame = useRequestAnimationFrame === true && typeof window !== "undefined";
     this.cancelled = false;
-    this.capability = new _shared_util_js__WEBPACK_IMPORTED_MODULE_0__.PromiseCapability();
+    this.capability = Promise.withResolvers();
     this.task = new RenderTask(this);
     this._cancelBound = this.cancel.bind(this);
     this._continueBound = this._continue.bind(this);
@@ -4549,15 +4671,15 @@ class InternalRenderTask {
     }
   }
 }
-const version = '4.0.379';
-const build = '9e14d04fd';
+const version = "4.2.67";
+const build = "49b388101";
 
 __webpack_async_result__();
 } catch(e) { __webpack_async_result__(e); } });
 
 /***/ }),
 
-/***/ 822:
+/***/ 583:
 /***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
 
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -4567,7 +4689,7 @@ __webpack_async_result__();
 /* harmony export */   BaseSVGFactory: () => (/* binding */ BaseSVGFactory),
 /* harmony export */   BaseStandardFontDataFactory: () => (/* binding */ BaseStandardFontDataFactory)
 /* harmony export */ });
-/* harmony import */ var _shared_util_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(266);
+/* harmony import */ var _shared_util_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(292);
 
 class BaseFilterFactory {
   constructor() {
@@ -4581,7 +4703,7 @@ class BaseFilterFactory {
   addHCMFilter(fgColor, bgColor) {
     return "none";
   }
-  addHighlightHCMFilter(fgColor, bgColor, newFgColor, newBgColor) {
+  addHighlightHCMFilter(filterName, fgColor, bgColor, newFgColor, newBgColor) {
     return "none";
   }
   destroy(keepHCM = false) {}
@@ -4716,7 +4838,7 @@ class BaseSVGFactory {
 
 /***/ }),
 
-/***/ 250:
+/***/ 923:
 /***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
 
 
@@ -4726,9 +4848,9 @@ __webpack_require__.d(__webpack_exports__, {
 });
 
 // EXTERNAL MODULE: ./src/shared/util.js
-var util = __webpack_require__(266);
+var util = __webpack_require__(292);
 // EXTERNAL MODULE: ./src/display/display_utils.js
-var display_utils = __webpack_require__(473);
+var display_utils = __webpack_require__(419);
 ;// CONCATENATED MODULE: ./src/display/pattern_helper.js
 
 
@@ -5635,17 +5757,13 @@ class CanvasExtraState {
   updateScalingPathMinMax(transform, minMax) {
     util.Util.scaleMinMax(transform, minMax);
     this.minX = Math.min(this.minX, minMax[0]);
-    this.maxX = Math.max(this.maxX, minMax[1]);
-    this.minY = Math.min(this.minY, minMax[2]);
+    this.minY = Math.min(this.minY, minMax[1]);
+    this.maxX = Math.max(this.maxX, minMax[2]);
     this.maxY = Math.max(this.maxY, minMax[3]);
   }
   updateCurvePathMinMax(transform, x0, y0, x1, y1, x2, y2, x3, y3, minMax) {
-    const box = util.Util.bezierBoundingBox(x0, y0, x1, y1, x2, y2, x3, y3);
+    const box = util.Util.bezierBoundingBox(x0, y0, x1, y1, x2, y2, x3, y3, minMax);
     if (minMax) {
-      minMax[0] = Math.min(minMax[0], box[0], box[2]);
-      minMax[1] = Math.max(minMax[1], box[0], box[2]);
-      minMax[2] = Math.min(minMax[2], box[1], box[3]);
-      minMax[3] = Math.max(minMax[3], box[1], box[3]);
       return;
     }
     this.updateRectMinMax(transform, box);
@@ -5908,16 +6026,14 @@ function composeSMask(ctx, smask, layerCtx, layerBox) {
   ctx.restore();
 }
 function getImageSmoothingEnabled(transform, interpolate) {
+  if (interpolate) {
+    return true;
+  }
   const scale = util.Util.singularValueDecompose2dScale(transform);
   scale[0] = Math.fround(scale[0]);
   scale[1] = Math.fround(scale[1]);
   const actualScale = Math.fround((globalThis.devicePixelRatio || 1) * display_utils.PixelsPerInch.PDF_TO_CSS_UNITS);
-  if (interpolate !== undefined) {
-    return interpolate;
-  } else if (scale[0] <= actualScale || scale[1] <= actualScale) {
-    return true;
-  }
-  return false;
+  return scale[0] <= actualScale && scale[1] <= actualScale;
 }
 const LINE_CAP_STYLES = ["butt", "round", "square"];
 const LINE_JOIN_STYLES = ["miter", "round", "bevel"];
@@ -6873,12 +6989,10 @@ class CanvasGraphics {
       const color = IR[1];
       const baseTransform = this.baseTransform || (0,display_utils.getCurrentTransform)(this.ctx);
       const canvasGraphicsFactory = {
-        createCanvasGraphics: ctx => {
-          return new CanvasGraphics(ctx, this.commonObjs, this.objs, this.canvasFactory, this.filterFactory, {
-            optionalContentConfig: this.optionalContentConfig,
-            markedContentStack: this.markedContentStack
-          });
-        }
+        createCanvasGraphics: ctx => new CanvasGraphics(ctx, this.commonObjs, this.objs, this.canvasFactory, this.filterFactory, {
+          optionalContentConfig: this.optionalContentConfig,
+          markedContentStack: this.markedContentStack
+        })
       };
       pattern = new TilingPattern(IR, color, this.ctx, canvasGraphicsFactory, baseTransform);
     } else {
@@ -7482,7 +7596,7 @@ for (const op in util.OPS) {
 
 /***/ }),
 
-/***/ 473:
+/***/ 419:
 /***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
 
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -7511,8 +7625,8 @@ for (const op in util.OPS) {
 /* harmony export */   setLayerDimensions: () => (/* binding */ setLayerDimensions)
 /* harmony export */ });
 /* unused harmony export deprecated */
-/* harmony import */ var _base_factory_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(822);
-/* harmony import */ var _shared_util_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(266);
+/* harmony import */ var _base_factory_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(583);
+/* harmony import */ var _shared_util_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(292);
 
 
 const SVG_NS = "http://www.w3.org/2000/svg";
@@ -7526,12 +7640,7 @@ class DOMFilterFactory extends _base_factory_js__WEBPACK_IMPORTED_MODULE_0__.Bas
   #_defs;
   #docId;
   #document;
-  #hcmFilter;
-  #hcmKey;
-  #hcmUrl;
-  #hcmHighlightFilter;
-  #hcmHighlightKey;
-  #hcmHighlightUrl;
+  #_hcmCache;
   #id = 0;
   constructor({
     docId,
@@ -7543,6 +7652,9 @@ class DOMFilterFactory extends _base_factory_js__WEBPACK_IMPORTED_MODULE_0__.Bas
   }
   get #cache() {
     return this.#_cache ||= new Map();
+  }
+  get #hcmCache() {
+    return this.#_hcmCache ||= new Map();
   }
   get #defs() {
     if (!this.#_defs) {
@@ -7612,14 +7724,26 @@ class DOMFilterFactory extends _base_factory_js__WEBPACK_IMPORTED_MODULE_0__.Bas
   }
   addHCMFilter(fgColor, bgColor) {
     const key = `${fgColor}-${bgColor}`;
-    if (this.#hcmKey === key) {
-      return this.#hcmUrl;
+    const filterName = "base";
+    let info = this.#hcmCache.get(filterName);
+    if (info?.key === key) {
+      return info.url;
     }
-    this.#hcmKey = key;
-    this.#hcmUrl = "none";
-    this.#hcmFilter?.remove();
+    if (info) {
+      info.filter?.remove();
+      info.key = key;
+      info.url = "none";
+      info.filter = null;
+    } else {
+      info = {
+        key,
+        url: "none",
+        filter: null
+      };
+      this.#hcmCache.set(filterName, info);
+    }
     if (!fgColor || !bgColor) {
-      return this.#hcmUrl;
+      return info.url;
     }
     const fgRGB = this.#getRGB(fgColor);
     fgColor = _shared_util_js__WEBPACK_IMPORTED_MODULE_1__.Util.makeHexColor(...fgRGB);
@@ -7627,7 +7751,7 @@ class DOMFilterFactory extends _base_factory_js__WEBPACK_IMPORTED_MODULE_0__.Bas
     bgColor = _shared_util_js__WEBPACK_IMPORTED_MODULE_1__.Util.makeHexColor(...bgRGB);
     this.#defs.style.color = "";
     if (fgColor === "#000000" && bgColor === "#ffffff" || fgColor === bgColor) {
-      return this.#hcmUrl;
+      return info.url;
     }
     const map = new Array(256);
     for (let i = 0; i <= 255; i++) {
@@ -7636,7 +7760,7 @@ class DOMFilterFactory extends _base_factory_js__WEBPACK_IMPORTED_MODULE_0__.Bas
     }
     const table = map.join(",");
     const id = `g_${this.#docId}_hcm_filter`;
-    const filter = this.#hcmHighlightFilter = this.#createFilter(id);
+    const filter = info.filter = this.#createFilter(id);
     this.#addTransferMapConversion(table, table, table, filter);
     this.#addGrayConversion(filter);
     const getSteps = (c, n) => {
@@ -7649,19 +7773,30 @@ class DOMFilterFactory extends _base_factory_js__WEBPACK_IMPORTED_MODULE_0__.Bas
       return arr.join(",");
     };
     this.#addTransferMapConversion(getSteps(0, 5), getSteps(1, 5), getSteps(2, 5), filter);
-    this.#hcmUrl = `url(#${id})`;
-    return this.#hcmUrl;
+    info.url = `url(#${id})`;
+    return info.url;
   }
-  addHighlightHCMFilter(fgColor, bgColor, newFgColor, newBgColor) {
+  addHighlightHCMFilter(filterName, fgColor, bgColor, newFgColor, newBgColor) {
     const key = `${fgColor}-${bgColor}-${newFgColor}-${newBgColor}`;
-    if (this.#hcmHighlightKey === key) {
-      return this.#hcmHighlightUrl;
+    let info = this.#hcmCache.get(filterName);
+    if (info?.key === key) {
+      return info.url;
     }
-    this.#hcmHighlightKey = key;
-    this.#hcmHighlightUrl = "none";
-    this.#hcmHighlightFilter?.remove();
+    if (info) {
+      info.filter?.remove();
+      info.key = key;
+      info.url = "none";
+      info.filter = null;
+    } else {
+      info = {
+        key,
+        url: "none",
+        filter: null
+      };
+      this.#hcmCache.set(filterName, info);
+    }
     if (!fgColor || !bgColor) {
-      return this.#hcmHighlightUrl;
+      return info.url;
     }
     const [fgRGB, bgRGB] = [fgColor, bgColor].map(this.#getRGB.bind(this));
     let fgGray = Math.round(0.2126 * fgRGB[0] + 0.7152 * fgRGB[1] + 0.0722 * fgRGB[2]);
@@ -7690,15 +7825,15 @@ class DOMFilterFactory extends _base_factory_js__WEBPACK_IMPORTED_MODULE_0__.Bas
       }
       return arr.join(",");
     };
-    const id = `g_${this.#docId}_hcm_highlight_filter`;
-    const filter = this.#hcmHighlightFilter = this.#createFilter(id);
+    const id = `g_${this.#docId}_hcm_${filterName}_filter`;
+    const filter = info.filter = this.#createFilter(id);
     this.#addGrayConversion(filter);
     this.#addTransferMapConversion(getSteps(newFgRGB[0], newBgRGB[0], 5), getSteps(newFgRGB[1], newBgRGB[1], 5), getSteps(newFgRGB[2], newBgRGB[2], 5), filter);
-    this.#hcmHighlightUrl = `url(#${id})`;
-    return this.#hcmHighlightUrl;
+    info.url = `url(#${id})`;
+    return info.url;
   }
   destroy(keepHCM = false) {
-    if (keepHCM && (this.#hcmUrl || this.#hcmHighlightUrl)) {
+    if (keepHCM && this.#hcmCache.size !== 0) {
       return;
     }
     if (this.#_defs) {
@@ -7781,21 +7916,15 @@ async function fetchData(url, type = "text") {
         return;
       }
       if (request.status === 200 || request.status === 0) {
-        let data;
         switch (type) {
           case "arraybuffer":
           case "blob":
           case "json":
-            data = request.response;
-            break;
-          default:
-            data = request.responseText;
-            break;
+            resolve(request.response);
+            return;
         }
-        if (data) {
-          resolve(data);
-          return;
-        }
+        resolve(request.responseText);
+        return;
       }
       reject(new Error(request.statusText));
     };
@@ -7804,19 +7933,15 @@ async function fetchData(url, type = "text") {
 }
 class DOMCMapReaderFactory extends _base_factory_js__WEBPACK_IMPORTED_MODULE_0__.BaseCMapReaderFactory {
   _fetchData(url, compressionType) {
-    return fetchData(url, this.isCompressed ? "arraybuffer" : "text").then(data => {
-      return {
-        cMapData: data instanceof ArrayBuffer ? new Uint8Array(data) : (0,_shared_util_js__WEBPACK_IMPORTED_MODULE_1__.stringToBytes)(data),
-        compressionType
-      };
-    });
+    return fetchData(url, this.isCompressed ? "arraybuffer" : "text").then(data => ({
+      cMapData: data instanceof ArrayBuffer ? new Uint8Array(data) : (0,_shared_util_js__WEBPACK_IMPORTED_MODULE_1__.stringToBytes)(data),
+      compressionType
+    }));
   }
 }
 class DOMStandardFontDataFactory extends _base_factory_js__WEBPACK_IMPORTED_MODULE_0__.BaseStandardFontDataFactory {
   _fetchData(url) {
-    return fetchData(url, "arraybuffer").then(data => {
-      return new Uint8Array(data);
-    });
+    return fetchData(url, "arraybuffer").then(data => new Uint8Array(data));
   }
 }
 class DOMSVGFactory extends _base_factory_js__WEBPACK_IMPORTED_MODULE_0__.BaseSVGFactory {
@@ -8161,20 +8286,21 @@ function setLayerDimensions(div, viewport, mustFlip = false, mustRotate = true) 
 
 /***/ }),
 
-/***/ 423:
+/***/ 47:
 /***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
 
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   DrawLayer: () => (/* binding */ DrawLayer)
 /* harmony export */ });
-/* harmony import */ var _display_utils_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(473);
-/* harmony import */ var _shared_util_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(266);
+/* harmony import */ var _display_utils_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(419);
+/* harmony import */ var _shared_util_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(292);
 
 
 class DrawLayer {
   #parent = null;
   #id = 0;
   #mapping = new Map();
+  #toUpdate = new Map();
   constructor({
     pageIndex
   }) {
@@ -8199,11 +8325,11 @@ class DrawLayer {
     return (0,_shared_util_js__WEBPACK_IMPORTED_MODULE_1__.shadow)(this, "_svgFactory", new _display_utils_js__WEBPACK_IMPORTED_MODULE_0__.DOMSVGFactory());
   }
   static #setBox(element, {
-    x,
-    y,
-    width,
-    height
-  }) {
+    x = 0,
+    y = 0,
+    width = 1,
+    height = 1
+  } = {}) {
     const {
       style
     } = element;
@@ -8215,23 +8341,11 @@ class DrawLayer {
   #createSVG(box) {
     const svg = DrawLayer._svgFactory.create(1, 1, true);
     this.#parent.append(svg);
+    svg.setAttribute("aria-hidden", true);
     DrawLayer.#setBox(svg, box);
     return svg;
   }
-  highlight({
-    outlines,
-    box
-  }, color, opacity) {
-    const id = this.#id++;
-    const root = this.#createSVG(box);
-    root.classList.add("highlight");
-    const defs = DrawLayer._svgFactory.createElement("defs");
-    root.append(defs);
-    const path = DrawLayer._svgFactory.createElement("path");
-    defs.append(path);
-    const pathId = `path_p${this.pageIndex}_${id}`;
-    path.setAttribute("id", pathId);
-    path.setAttribute("d", DrawLayer.#extractPathFromHighlightOutlines(outlines));
+  #createClipPath(defs, pathId) {
     const clipPath = DrawLayer._svgFactory.createElement("clipPath");
     defs.append(clipPath);
     const clipPathId = `clip_${pathId}`;
@@ -8241,6 +8355,26 @@ class DrawLayer {
     clipPath.append(clipPathUse);
     clipPathUse.setAttribute("href", `#${pathId}`);
     clipPathUse.classList.add("clip");
+    return clipPathId;
+  }
+  highlight(outlines, color, opacity, isPathUpdatable = false) {
+    const id = this.#id++;
+    const root = this.#createSVG(outlines.box);
+    root.classList.add("highlight");
+    if (outlines.free) {
+      root.classList.add("free");
+    }
+    const defs = DrawLayer._svgFactory.createElement("defs");
+    root.append(defs);
+    const path = DrawLayer._svgFactory.createElement("path");
+    defs.append(path);
+    const pathId = `path_p${this.pageIndex}_${id}`;
+    path.setAttribute("id", pathId);
+    path.setAttribute("d", outlines.toSVGPath());
+    if (isPathUpdatable) {
+      this.#toUpdate.set(id, path);
+    }
+    const clipPathId = this.#createClipPath(defs, pathId);
     const use = DrawLayer._svgFactory.createElement("use");
     root.append(use);
     root.setAttribute("fill", color);
@@ -8252,12 +8386,9 @@ class DrawLayer {
       clipPathId: `url(#${clipPathId})`
     };
   }
-  highlightOutline({
-    outlines,
-    box
-  }) {
+  highlightOutline(outlines) {
     const id = this.#id++;
-    const root = this.#createSVG(box);
+    const root = this.#createSVG(outlines.box);
     root.classList.add("highlightOutline");
     const defs = DrawLayer._svgFactory.createElement("defs");
     root.append(defs);
@@ -8265,11 +8396,35 @@ class DrawLayer {
     defs.append(path);
     const pathId = `path_p${this.pageIndex}_${id}`;
     path.setAttribute("id", pathId);
-    path.setAttribute("d", DrawLayer.#extractPathFromHighlightOutlines(outlines));
+    path.setAttribute("d", outlines.toSVGPath());
     path.setAttribute("vector-effect", "non-scaling-stroke");
+    let maskId;
+    if (outlines.free) {
+      root.classList.add("free");
+      const mask = DrawLayer._svgFactory.createElement("mask");
+      defs.append(mask);
+      maskId = `mask_p${this.pageIndex}_${id}`;
+      mask.setAttribute("id", maskId);
+      mask.setAttribute("maskUnits", "objectBoundingBox");
+      const rect = DrawLayer._svgFactory.createElement("rect");
+      mask.append(rect);
+      rect.setAttribute("width", "1");
+      rect.setAttribute("height", "1");
+      rect.setAttribute("fill", "white");
+      const use = DrawLayer._svgFactory.createElement("use");
+      mask.append(use);
+      use.setAttribute("href", `#${pathId}`);
+      use.setAttribute("stroke", "none");
+      use.setAttribute("fill", "black");
+      use.setAttribute("fill-rule", "nonzero");
+      use.classList.add("mask");
+    }
     const use1 = DrawLayer._svgFactory.createElement("use");
     root.append(use1);
     use1.setAttribute("href", `#${pathId}`);
+    if (maskId) {
+      use1.setAttribute("mask", `url(#${maskId})`);
+    }
     const use2 = use1.cloneNode();
     root.append(use2);
     use1.classList.add("mainOutline");
@@ -8277,28 +8432,30 @@ class DrawLayer {
     this.#mapping.set(id, root);
     return id;
   }
-  static #extractPathFromHighlightOutlines(polygons) {
-    const buffer = [];
-    for (const polygon of polygons) {
-      let [prevX, prevY] = polygon;
-      buffer.push(`M${prevX} ${prevY}`);
-      for (let i = 2; i < polygon.length; i += 2) {
-        const x = polygon[i];
-        const y = polygon[i + 1];
-        if (x === prevX) {
-          buffer.push(`V${y}`);
-          prevY = y;
-        } else if (y === prevY) {
-          buffer.push(`H${x}`);
-          prevX = x;
-        }
-      }
-      buffer.push("Z");
-    }
-    return buffer.join(" ");
+  finalizeLine(id, line) {
+    const path = this.#toUpdate.get(id);
+    this.#toUpdate.delete(id);
+    this.updateBox(id, line.box);
+    path.setAttribute("d", line.toSVGPath());
+  }
+  updateLine(id, line) {
+    const root = this.#mapping.get(id);
+    const defs = root.firstChild;
+    const path = defs.firstChild;
+    path.setAttribute("d", line.toSVGPath());
+  }
+  removeFreeHighlight(id) {
+    this.remove(id);
+    this.#toUpdate.delete(id);
+  }
+  updatePath(id, line) {
+    this.#toUpdate.get(id).setAttribute("d", line.toSVGPath());
   }
   updateBox(id, box) {
     DrawLayer.#setBox(this.#mapping.get(id), box);
+  }
+  show(id, visible) {
+    this.#mapping.get(id).classList.toggle("hidden", !visible);
   }
   rotate(id, angle) {
     this.#mapping.get(id).setAttribute("data-main-rotation", angle);
@@ -8334,7 +8491,7 @@ class DrawLayer {
 
 /***/ }),
 
-/***/ 629:
+/***/ 731:
 /***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
 
 
@@ -8344,23 +8501,25 @@ __webpack_require__.d(__webpack_exports__, {
 });
 
 // EXTERNAL MODULE: ./src/shared/util.js
-var util = __webpack_require__(266);
-// EXTERNAL MODULE: ./src/display/editor/editor.js + 2 modules
-var editor_editor = __webpack_require__(115);
+var util = __webpack_require__(292);
+// EXTERNAL MODULE: ./src/display/editor/editor.js + 1 modules
+var editor_editor = __webpack_require__(310);
 // EXTERNAL MODULE: ./src/display/editor/tools.js
-var tools = __webpack_require__(812);
+var tools = __webpack_require__(830);
 // EXTERNAL MODULE: ./src/display/annotation_layer.js + 1 modules
-var annotation_layer = __webpack_require__(640);
+var annotation_layer = __webpack_require__(976);
 ;// CONCATENATED MODULE: ./src/display/editor/freetext.js
 
 
 
 
+const EOL_PATTERN = /\r\n?|\n/g;
 class FreeTextEditor extends editor_editor.AnnotationEditor {
   #boundEditorDivBlur = this.editorDivBlur.bind(this);
   #boundEditorDivFocus = this.editorDivFocus.bind(this);
   #boundEditorDivInput = this.editorDivInput.bind(this);
   #boundEditorDivKeydown = this.editorDivKeydown.bind(this);
+  #boundEditorDivPaste = this.editorDivPaste.bind(this);
   #color;
   #content = "";
   #editorDivId = `${this.id}-editor`;
@@ -8413,8 +8572,8 @@ class FreeTextEditor extends editor_editor.AnnotationEditor {
     this.#color = params.color || FreeTextEditor._defaultColor || editor_editor.AnnotationEditor._defaultLineColor;
     this.#fontSize = params.fontSize || FreeTextEditor._defaultFontSize;
   }
-  static initialize(l10n) {
-    editor_editor.AnnotationEditor.initialize(l10n, {
+  static initialize(l10n, uiManager) {
+    editor_editor.AnnotationEditor.initialize(l10n, uiManager, {
       strings: ["pdfjs-free-text-default-content"]
     });
     const style = getComputedStyle(document.documentElement);
@@ -8455,12 +8614,9 @@ class FreeTextEditor extends editor_editor.AnnotationEditor {
     };
     const savedFontsize = this.#fontSize;
     this.addCommands({
-      cmd: () => {
-        setFontsize(fontSize);
-      },
-      undo: () => {
-        setFontsize(savedFontsize);
-      },
+      cmd: setFontsize.bind(this, fontSize),
+      undo: setFontsize.bind(this, savedFontsize),
+      post: this._uiManager.updateUI.bind(this._uiManager, this),
       mustExec: true,
       type: util.AnnotationEditorParamsType.FREETEXT_SIZE,
       overwriteIfSameType: true,
@@ -8468,14 +8624,14 @@ class FreeTextEditor extends editor_editor.AnnotationEditor {
     });
   }
   #updateColor(color) {
+    const setColor = col => {
+      this.#color = this.editorDiv.style.color = col;
+    };
     const savedColor = this.#color;
     this.addCommands({
-      cmd: () => {
-        this.#color = this.editorDiv.style.color = color;
-      },
-      undo: () => {
-        this.#color = this.editorDiv.style.color = savedColor;
-      },
+      cmd: setColor.bind(this, color),
+      undo: setColor.bind(this, savedColor),
+      post: this._uiManager.updateUI.bind(this._uiManager, this),
       mustExec: true,
       type: util.AnnotationEditorParamsType.FREETEXT_COLOR,
       overwriteIfSameType: true,
@@ -8516,6 +8672,7 @@ class FreeTextEditor extends editor_editor.AnnotationEditor {
     this.editorDiv.addEventListener("focus", this.#boundEditorDivFocus);
     this.editorDiv.addEventListener("blur", this.#boundEditorDivBlur);
     this.editorDiv.addEventListener("input", this.#boundEditorDivInput);
+    this.editorDiv.addEventListener("paste", this.#boundEditorDivPaste);
   }
   disableEditMode() {
     if (!this.isInEditMode()) {
@@ -8531,6 +8688,7 @@ class FreeTextEditor extends editor_editor.AnnotationEditor {
     this.editorDiv.removeEventListener("focus", this.#boundEditorDivFocus);
     this.editorDiv.removeEventListener("blur", this.#boundEditorDivBlur);
     this.editorDiv.removeEventListener("input", this.#boundEditorDivInput);
+    this.editorDiv.removeEventListener("paste", this.#boundEditorDivPaste);
     this.div.focus({
       preventScroll: true
     });
@@ -8548,7 +8706,6 @@ class FreeTextEditor extends editor_editor.AnnotationEditor {
   }
   onceAdded() {
     if (this.width) {
-      this.#cheatInitialRect();
       return;
     }
     this.enableEditMode();
@@ -8570,13 +8727,10 @@ class FreeTextEditor extends editor_editor.AnnotationEditor {
     super.remove();
   }
   #extractText() {
-    const divs = this.editorDiv.getElementsByTagName("div");
-    if (divs.length === 0) {
-      return this.editorDiv.innerText;
-    }
     const buffer = [];
-    for (const div of divs) {
-      buffer.push(div.innerText.replace(/\r\n?|\n/, ""));
+    this.editorDiv.normalize();
+    for (const child of this.editorDiv.childNodes) {
+      buffer.push(FreeTextEditor.#getNodeContent(child));
     }
     return buffer.join("\n");
   }
@@ -8591,11 +8745,14 @@ class FreeTextEditor extends editor_editor.AnnotationEditor {
         div
       } = this;
       const savedDisplay = div.style.display;
+      const savedVisibility = div.classList.contains("hidden");
+      div.classList.remove("hidden");
       div.style.display = "hidden";
       currentLayer.div.append(this.div);
       rect = div.getBoundingClientRect();
       div.remove();
       div.style.display = savedDisplay;
+      div.classList.toggle("hidden", savedVisibility);
     }
     if (this.rotation % 180 === this.parentRotation % 180) {
       this.width = rect.width / parentWidth;
@@ -8746,6 +8903,85 @@ class FreeTextEditor extends editor_editor.AnnotationEditor {
     }
     return this.div;
   }
+  static #getNodeContent(node) {
+    return (node.nodeType === Node.TEXT_NODE ? node.nodeValue : node.innerText).replaceAll(EOL_PATTERN, "");
+  }
+  editorDivPaste(event) {
+    const clipboardData = event.clipboardData || window.clipboardData;
+    const {
+      types
+    } = clipboardData;
+    if (types.length === 1 && types[0] === "text/plain") {
+      return;
+    }
+    event.preventDefault();
+    const paste = FreeTextEditor.#deserializeContent(clipboardData.getData("text") || "").replaceAll(EOL_PATTERN, "\n");
+    if (!paste) {
+      return;
+    }
+    const selection = window.getSelection();
+    if (!selection.rangeCount) {
+      return;
+    }
+    this.editorDiv.normalize();
+    selection.deleteFromDocument();
+    const range = selection.getRangeAt(0);
+    if (!paste.includes("\n")) {
+      range.insertNode(document.createTextNode(paste));
+      this.editorDiv.normalize();
+      selection.collapseToStart();
+      return;
+    }
+    const {
+      startContainer,
+      startOffset
+    } = range;
+    const bufferBefore = [];
+    const bufferAfter = [];
+    if (startContainer.nodeType === Node.TEXT_NODE) {
+      const parent = startContainer.parentElement;
+      bufferAfter.push(startContainer.nodeValue.slice(startOffset).replaceAll(EOL_PATTERN, ""));
+      if (parent !== this.editorDiv) {
+        let buffer = bufferBefore;
+        for (const child of this.editorDiv.childNodes) {
+          if (child === parent) {
+            buffer = bufferAfter;
+            continue;
+          }
+          buffer.push(FreeTextEditor.#getNodeContent(child));
+        }
+      }
+      bufferBefore.push(startContainer.nodeValue.slice(0, startOffset).replaceAll(EOL_PATTERN, ""));
+    } else if (startContainer === this.editorDiv) {
+      let buffer = bufferBefore;
+      let i = 0;
+      for (const child of this.editorDiv.childNodes) {
+        if (i++ === startOffset) {
+          buffer = bufferAfter;
+        }
+        buffer.push(FreeTextEditor.#getNodeContent(child));
+      }
+    }
+    this.#content = `${bufferBefore.join("\n")}${paste}${bufferAfter.join("\n")}`;
+    this.#setContent();
+    const newRange = new Range();
+    let beforeLength = bufferBefore.reduce((acc, line) => acc + line.length, 0);
+    for (const {
+      firstChild
+    } of this.editorDiv.childNodes) {
+      if (firstChild.nodeType === Node.TEXT_NODE) {
+        const length = firstChild.nodeValue.length;
+        if (beforeLength <= length) {
+          newRange.setStart(firstChild, beforeLength);
+          newRange.setEnd(firstChild, beforeLength);
+          break;
+        }
+        beforeLength -= length;
+      }
+    }
+    selection.removeAllRanges();
+    selection.addRange(newRange);
+  }
   #setContent() {
     this.editorDiv.replaceChildren();
     if (!this.#content) {
@@ -8756,6 +8992,12 @@ class FreeTextEditor extends editor_editor.AnnotationEditor {
       div.append(line ? document.createTextNode(line) : document.createElement("br"));
       this.editorDiv.append(div);
     }
+  }
+  #serializeContent() {
+    return this.#content.replaceAll("\xa0", " ");
+  }
+  static #deserializeContent(content) {
+    return content.replaceAll(" ", "\xa0");
   }
   get contentDiv() {
     return this.editorDiv;
@@ -8791,7 +9033,7 @@ class FreeTextEditor extends editor_editor.AnnotationEditor {
         value: textContent.join("\n"),
         position: textPosition,
         pageIndex: pageNumber - 1,
-        rect,
+        rect: rect.slice(0),
         rotation,
         id,
         deleted: false
@@ -8800,7 +9042,7 @@ class FreeTextEditor extends editor_editor.AnnotationEditor {
     const editor = super.deserialize(data, parent, uiManager);
     editor.#fontSize = data.fontSize;
     editor.#color = util.Util.makeHexColor(...data.color);
-    editor.#content = data.value;
+    editor.#content = FreeTextEditor.#deserializeContent(data.value);
     editor.annotationElementId = data.id || null;
     editor.#initialData = initialData;
     return editor;
@@ -8823,7 +9065,7 @@ class FreeTextEditor extends editor_editor.AnnotationEditor {
       annotationType: util.AnnotationEditorType.FREETEXT,
       color,
       fontSize: this.#fontSize,
-      value: this.#content,
+      value: this.#serializeContent(),
       pageIndex: this.pageIndex,
       rect,
       rotation: this.rotation,
@@ -8843,64 +9085,137 @@ class FreeTextEditor extends editor_editor.AnnotationEditor {
       value,
       fontSize,
       color,
-      rect,
       pageIndex
     } = this.#initialData;
-    return serialized.value !== value || serialized.fontSize !== fontSize || serialized.rect.some((x, i) => Math.abs(x - rect[i]) >= 1) || serialized.color.some((c, i) => c !== color[i]) || serialized.pageIndex !== pageIndex;
+    return this._hasBeenMoved || serialized.value !== value || serialized.fontSize !== fontSize || serialized.color.some((c, i) => c !== color[i]) || serialized.pageIndex !== pageIndex;
   }
-  #cheatInitialRect(delayed = false) {
-    if (!this.annotationElementId) {
-      return;
+  renderAnnotationElement(annotation) {
+    const content = super.renderAnnotationElement(annotation);
+    if (this.deleted) {
+      return content;
     }
-    this.#setEditorDimensions();
-    if (!delayed && (this.width === 0 || this.height === 0)) {
-      setTimeout(() => this.#cheatInitialRect(true), 0);
-      return;
+    const {
+      style
+    } = content;
+    style.fontSize = `calc(${this.#fontSize}px * var(--scale-factor))`;
+    style.color = this.#color;
+    content.replaceChildren();
+    for (const line of this.#content.split("\n")) {
+      const div = document.createElement("div");
+      div.append(line ? document.createTextNode(line) : document.createElement("br"));
+      content.append(div);
     }
     const padding = FreeTextEditor._internalPadding * this.parentScale;
-    this.#initialData.rect = this.getRect(padding, padding);
+    annotation.updateEdited({
+      rect: this.getRect(padding, padding)
+    });
+    return content;
+  }
+  resetAnnotationElement(annotation) {
+    super.resetAnnotationElement(annotation);
+    annotation.resetEdited();
   }
 }
 
-// EXTERNAL MODULE: ./src/display/editor/color_picker.js
-var color_picker = __webpack_require__(97);
 // EXTERNAL MODULE: ./src/display/editor/outliner.js
-var editor_outliner = __webpack_require__(405);
+var editor_outliner = __webpack_require__(61);
+// EXTERNAL MODULE: ./src/display/editor/color_picker.js
+var color_picker = __webpack_require__(259);
+// EXTERNAL MODULE: ./src/display/display_utils.js
+var display_utils = __webpack_require__(419);
 ;// CONCATENATED MODULE: ./src/display/editor/highlight.js
 
 
 
 
 
+
 class HighlightEditor extends editor_editor.AnnotationEditor {
+  #anchorNode = null;
+  #anchorOffset = 0;
   #boxes;
   #clipPathId = null;
   #colorPicker = null;
   #focusOutlines = null;
+  #focusNode = null;
+  #focusOffset = 0;
   #highlightDiv = null;
   #highlightOutlines = null;
   #id = null;
+  #isFreeHighlight = false;
+  #boundKeydown = this.#keydown.bind(this);
   #lastPoint = null;
   #opacity;
   #outlineId = null;
+  #text = "";
+  #thickness;
+  #methodOfCreation = "";
   static _defaultColor = null;
   static _defaultOpacity = 1;
+  static _defaultThickness = 12;
   static _l10nPromise;
   static _type = "highlight";
   static _editorType = util.AnnotationEditorType.HIGHLIGHT;
+  static _freeHighlightId = -1;
+  static _freeHighlight = null;
+  static _freeHighlightClipId = "";
+  static get _keyboardManager() {
+    const proto = HighlightEditor.prototype;
+    return (0,util.shadow)(this, "_keyboardManager", new tools.KeyboardManager([[["ArrowLeft", "mac+ArrowLeft"], proto._moveCaret, {
+      args: [0]
+    }], [["ArrowRight", "mac+ArrowRight"], proto._moveCaret, {
+      args: [1]
+    }], [["ArrowUp", "mac+ArrowUp"], proto._moveCaret, {
+      args: [2]
+    }], [["ArrowDown", "mac+ArrowDown"], proto._moveCaret, {
+      args: [3]
+    }]]));
+  }
   constructor(params) {
     super({
       ...params,
       name: "highlightEditor"
     });
-    HighlightEditor._defaultColor ||= this._uiManager.highlightColors?.values().next().value || "#fff066";
     this.color = params.color || HighlightEditor._defaultColor;
+    this.#thickness = params.thickness || HighlightEditor._defaultThickness;
     this.#opacity = params.opacity || HighlightEditor._defaultOpacity;
     this.#boxes = params.boxes || null;
+    this.#methodOfCreation = params.methodOfCreation || "";
+    this.#text = params.text || "";
     this._isDraggable = false;
-    this.#createOutlines();
-    this.#addToDrawLayer();
-    this.rotate(this.rotation);
+    if (params.highlightId > -1) {
+      this.#isFreeHighlight = true;
+      this.#createFreeOutlines(params);
+      this.#addToDrawLayer();
+    } else {
+      this.#anchorNode = params.anchorNode;
+      this.#anchorOffset = params.anchorOffset;
+      this.#focusNode = params.focusNode;
+      this.#focusOffset = params.focusOffset;
+      this.#createOutlines();
+      this.#addToDrawLayer();
+      this.rotate(this.rotation);
+    }
+  }
+  get telemetryInitialData() {
+    return {
+      action: "added",
+      type: this.#isFreeHighlight ? "free_highlight" : "highlight",
+      color: this._uiManager.highlightColorNames.get(this.color),
+      thickness: this.#thickness,
+      methodOfCreation: this.#methodOfCreation
+    };
+  }
+  get telemetryFinalData() {
+    return {
+      type: "highlight",
+      color: this._uiManager.highlightColorNames.get(this.color)
+    };
+  }
+  static computeTelemetryFinalData(data) {
+    return {
+      numberOfColors: data.get("color").size
+    };
   }
   #createOutlines() {
     const outliner = new editor_outliner.Outliner(this.#boxes, 0.001);
@@ -8918,16 +9233,84 @@ class HighlightEditor extends editor_editor.AnnotationEditor {
     } = this.#focusOutlines.box;
     this.#lastPoint = [(lastPoint[0] - this.x) / this.width, (lastPoint[1] - this.y) / this.height];
   }
-  static initialize(l10n) {
-    editor_editor.AnnotationEditor.initialize(l10n);
+  #createFreeOutlines({
+    highlightOutlines,
+    highlightId,
+    clipPathId
+  }) {
+    this.#highlightOutlines = highlightOutlines;
+    const extraThickness = 1.5;
+    this.#focusOutlines = highlightOutlines.getNewOutline(this.#thickness / 2 + extraThickness, 0.0025);
+    if (highlightId >= 0) {
+      this.#id = highlightId;
+      this.#clipPathId = clipPathId;
+      this.parent.drawLayer.finalizeLine(highlightId, highlightOutlines);
+      this.#outlineId = this.parent.drawLayer.highlightOutline(this.#focusOutlines);
+    } else if (this.parent) {
+      const angle = this.parent.viewport.rotation;
+      this.parent.drawLayer.updateLine(this.#id, highlightOutlines);
+      this.parent.drawLayer.updateBox(this.#id, HighlightEditor.#rotateBbox(this.#highlightOutlines.box, (angle - this.rotation + 360) % 360));
+      this.parent.drawLayer.updateLine(this.#outlineId, this.#focusOutlines);
+      this.parent.drawLayer.updateBox(this.#outlineId, HighlightEditor.#rotateBbox(this.#focusOutlines.box, angle));
+    }
+    const {
+      x,
+      y,
+      width,
+      height
+    } = highlightOutlines.box;
+    switch (this.rotation) {
+      case 0:
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
+        break;
+      case 90:
+        {
+          const [pageWidth, pageHeight] = this.parentDimensions;
+          this.x = y;
+          this.y = 1 - x;
+          this.width = width * pageHeight / pageWidth;
+          this.height = height * pageWidth / pageHeight;
+          break;
+        }
+      case 180:
+        this.x = 1 - x;
+        this.y = 1 - y;
+        this.width = width;
+        this.height = height;
+        break;
+      case 270:
+        {
+          const [pageWidth, pageHeight] = this.parentDimensions;
+          this.x = 1 - y;
+          this.y = x;
+          this.width = width * pageHeight / pageWidth;
+          this.height = height * pageWidth / pageHeight;
+          break;
+        }
+    }
+    const {
+      lastPoint
+    } = this.#focusOutlines.box;
+    this.#lastPoint = [(lastPoint[0] - x) / width, (lastPoint[1] - y) / height];
+  }
+  static initialize(l10n, uiManager) {
+    editor_editor.AnnotationEditor.initialize(l10n, uiManager);
+    HighlightEditor._defaultColor ||= uiManager.highlightColors?.values().next().value || "#fff066";
   }
   static updateDefaultParams(type, value) {
     switch (type) {
       case util.AnnotationEditorParamsType.HIGHLIGHT_DEFAULT_COLOR:
         HighlightEditor._defaultColor = value;
         break;
+      case util.AnnotationEditorParamsType.HIGHLIGHT_THICKNESS:
+        HighlightEditor._defaultThickness = value;
+        break;
     }
   }
+  translateInPage(x, y) {}
   get toolbarPosition() {
     return this.#lastPoint;
   }
@@ -8936,32 +9319,57 @@ class HighlightEditor extends editor_editor.AnnotationEditor {
       case util.AnnotationEditorParamsType.HIGHLIGHT_COLOR:
         this.#updateColor(value);
         break;
+      case util.AnnotationEditorParamsType.HIGHLIGHT_THICKNESS:
+        this.#updateThickness(value);
+        break;
     }
   }
   static get defaultPropertiesToUpdate() {
-    return [[util.AnnotationEditorParamsType.HIGHLIGHT_DEFAULT_COLOR, HighlightEditor._defaultColor]];
+    return [[util.AnnotationEditorParamsType.HIGHLIGHT_DEFAULT_COLOR, HighlightEditor._defaultColor], [util.AnnotationEditorParamsType.HIGHLIGHT_THICKNESS, HighlightEditor._defaultThickness]];
   }
   get propertiesToUpdate() {
-    return [[util.AnnotationEditorParamsType.HIGHLIGHT_COLOR, this.color || HighlightEditor._defaultColor]];
+    return [[util.AnnotationEditorParamsType.HIGHLIGHT_COLOR, this.color || HighlightEditor._defaultColor], [util.AnnotationEditorParamsType.HIGHLIGHT_THICKNESS, this.#thickness || HighlightEditor._defaultThickness], [util.AnnotationEditorParamsType.HIGHLIGHT_FREE, this.#isFreeHighlight]];
   }
   #updateColor(color) {
+    const setColor = col => {
+      this.color = col;
+      this.parent?.drawLayer.changeColor(this.#id, col);
+      this.#colorPicker?.updateColor(col);
+    };
     const savedColor = this.color;
     this.addCommands({
-      cmd: () => {
-        this.color = color;
-        this.parent.drawLayer.changeColor(this.#id, color);
-        this.#colorPicker?.updateColor(color);
-      },
-      undo: () => {
-        this.color = savedColor;
-        this.parent.drawLayer.changeColor(this.#id, savedColor);
-        this.#colorPicker?.updateColor(savedColor);
-      },
+      cmd: setColor.bind(this, color),
+      undo: setColor.bind(this, savedColor),
+      post: this._uiManager.updateUI.bind(this._uiManager, this),
       mustExec: true,
       type: util.AnnotationEditorParamsType.HIGHLIGHT_COLOR,
       overwriteIfSameType: true,
       keepUndo: true
     });
+    this._reportTelemetry({
+      action: "color_changed",
+      color: this._uiManager.highlightColorNames.get(color)
+    }, true);
+  }
+  #updateThickness(thickness) {
+    const savedThickness = this.#thickness;
+    const setThickness = th => {
+      this.#thickness = th;
+      this.#changeThickness(th);
+    };
+    this.addCommands({
+      cmd: setThickness.bind(this, thickness),
+      undo: setThickness.bind(this, savedThickness),
+      post: this._uiManager.updateUI.bind(this._uiManager, this),
+      mustExec: true,
+      type: util.AnnotationEditorParamsType.INK_THICKNESS,
+      overwriteIfSameType: true,
+      keepUndo: true
+    });
+    this._reportTelemetry({
+      action: "thickness_changed",
+      thickness
+    }, true);
   }
   async addEditToolbar() {
     const toolbar = await super.addEditToolbar();
@@ -8985,18 +9393,24 @@ class HighlightEditor extends editor_editor.AnnotationEditor {
     this.div.classList.toggle("disabled", false);
   }
   fixAndSetPosition() {
-    return super.fixAndSetPosition(0);
+    return super.fixAndSetPosition(this.#getRotation());
+  }
+  getBaseTranslation() {
+    return [0, 0];
   }
   getRect(tx, ty) {
-    return super.getRect(tx, ty, 0);
+    return super.getRect(tx, ty, this.#getRotation());
   }
   onceAdded() {
     this.parent.addUndoableEditor(this);
     this.div.focus();
   }
   remove() {
-    super.remove();
     this.#cleanDrawLayer();
+    this._reportTelemetry({
+      action: "deleted"
+    });
+    super.remove();
   }
   rebuild() {
     if (!this.parent) {
@@ -9020,9 +9434,21 @@ class HighlightEditor extends editor_editor.AnnotationEditor {
       mustBeSelected = !this.parent && this.div?.classList.contains("selectedEditor");
     }
     super.setParent(parent);
+    this.show(this._isVisible);
     if (mustBeSelected) {
       this.select();
     }
+  }
+  #changeThickness(thickness) {
+    if (!this.#isFreeHighlight) {
+      return;
+    }
+    this.#createFreeOutlines({
+      highlightOutlines: this.#highlightOutlines.getNewOutline(thickness / 2)
+    });
+    this.fixAndSetPosition();
+    const [parentWidth, parentHeight] = this.parentDimensions;
+    this.setDims(this.width * parentWidth, this.height * parentHeight);
   }
   #cleanDrawLayer() {
     if (this.#id === null || !this.parent) {
@@ -9041,10 +9467,10 @@ class HighlightEditor extends editor_editor.AnnotationEditor {
       id: this.#id,
       clipPathId: this.#clipPathId
     } = parent.drawLayer.highlight(this.#highlightOutlines, this.color, this.#opacity));
+    this.#outlineId = parent.drawLayer.highlightOutline(this.#focusOutlines);
     if (this.#highlightDiv) {
       this.#highlightDiv.style.clipPath = this.#clipPathId;
     }
-    this.#outlineId = parent.drawLayer.highlightOutline(this.#focusOutlines);
   }
   static #rotateBbox({
     x,
@@ -9086,9 +9512,16 @@ class HighlightEditor extends editor_editor.AnnotationEditor {
     const {
       drawLayer
     } = this.parent;
+    let box;
+    if (this.#isFreeHighlight) {
+      angle = (angle - this.rotation + 360) % 360;
+      box = HighlightEditor.#rotateBbox(this.#highlightOutlines.box, angle);
+    } else {
+      box = HighlightEditor.#rotateBbox(this, angle);
+    }
     drawLayer.rotate(this.#id, angle);
     drawLayer.rotate(this.#outlineId, angle);
-    drawLayer.updateBox(this.#id, HighlightEditor.#rotateBbox(this, angle));
+    drawLayer.updateBox(this.#id, box);
     drawLayer.updateBox(this.#outlineId, HighlightEditor.#rotateBbox(this.#focusOutlines.box, angle));
   }
   render() {
@@ -9096,8 +9529,18 @@ class HighlightEditor extends editor_editor.AnnotationEditor {
       return this.div;
     }
     const div = super.render();
+    if (this.#text) {
+      div.setAttribute("aria-label", this.#text);
+      div.setAttribute("role", "mark");
+    }
+    if (this.#isFreeHighlight) {
+      div.classList.add("free");
+    } else {
+      this.div.addEventListener("keydown", this.#boundKeydown);
+    }
     const highlightDiv = this.#highlightDiv = document.createElement("div");
     div.append(highlightDiv);
+    highlightDiv.setAttribute("aria-hidden", "true");
     highlightDiv.className = "internal";
     highlightDiv.style.clipPath = this.#clipPathId;
     const [parentWidth, parentHeight] = this.parentDimensions;
@@ -9112,16 +9555,68 @@ class HighlightEditor extends editor_editor.AnnotationEditor {
   pointerleave() {
     this.parent.drawLayer.removeClass(this.#outlineId, "hovered");
   }
+  #keydown(event) {
+    HighlightEditor._keyboardManager.exec(this, event);
+  }
+  _moveCaret(direction) {
+    this.parent.unselect(this);
+    switch (direction) {
+      case 0:
+      case 2:
+        this.#setCaret(true);
+        break;
+      case 1:
+      case 3:
+        this.#setCaret(false);
+        break;
+    }
+  }
+  #setCaret(start) {
+    if (!this.#anchorNode) {
+      return;
+    }
+    const selection = window.getSelection();
+    if (start) {
+      selection.setPosition(this.#anchorNode, this.#anchorOffset);
+    } else {
+      selection.setPosition(this.#focusNode, this.#focusOffset);
+    }
+  }
   select() {
     super.select();
+    if (!this.#outlineId) {
+      return;
+    }
     this.parent?.drawLayer.removeClass(this.#outlineId, "hovered");
     this.parent?.drawLayer.addClass(this.#outlineId, "selected");
   }
   unselect() {
     super.unselect();
+    if (!this.#outlineId) {
+      return;
+    }
     this.parent?.drawLayer.removeClass(this.#outlineId, "selected");
+    if (!this.#isFreeHighlight) {
+      this.#setCaret(false);
+    }
+  }
+  get _mustFixPosition() {
+    return !this.#isFreeHighlight;
+  }
+  show(visible = this._isVisible) {
+    super.show(visible);
+    if (this.parent) {
+      this.parent.drawLayer.show(this.#id, visible);
+      this.parent.drawLayer.show(this.#outlineId, visible);
+    }
+  }
+  #getRotation() {
+    return this.#isFreeHighlight ? this.rotation : 0;
   }
   #serializeBoxes() {
+    if (this.#isFreeHighlight) {
+      return null;
+    }
     const [pageWidth, pageHeight] = this.pageDimensions;
     const boxes = this.#boxes;
     const quadPoints = new Array(boxes.length * 8);
@@ -9142,40 +9637,90 @@ class HighlightEditor extends editor_editor.AnnotationEditor {
     }
     return quadPoints;
   }
-  #serializeOutlines() {
-    const [pageWidth, pageHeight] = this.pageDimensions;
-    const width = this.width * pageWidth;
-    const height = this.height * pageHeight;
-    const tx = this.x * pageWidth;
-    const ty = (1 - this.y - this.height) * pageHeight;
-    const outlines = [];
-    for (const outline of this.#highlightOutlines.outlines) {
-      const points = new Array(outline.length);
-      for (let i = 0; i < outline.length; i += 2) {
-        points[i] = tx + outline[i] * width;
-        points[i + 1] = ty + (1 - outline[i + 1]) * height;
-      }
-      outlines.push(points);
+  #serializeOutlines(rect) {
+    return this.#highlightOutlines.serialize(rect, this.#getRotation());
+  }
+  static startHighlighting(parent, isLTR, {
+    target: textLayer,
+    x,
+    y
+  }) {
+    const {
+      x: layerX,
+      y: layerY,
+      width: parentWidth,
+      height: parentHeight
+    } = textLayer.getBoundingClientRect();
+    const pointerMove = e => {
+      this.#highlightMove(parent, e);
+    };
+    const pointerDownOptions = {
+      capture: true,
+      passive: false
+    };
+    const pointerDown = e => {
+      e.preventDefault();
+      e.stopPropagation();
+    };
+    const pointerUpCallback = e => {
+      textLayer.removeEventListener("pointermove", pointerMove);
+      window.removeEventListener("blur", pointerUpCallback);
+      window.removeEventListener("pointerup", pointerUpCallback);
+      window.removeEventListener("pointerdown", pointerDown, pointerDownOptions);
+      window.removeEventListener("contextmenu", display_utils.noContextMenu);
+      this.#endHighlight(parent, e);
+    };
+    window.addEventListener("blur", pointerUpCallback);
+    window.addEventListener("pointerup", pointerUpCallback);
+    window.addEventListener("pointerdown", pointerDown, pointerDownOptions);
+    window.addEventListener("contextmenu", display_utils.noContextMenu);
+    textLayer.addEventListener("pointermove", pointerMove);
+    this._freeHighlight = new editor_outliner.FreeOutliner({
+      x,
+      y
+    }, [layerX, layerY, parentWidth, parentHeight], parent.scale, this._defaultThickness / 2, isLTR, 0.001);
+    ({
+      id: this._freeHighlightId,
+      clipPathId: this._freeHighlightClipId
+    } = parent.drawLayer.highlight(this._freeHighlight, this._defaultColor, this._defaultOpacity, true));
+  }
+  static #highlightMove(parent, event) {
+    if (this._freeHighlight.add(event)) {
+      parent.drawLayer.updatePath(this._freeHighlightId, this._freeHighlight);
     }
-    return outlines;
+  }
+  static #endHighlight(parent, event) {
+    if (!this._freeHighlight.isEmpty()) {
+      parent.createAndAddNewEditor(event, false, {
+        highlightId: this._freeHighlightId,
+        highlightOutlines: this._freeHighlight.getOutlines(),
+        clipPathId: this._freeHighlightClipId,
+        methodOfCreation: "main_toolbar"
+      });
+    } else {
+      parent.drawLayer.removeFreeHighlight(this._freeHighlightId);
+    }
+    this._freeHighlightId = -1;
+    this._freeHighlight = null;
+    this._freeHighlightClipId = "";
   }
   static deserialize(data, parent, uiManager) {
     const editor = super.deserialize(data, parent, uiManager);
     const {
-      rect,
+      rect: [blX, blY, trX, trY],
       color,
       quadPoints
     } = data;
     editor.color = util.Util.makeHexColor(...color);
     editor.#opacity = data.opacity;
     const [pageWidth, pageHeight] = editor.pageDimensions;
-    editor.width = (rect[2] - rect[0]) / pageWidth;
-    editor.height = (rect[3] - rect[1]) / pageHeight;
+    editor.width = (trX - blX) / pageWidth;
+    editor.height = (trY - blY) / pageHeight;
     const boxes = editor.#boxes = [];
     for (let i = 0; i < quadPoints.length; i += 8) {
       boxes.push({
-        x: quadPoints[4] / pageWidth,
-        y: 1 - quadPoints[i + 5] / pageHeight,
+        x: (quadPoints[4] - trX) / pageWidth,
+        y: (trY - (1 - quadPoints[i + 5])) / pageHeight,
         width: (quadPoints[i + 2] - quadPoints[i]) / pageWidth,
         height: (quadPoints[i + 5] - quadPoints[i + 1]) / pageHeight
       });
@@ -9193,11 +9738,12 @@ class HighlightEditor extends editor_editor.AnnotationEditor {
       annotationType: util.AnnotationEditorType.HIGHLIGHT,
       color,
       opacity: this.#opacity,
+      thickness: this.#thickness,
       quadPoints: this.#serializeBoxes(),
-      outlines: this.#serializeOutlines(),
+      outlines: this.#serializeOutlines(rect),
       pageIndex: this.pageIndex,
       rect,
-      rotation: 0,
+      rotation: this.#getRotation(),
       structTreeParentId: this._structTreeParentId
     };
   }
@@ -9206,8 +9752,6 @@ class HighlightEditor extends editor_editor.AnnotationEditor {
   }
 }
 
-// EXTERNAL MODULE: ./src/display/display_utils.js
-var display_utils = __webpack_require__(473);
 ;// CONCATENATED MODULE: ./src/display/editor/ink.js
 
 
@@ -9253,8 +9797,8 @@ class InkEditor extends editor_editor.AnnotationEditor {
     this.y = 0;
     this._willKeepAspectRatio = true;
   }
-  static initialize(l10n) {
-    editor_editor.AnnotationEditor.initialize(l10n);
+  static initialize(l10n, uiManager) {
+    editor_editor.AnnotationEditor.initialize(l10n, uiManager);
   }
   static updateDefaultParams(type, value) {
     switch (type) {
@@ -9289,16 +9833,15 @@ class InkEditor extends editor_editor.AnnotationEditor {
     return [[util.AnnotationEditorParamsType.INK_THICKNESS, this.thickness || InkEditor._defaultThickness], [util.AnnotationEditorParamsType.INK_COLOR, this.color || InkEditor._defaultColor || editor_editor.AnnotationEditor._defaultLineColor], [util.AnnotationEditorParamsType.INK_OPACITY, Math.round(100 * (this.opacity ?? InkEditor._defaultOpacity))]];
   }
   #updateThickness(thickness) {
+    const setThickness = th => {
+      this.thickness = th;
+      this.#fitToContent();
+    };
     const savedThickness = this.thickness;
     this.addCommands({
-      cmd: () => {
-        this.thickness = thickness;
-        this.#fitToContent();
-      },
-      undo: () => {
-        this.thickness = savedThickness;
-        this.#fitToContent();
-      },
+      cmd: setThickness.bind(this, thickness),
+      undo: setThickness.bind(this, savedThickness),
+      post: this._uiManager.updateUI.bind(this._uiManager, this),
       mustExec: true,
       type: util.AnnotationEditorParamsType.INK_THICKNESS,
       overwriteIfSameType: true,
@@ -9306,16 +9849,15 @@ class InkEditor extends editor_editor.AnnotationEditor {
     });
   }
   #updateColor(color) {
+    const setColor = col => {
+      this.color = col;
+      this.#redraw();
+    };
     const savedColor = this.color;
     this.addCommands({
-      cmd: () => {
-        this.color = color;
-        this.#redraw();
-      },
-      undo: () => {
-        this.color = savedColor;
-        this.#redraw();
-      },
+      cmd: setColor.bind(this, color),
+      undo: setColor.bind(this, savedColor),
+      post: this._uiManager.updateUI.bind(this._uiManager, this),
       mustExec: true,
       type: util.AnnotationEditorParamsType.INK_COLOR,
       overwriteIfSameType: true,
@@ -9323,17 +9865,16 @@ class InkEditor extends editor_editor.AnnotationEditor {
     });
   }
   #updateOpacity(opacity) {
+    const setOpacity = op => {
+      this.opacity = op;
+      this.#redraw();
+    };
     opacity /= 100;
     const savedOpacity = this.opacity;
     this.addCommands({
-      cmd: () => {
-        this.opacity = opacity;
-        this.#redraw();
-      },
-      undo: () => {
-        this.opacity = savedOpacity;
-        this.#redraw();
-      },
+      cmd: setOpacity.bind(this, opacity),
+      undo: setOpacity.bind(this, savedOpacity),
+      post: this._uiManager.updateUI.bind(this._uiManager, this),
       mustExec: true,
       type: util.AnnotationEditorParamsType.INK_OPACITY,
       overwriteIfSameType: true,
@@ -9517,7 +10058,7 @@ class InkEditor extends editor_editor.AnnotationEditor {
       this.allRawPaths.push(currentPath);
       this.paths.push(bezier);
       this.bezierPath2D.push(path2D);
-      this.rebuild();
+      this._uiManager.rebuild(this);
     };
     const undo = () => {
       this.allRawPaths.pop();
@@ -9857,6 +10398,13 @@ class InkEditor extends editor_editor.AnnotationEditor {
       const points = [];
       for (let j = 0, jj = bezier.length; j < jj; j++) {
         const [first, control1, control2, second] = bezier[j];
+        if (first[0] === second[0] && first[1] === second[1] && jj === 1) {
+          const p0 = s * first[0] + shiftX;
+          const p1 = s * first[1] + shiftY;
+          buffer.push(p0, p1);
+          points.push(p0, p1);
+          break;
+        }
         const p10 = s * first[0] + shiftX;
         const p11 = s * first[1] + shiftY;
         const p20 = s * control1[0] + shiftX;
@@ -10027,8 +10575,8 @@ class StampEditor extends editor_editor.AnnotationEditor {
     this.#bitmapUrl = params.bitmapUrl;
     this.#bitmapFile = params.bitmapFile;
   }
-  static initialize(l10n) {
-    editor_editor.AnnotationEditor.initialize(l10n);
+  static initialize(l10n, uiManager) {
+    editor_editor.AnnotationEditor.initialize(l10n, uiManager);
   }
   static get supportedTypes() {
     const types = ["apng", "avif", "bmp", "gif", "jpeg", "png", "svg+xml", "webp", "x-icon"];
@@ -10134,7 +10682,7 @@ class StampEditor extends editor_editor.AnnotationEditor {
     if (this.div === null) {
       return;
     }
-    if (this.#bitmapId) {
+    if (this.#bitmapId && this.#canvas === null) {
       this.#getBitmap();
     }
     if (!this.isAttachedToDOM) {
@@ -10146,7 +10694,7 @@ class StampEditor extends editor_editor.AnnotationEditor {
     this.div.focus();
   }
   isEmpty() {
-    return !(this.#bitmapPromise || this.#bitmap || this.#bitmapUrl || this.#bitmapFile);
+    return !(this.#bitmapPromise || this.#bitmap || this.#bitmapUrl || this.#bitmapFile || this.#bitmapId);
   }
   get isResizable() {
     return true;
@@ -10162,6 +10710,7 @@ class StampEditor extends editor_editor.AnnotationEditor {
     }
     super.render();
     this.div.hidden = true;
+    this.addAltTextButton();
     if (this.#bitmap) {
       this.#createCanvas();
     } else {
@@ -10203,17 +10752,9 @@ class StampEditor extends editor_editor.AnnotationEditor {
       this.parent.addUndoableEditor(this);
       this.#hasBeenAddedInUndoStack = true;
     }
-    this._uiManager._eventBus.dispatch("reporttelemetry", {
-      source: this,
-      details: {
-        type: "editing",
-        subtype: this.editorType,
-        data: {
-          action: "inserted_image"
-        }
-      }
+    this._reportTelemetry({
+      action: "inserted_image"
     });
-    this.addAltTextButton();
     if (this.#bitmapFileName) {
       canvas.setAttribute("aria-label", this.#bitmapFileName);
     }
@@ -10272,6 +10813,32 @@ class StampEditor extends editor_editor.AnnotationEditor {
     canvas.width = width;
     canvas.height = height;
     const bitmap = this.#isSvg ? this.#bitmap : this.#scaleBitmap(width, height);
+    if (this._uiManager.hasMLManager && !this.hasAltText()) {
+      const offscreen = new OffscreenCanvas(width, height);
+      const ctx = offscreen.getContext("2d");
+      ctx.drawImage(bitmap, 0, 0, bitmap.width, bitmap.height, 0, 0, width, height);
+      offscreen.convertToBlob().then(blob => {
+        const fileReader = new FileReader();
+        fileReader.onload = () => {
+          const url = fileReader.result;
+          this._uiManager.mlGuess({
+            service: "image-to-text",
+            request: {
+              imageData: url
+            }
+          }).then(response => {
+            const altText = response?.output || "";
+            if (this.parent && altText && !this.hasAltText()) {
+              this.altTextData = {
+                altText,
+                decorative: false
+              };
+            }
+          });
+        };
+        fileReader.readAsDataURL(blob);
+      });
+    }
     const ctx = canvas.getContext("2d");
     ctx.filter = this._uiManager.hcmFilter;
     ctx.drawImage(bitmap, 0, 0, bitmap.width, bitmap.height, 0, 0, width, height);
@@ -10405,11 +10972,10 @@ class AnnotationEditorLayer {
   #accessibilityManager;
   #allowClick = false;
   #annotationLayer = null;
-  #boundPointerup = this.pointerup.bind(this);
-  #boundPointerUpAfterSelection = this.pointerUpAfterSelection.bind(this);
-  #boundPointerdown = this.pointerdown.bind(this);
+  #boundPointerup = null;
+  #boundPointerdown = null;
+  #boundTextLayerPointerDown = null;
   #editorFocusTimeoutId = null;
-  #boundSelectionStart = this.selectionStart.bind(this);
   #editors = new Map();
   #hadPointerDown = false;
   #isCleaningUp = false;
@@ -10433,7 +10999,7 @@ class AnnotationEditorLayer {
     if (!AnnotationEditorLayer._initialized) {
       AnnotationEditorLayer._initialized = true;
       for (const editorType of editorTypes) {
-        editorType.initialize(l10n);
+        editorType.initialize(l10n, uiManager);
       }
     }
     uiManager.registerEditorTypes(editorTypes);
@@ -10450,6 +11016,9 @@ class AnnotationEditorLayer {
   get isEmpty() {
     return this.#editors.size === 0;
   }
+  get isInvisible() {
+    return this.isEmpty && this.#uiManager.getMode() === util.AnnotationEditorType.NONE;
+  }
   updateToolbar(mode) {
     this.#uiManager.updateToolbar(mode);
   }
@@ -10459,8 +11028,9 @@ class AnnotationEditorLayer {
       case util.AnnotationEditorType.NONE:
         this.disableTextSelection();
         this.togglePointerEvents(false);
+        this.toggleAnnotationLayerPointerEvents(true);
         this.disableClick();
-        break;
+        return;
       case util.AnnotationEditorType.INK:
         this.addInkEditorIfNeeded(false);
         this.disableTextSelection();
@@ -10477,15 +11047,17 @@ class AnnotationEditorLayer {
         this.togglePointerEvents(true);
         this.enableClick();
     }
-    if (mode !== util.AnnotationEditorType.NONE) {
-      const {
-        classList
-      } = this.div;
-      for (const editorType of AnnotationEditorLayer.#editorTypes.values()) {
-        classList.toggle(`${editorType._type}Editing`, mode === editorType._editorType);
-      }
-      this.div.hidden = false;
+    this.toggleAnnotationLayerPointerEvents(false);
+    const {
+      classList
+    } = this.div;
+    for (const editorType of AnnotationEditorLayer.#editorTypes.values()) {
+      classList.toggle(`${editorType._type}Editing`, mode === editorType._editorType);
     }
+    this.div.hidden = false;
+  }
+  hasTextLayer(textLayer) {
+    return textLayer === this.#textLayer?.div;
   }
   addInkEditorIfNeeded(isCommitting) {
     if (this.#uiManager.getMode() !== util.AnnotationEditorType.INK) {
@@ -10499,7 +11071,7 @@ class AnnotationEditorLayer {
         }
       }
     }
-    const editor = this.#createAndAddNewEditor({
+    const editor = this.createAndAddNewEditor({
       offsetX: 0,
       offsetY: 0
     }, false);
@@ -10514,12 +11086,18 @@ class AnnotationEditorLayer {
   togglePointerEvents(enabled = false) {
     this.div.classList.toggle("disabled", !enabled);
   }
+  toggleAnnotationLayerPointerEvents(enabled = false) {
+    this.#annotationLayer?.div.classList.toggle("disabled", !enabled);
+  }
   enable() {
+    this.div.tabIndex = 0;
     this.togglePointerEvents(true);
     const annotationElementIds = new Set();
     for (const editor of this.#editors.values()) {
       editor.enableEditing();
+      editor.show(true);
       if (editor.annotationElementId) {
+        this.#uiManager.removeChangedExistingAnnotation(editor);
         annotationElementIds.add(editor.annotationElementId);
       }
     }
@@ -10545,13 +11123,20 @@ class AnnotationEditorLayer {
   }
   disable() {
     this.#isDisabling = true;
+    this.div.tabIndex = -1;
     this.togglePointerEvents(false);
-    const hiddenAnnotationIds = new Set();
+    const changedAnnotations = new Map();
+    const resetAnnotations = new Map();
     for (const editor of this.#editors.values()) {
       editor.disableEditing();
-      if (!editor.annotationElementId || editor.serialize() !== null) {
-        hiddenAnnotationIds.add(editor.annotationElementId);
+      if (!editor.annotationElementId) {
         continue;
+      }
+      if (editor.serialize() !== null) {
+        changedAnnotations.set(editor.annotationElementId, editor);
+        continue;
+      } else {
+        resetAnnotations.set(editor.annotationElementId, editor);
       }
       this.getEditableAnnotation(editor.annotationElementId)?.show();
       editor.remove();
@@ -10562,8 +11147,21 @@ class AnnotationEditorLayer {
         const {
           id
         } = editable.data;
-        if (hiddenAnnotationIds.has(id) || this.#uiManager.isDeletedAnnotationElement(id)) {
+        if (this.#uiManager.isDeletedAnnotationElement(id)) {
           continue;
+        }
+        let editor = resetAnnotations.get(id);
+        if (editor) {
+          editor.resetAnnotationElement(editable);
+          editor.show(false);
+          editable.show();
+          continue;
+        }
+        editor = changedAnnotations.get(id);
+        if (editor) {
+          this.#uiManager.addChangedExistingAnnotation(editor);
+          editor.renderAnnotationElement(editable);
+          editor.show(false);
         }
         editable.show();
       }
@@ -10579,6 +11177,7 @@ class AnnotationEditorLayer {
       classList.remove(`${editorType._type}Editing`);
     }
     this.disableTextSelection();
+    this.toggleAnnotationLayerPointerEvents(true);
     this.#isDisabling = false;
   }
   getEditableAnnotation(id) {
@@ -10592,22 +11191,58 @@ class AnnotationEditorLayer {
     this.#uiManager.setActiveEditor(editor);
   }
   enableTextSelection() {
-    if (this.#textLayer?.div) {
-      document.addEventListener("selectstart", this.#boundSelectionStart);
+    this.div.tabIndex = -1;
+    if (this.#textLayer?.div && !this.#boundTextLayerPointerDown) {
+      this.#boundTextLayerPointerDown = this.#textLayerPointerDown.bind(this);
+      this.#textLayer.div.addEventListener("pointerdown", this.#boundTextLayerPointerDown);
+      this.#textLayer.div.classList.add("highlighting");
     }
   }
   disableTextSelection() {
-    if (this.#textLayer?.div) {
-      document.removeEventListener("selectstart", this.#boundSelectionStart);
+    this.div.tabIndex = 0;
+    if (this.#textLayer?.div && this.#boundTextLayerPointerDown) {
+      this.#textLayer.div.removeEventListener("pointerdown", this.#boundTextLayerPointerDown);
+      this.#boundTextLayerPointerDown = null;
+      this.#textLayer.div.classList.remove("highlighting");
+    }
+  }
+  #textLayerPointerDown(event) {
+    this.#uiManager.unselectAll();
+    if (event.target === this.#textLayer.div) {
+      const {
+        isMac
+      } = util.FeatureTest.platform;
+      if (event.button !== 0 || event.ctrlKey && isMac) {
+        return;
+      }
+      this.#uiManager.showAllEditors("highlight", true, true);
+      this.#textLayer.div.classList.add("free");
+      HighlightEditor.startHighlighting(this, this.#uiManager.direction === "ltr", event);
+      this.#textLayer.div.addEventListener("pointerup", () => {
+        this.#textLayer.div.classList.remove("free");
+      }, {
+        once: true
+      });
+      event.preventDefault();
     }
   }
   enableClick() {
+    if (this.#boundPointerdown) {
+      return;
+    }
+    this.#boundPointerdown = this.pointerdown.bind(this);
+    this.#boundPointerup = this.pointerup.bind(this);
     this.div.addEventListener("pointerdown", this.#boundPointerdown);
     this.div.addEventListener("pointerup", this.#boundPointerup);
   }
   disableClick() {
+    if (!this.#boundPointerdown) {
+      return;
+    }
     this.div.removeEventListener("pointerdown", this.#boundPointerdown);
     this.div.removeEventListener("pointerup", this.#boundPointerup);
+    this.#boundPointerdown = null;
+    this.#boundPointerup = null;
   }
   attach(editor) {
     this.#editors.set(editor.id, editor);
@@ -10638,7 +11273,7 @@ class AnnotationEditorLayer {
     if (editor.parent === this) {
       return;
     }
-    if (editor.annotationElementId) {
+    if (editor.parent && editor.annotationElementId) {
       this.#uiManager.addDeletedAnnotationElement(editor.annotationElementId);
       editor_editor.AnnotationEditor.deleteAnnotationElement(editor);
       editor.annotationElementId = null;
@@ -10652,6 +11287,9 @@ class AnnotationEditorLayer {
     }
   }
   add(editor) {
+    if (editor.parent === this && editor.isAttachedToDOM) {
+      return;
+    }
     this.changeParent(editor);
     this.#uiManager.addEditor(editor);
     this.attach(editor);
@@ -10663,6 +11301,7 @@ class AnnotationEditorLayer {
     editor.fixAndSetPosition();
     editor.onceAdded();
     this.#uiManager.addToAnnotationStorage(editor);
+    editor._reportTelemetry(editor.telemetryInitialData);
   }
   moveEditorInDOM(editor) {
     if (!editor.isAttachedToDOM) {
@@ -10693,6 +11332,7 @@ class AnnotationEditorLayer {
     if (editor.needsToBeRebuilt()) {
       editor.parent ||= this;
       editor.rebuild();
+      editor.show();
     } else {
       this.add(editor);
     }
@@ -10745,7 +11385,7 @@ class AnnotationEditorLayer {
   deserialize(data) {
     return AnnotationEditorLayer.#editorTypes.get(data.annotationType ?? data.annotationEditorType)?.deserialize(data, this, this.#uiManager) || null;
   }
-  #createAndAddNewEditor(event, isCentered, data = {}) {
+  createAndAddNewEditor(event, isCentered, data = {}) {
     const id = this.getNextId();
     const editor = this.#createNewEditor({
       parent: this,
@@ -10781,7 +11421,7 @@ class AnnotationEditorLayer {
     };
   }
   addNewEditor() {
-    this.#createAndAddNewEditor(this.#getCenterPoint(), true);
+    this.createAndAddNewEditor(this.#getCenterPoint(), true);
   }
   setSelected(editor) {
     this.#uiManager.setSelected(editor);
@@ -10794,84 +11434,6 @@ class AnnotationEditorLayer {
   }
   unselect(editor) {
     this.#uiManager.unselect(editor);
-  }
-  selectionStart(_event) {
-    this.#textLayer?.div.addEventListener("pointerup", this.#boundPointerUpAfterSelection, {
-      once: true
-    });
-  }
-  pointerUpAfterSelection(event) {
-    const selection = document.getSelection();
-    if (selection.rangeCount === 0) {
-      return;
-    }
-    const range = selection.getRangeAt(0);
-    if (range.collapsed) {
-      return;
-    }
-    if (!this.#textLayer?.div.contains(range.commonAncestorContainer)) {
-      return;
-    }
-    const {
-      x: layerX,
-      y: layerY,
-      width: parentWidth,
-      height: parentHeight
-    } = this.#textLayer.div.getBoundingClientRect();
-    const bboxes = range.getClientRects();
-    let rotator;
-    switch (this.viewport.rotation) {
-      case 90:
-        rotator = (x, y, w, h) => ({
-          x: (y - layerY) / parentHeight,
-          y: 1 - (x + w - layerX) / parentWidth,
-          width: h / parentHeight,
-          height: w / parentWidth
-        });
-        break;
-      case 180:
-        rotator = (x, y, w, h) => ({
-          x: 1 - (x + w - layerX) / parentWidth,
-          y: 1 - (y + h - layerY) / parentHeight,
-          width: w / parentWidth,
-          height: h / parentHeight
-        });
-        break;
-      case 270:
-        rotator = (x, y, w, h) => ({
-          x: 1 - (y + h - layerY) / parentHeight,
-          y: (x - layerX) / parentWidth,
-          width: h / parentHeight,
-          height: w / parentWidth
-        });
-        break;
-      default:
-        rotator = (x, y, w, h) => ({
-          x: (x - layerX) / parentWidth,
-          y: (y - layerY) / parentHeight,
-          width: w / parentWidth,
-          height: h / parentHeight
-        });
-        break;
-    }
-    const boxes = [];
-    for (const {
-      x,
-      y,
-      width,
-      height
-    } of bboxes) {
-      if (width === 0 || height === 0) {
-        continue;
-      }
-      boxes.push(rotator(x, y, width, height));
-    }
-    if (boxes.length !== 0) {
-      this.#createAndAddNewEditor(event, false, {
-        boxes
-      });
-    }
-    selection.empty();
   }
   pointerup(event) {
     const {
@@ -10895,7 +11457,7 @@ class AnnotationEditorLayer {
       this.#uiManager.unselectAll();
       return;
     }
-    this.#createAndAddNewEditor(event, false);
+    this.createAndAddNewEditor(event, false);
   }
   pointerdown(event) {
     if (this.#uiManager.getMode() === util.AnnotationEditorType.HIGHLIGHT) {
@@ -10961,6 +11523,7 @@ class AnnotationEditorLayer {
     (0,display_utils.setLayerDimensions)(this.div, viewport);
     for (const editor of this.#uiManager.getEditors(this.pageIndex)) {
       this.add(editor);
+      editor.rebuild();
     }
     this.updateMode();
   }
@@ -10968,6 +11531,7 @@ class AnnotationEditorLayer {
     viewport
   }) {
     this.#uiManager.commitOrRemove();
+    this.#cleanup();
     const oldRotation = this.viewport.rotation;
     const rotation = viewport.rotation;
     this.viewport = viewport;
@@ -10979,7 +11543,7 @@ class AnnotationEditorLayer {
         editor.rotate(rotation);
       }
     }
-    this.updateMode();
+    this.addInkEditorIfNeeded(false);
   }
   get pageDimensions() {
     const {
@@ -10988,33 +11552,39 @@ class AnnotationEditorLayer {
     } = this.viewport.rawDims;
     return [pageWidth, pageHeight];
   }
+  get scale() {
+    return this.#uiManager.viewParameters.realScale;
+  }
 }
 
 
 /***/ }),
 
-/***/ 97:
+/***/ 259:
 /***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
 
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   ColorPicker: () => (/* binding */ ColorPicker)
 /* harmony export */ });
-/* harmony import */ var _shared_util_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(266);
-/* harmony import */ var _tools_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(812);
-/* harmony import */ var _display_utils_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(473);
+/* harmony import */ var _shared_util_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(292);
+/* harmony import */ var _tools_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(830);
+/* harmony import */ var _display_utils_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(419);
 
 
 
 class ColorPicker {
   #boundKeyDown = this.#keyDown.bind(this);
+  #boundPointerDown = this.#pointerDown.bind(this);
   #button = null;
   #buttonSwatch = null;
   #defaultColor;
   #dropdown = null;
   #dropdownWasFromKeyboard = false;
   #isMainColorPicker = false;
+  #editor = null;
   #eventBus;
   #uiManager = null;
+  #type;
   static get _keyboardManager() {
     return (0,_shared_util_js__WEBPACK_IMPORTED_MODULE_0__.shadow)(this, "_keyboardManager", new _tools_js__WEBPACK_IMPORTED_MODULE_1__.KeyboardManager([[["Escape", "mac+Escape"], ColorPicker.prototype._hideDropdownFromKeyboard], [[" ", "mac+ "], ColorPicker.prototype._colorSelectFromKeyboard], [["ArrowDown", "ArrowRight", "mac+ArrowDown", "mac+ArrowRight"], ColorPicker.prototype._moveToNext], [["ArrowUp", "ArrowLeft", "mac+ArrowUp", "mac+ArrowLeft"], ColorPicker.prototype._moveToPrevious], [["Home", "mac+Home"], ColorPicker.prototype._moveToBeginning], [["End", "mac+End"], ColorPicker.prototype._moveToEnd]]));
   }
@@ -11022,7 +11592,14 @@ class ColorPicker {
     editor = null,
     uiManager = null
   }) {
-    this.#isMainColorPicker = !editor;
+    if (editor) {
+      this.#isMainColorPicker = false;
+      this.#type = _shared_util_js__WEBPACK_IMPORTED_MODULE_0__.AnnotationEditorParamsType.HIGHLIGHT_COLOR;
+      this.#editor = editor;
+    } else {
+      this.#isMainColorPicker = true;
+      this.#type = _shared_util_js__WEBPACK_IMPORTED_MODULE_0__.AnnotationEditorParamsType.HIGHLIGHT_DEFAULT_COLOR;
+    }
     this.#uiManager = editor?._uiManager || uiManager;
     this.#eventBus = this.#uiManager._eventBus;
     this.#defaultColor = editor?.color || this.#uiManager?.highlightColors.values().next().value || "#FFFF98";
@@ -11034,19 +11611,21 @@ class ColorPicker {
     button.setAttribute("data-l10n-id", "pdfjs-editor-colorpicker-button");
     button.setAttribute("aria-haspopup", true);
     button.addEventListener("click", this.#openDropdown.bind(this));
+    button.addEventListener("keydown", this.#boundKeyDown);
     const swatch = this.#buttonSwatch = document.createElement("span");
     swatch.className = "swatch";
+    swatch.setAttribute("aria-hidden", true);
     swatch.style.backgroundColor = this.#defaultColor;
     button.append(swatch);
     return button;
   }
   renderMainDropdown() {
-    const dropdown = this.#dropdown = this.#getDropdownRoot(_shared_util_js__WEBPACK_IMPORTED_MODULE_0__.AnnotationEditorParamsType.HIGHLIGHT_DEFAULT_COLOR);
+    const dropdown = this.#dropdown = this.#getDropdownRoot();
     dropdown.setAttribute("aria-orientation", "horizontal");
     dropdown.setAttribute("aria-labelledby", "highlightColorPickerLabel");
     return dropdown;
   }
-  #getDropdownRoot(paramType) {
+  #getDropdownRoot() {
     const div = document.createElement("div");
     div.addEventListener("contextmenu", _display_utils_js__WEBPACK_IMPORTED_MODULE_2__.noContextMenu);
     div.className = "dropdown";
@@ -11066,21 +11645,25 @@ class ColorPicker {
       swatch.className = "swatch";
       swatch.style.backgroundColor = color;
       button.setAttribute("aria-selected", color === this.#defaultColor);
-      button.addEventListener("click", this.#colorSelect.bind(this, paramType, color));
+      button.addEventListener("click", this.#colorSelect.bind(this, color));
       div.append(button);
     }
     div.addEventListener("keydown", this.#boundKeyDown);
     return div;
   }
-  #colorSelect(type, color, event) {
+  #colorSelect(color, event) {
     event.stopPropagation();
     this.#eventBus.dispatch("switchannotationeditorparams", {
       source: this,
-      type,
+      type: this.#type,
       value: color
     });
   }
   _colorSelectFromKeyboard(event) {
+    if (event.target === this.#button) {
+      this.#openDropdown(event);
+      return;
+    }
     const color = event.target.getAttribute("data-color");
     if (!color) {
       return;
@@ -11088,6 +11671,10 @@ class ColorPicker {
     this.#colorSelect(color, event);
   }
   _moveToNext(event) {
+    if (!this.#isDropdownVisible) {
+      this.#openDropdown(event);
+      return;
+    }
     if (event.target === this.#button) {
       this.#dropdown.firstChild?.focus();
       return;
@@ -11095,40 +11682,70 @@ class ColorPicker {
     event.target.nextSibling?.focus();
   }
   _moveToPrevious(event) {
+    if (event.target === this.#dropdown?.firstChild || event.target === this.#button) {
+      if (this.#isDropdownVisible) {
+        this._hideDropdownFromKeyboard();
+      }
+      return;
+    }
+    if (!this.#isDropdownVisible) {
+      this.#openDropdown(event);
+    }
     event.target.previousSibling?.focus();
   }
-  _moveToBeginning() {
+  _moveToBeginning(event) {
+    if (!this.#isDropdownVisible) {
+      this.#openDropdown(event);
+      return;
+    }
     this.#dropdown.firstChild?.focus();
   }
-  _moveToEnd() {
+  _moveToEnd(event) {
+    if (!this.#isDropdownVisible) {
+      this.#openDropdown(event);
+      return;
+    }
     this.#dropdown.lastChild?.focus();
   }
   #keyDown(event) {
     ColorPicker._keyboardManager.exec(this, event);
   }
   #openDropdown(event) {
-    if (this.#dropdown && !this.#dropdown.classList.contains("hidden")) {
+    if (this.#isDropdownVisible) {
       this.hideDropdown();
       return;
     }
-    this.#button.addEventListener("keydown", this.#boundKeyDown);
     this.#dropdownWasFromKeyboard = event.detail === 0;
+    window.addEventListener("pointerdown", this.#boundPointerDown);
     if (this.#dropdown) {
       this.#dropdown.classList.remove("hidden");
       return;
     }
-    const root = this.#dropdown = this.#getDropdownRoot(_shared_util_js__WEBPACK_IMPORTED_MODULE_0__.AnnotationEditorParamsType.HIGHLIGHT_COLOR);
+    const root = this.#dropdown = this.#getDropdownRoot();
     this.#button.append(root);
   }
-  hideDropdown() {
-    this.#dropdown?.classList.add("hidden");
-  }
-  _hideDropdownFromKeyboard() {
-    if (this.#isMainColorPicker || !this.#dropdown || this.#dropdown.classList.contains("hidden")) {
+  #pointerDown(event) {
+    if (this.#dropdown?.contains(event.target)) {
       return;
     }
     this.hideDropdown();
-    this.#button.removeEventListener("keydown", this.#boundKeyDown);
+  }
+  hideDropdown() {
+    this.#dropdown?.classList.add("hidden");
+    window.removeEventListener("pointerdown", this.#boundPointerDown);
+  }
+  get #isDropdownVisible() {
+    return this.#dropdown && !this.#dropdown.classList.contains("hidden");
+  }
+  _hideDropdownFromKeyboard() {
+    if (this.#isMainColorPicker) {
+      return;
+    }
+    if (!this.#isDropdownVisible) {
+      this.#editor?.unselect();
+      return;
+    }
+    this.hideDropdown();
     this.#button.focus({
       preventScroll: true,
       focusVisible: this.#dropdownWasFromKeyboard
@@ -11158,7 +11775,7 @@ class ColorPicker {
 
 /***/ }),
 
-/***/ 115:
+/***/ 310:
 /***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
 
 
@@ -11168,11 +11785,11 @@ __webpack_require__.d(__webpack_exports__, {
 });
 
 // EXTERNAL MODULE: ./src/display/editor/tools.js
-var tools = __webpack_require__(812);
+var tools = __webpack_require__(830);
 // EXTERNAL MODULE: ./src/shared/util.js
-var util = __webpack_require__(266);
+var util = __webpack_require__(292);
 // EXTERNAL MODULE: ./src/display/display_utils.js
-var display_utils = __webpack_require__(473);
+var display_utils = __webpack_require__(419);
 ;// CONCATENATED MODULE: ./src/display/editor/alt_text.js
 
 class AltText {
@@ -11223,6 +11840,9 @@ class AltText {
       focusVisible: this.#altTextWasFromKeyBoard
     });
     this.#altTextWasFromKeyBoard = false;
+  }
+  isEmpty() {
+    return !this.#altText && !this.#altTextDecorative;
   }
   get data() {
     return {
@@ -11282,15 +11902,8 @@ class AltText {
         this.#altTextTooltipTimeout = setTimeout(() => {
           this.#altTextTooltipTimeout = null;
           this.#altTextTooltip.classList.add("show");
-          this.#editor._uiManager._eventBus.dispatch("reporttelemetry", {
-            source: this,
-            details: {
-              type: "editing",
-              subtype: this.#editor.editorType,
-              data: {
-                action: "alt_text_tooltip"
-              }
-            }
+          this.#editor._reportTelemetry({
+            action: "alt_text_tooltip"
           });
         }, DELAY_TO_SHOW_TOOLTIP);
       });
@@ -11311,98 +11924,8 @@ class AltText {
   }
 }
 
-;// CONCATENATED MODULE: ./src/display/editor/toolbar.js
-
-class EditorToolbar {
-  #toolbar = null;
-  #colorPicker = null;
-  #editor;
-  #buttons = null;
-  constructor(editor) {
-    this.#editor = editor;
-  }
-  render() {
-    const editToolbar = this.#toolbar = document.createElement("div");
-    editToolbar.className = "editToolbar";
-    editToolbar.addEventListener("contextmenu", display_utils.noContextMenu);
-    editToolbar.addEventListener("pointerdown", EditorToolbar.#pointerDown);
-    const buttons = this.#buttons = document.createElement("div");
-    buttons.className = "buttons";
-    editToolbar.append(buttons);
-    const position = this.#editor.toolbarPosition;
-    if (position) {
-      const {
-        style
-      } = editToolbar;
-      const x = this.#editor._uiManager.direction === "ltr" ? 1 - position[0] : position[0];
-      style.insetInlineEnd = `${100 * x}%`;
-      style.top = `calc(${100 * position[1]}% + var(--editor-toolbar-vert-offset))`;
-    }
-    this.#addDeleteButton();
-    return editToolbar;
-  }
-  static #pointerDown(e) {
-    e.stopPropagation();
-  }
-  #focusIn(e) {
-    this.#editor._focusEventsAllowed = false;
-    e.preventDefault();
-    e.stopPropagation();
-  }
-  #focusOut(e) {
-    this.#editor._focusEventsAllowed = true;
-    e.preventDefault();
-    e.stopPropagation();
-  }
-  #addListenersToElement(element) {
-    element.addEventListener("focusin", this.#focusIn.bind(this), {
-      capture: true
-    });
-    element.addEventListener("focusout", this.#focusOut.bind(this), {
-      capture: true
-    });
-    element.addEventListener("contextmenu", display_utils.noContextMenu);
-  }
-  hide() {
-    this.#toolbar.classList.add("hidden");
-    this.#colorPicker?.hideDropdown();
-  }
-  show() {
-    this.#toolbar.classList.remove("hidden");
-  }
-  #addDeleteButton() {
-    const button = document.createElement("button");
-    button.className = "delete";
-    button.tabIndex = 0;
-    button.setAttribute("data-l10n-id", `pdfjs-editor-remove-${this.#editor.editorType}-button`);
-    this.#addListenersToElement(button);
-    button.addEventListener("click", e => {
-      this.#editor._uiManager.delete();
-    });
-    this.#buttons.append(button);
-  }
-  get #divider() {
-    const divider = document.createElement("div");
-    divider.className = "divider";
-    return divider;
-  }
-  addAltTextButton(button) {
-    this.#addListenersToElement(button);
-    this.#buttons.prepend(button, this.#divider);
-  }
-  addColorPicker(colorPicker) {
-    this.#colorPicker = colorPicker;
-    const button = colorPicker.renderButton();
-    this.#addListenersToElement(button);
-    this.#buttons.prepend(button, this.#divider);
-  }
-  remove() {
-    this.#toolbar.remove();
-    this.#colorPicker?.destroy();
-    this.#colorPicker = null;
-  }
-}
-
+// EXTERNAL MODULE: ./src/display/editor/toolbar.js
+var toolbar = __webpack_require__(362);
 ;// CONCATENATED MODULE: ./src/display/editor/editor.js
 
 
@@ -11412,6 +11935,7 @@ class EditorToolbar {
 class AnnotationEditor {
   #allResizerDivs = null;
   #altText = null;
+  #disabled = false;
   #keepAspectRatio = false;
   #resizersDiv = null;
   #savedDimensions = null;
@@ -11420,11 +11944,16 @@ class AnnotationEditor {
   #editToolbar = null;
   #focusedResizerName = "";
   #hasBeenClicked = false;
+  #initialPosition = null;
   #isEditing = false;
   #isInEditMode = false;
   #isResizerEnabledForKeyboard = false;
   #moveInDOMTimeout = null;
+  #prevDragX = 0;
+  #prevDragY = 0;
+  #telemetryTimeouts = null;
   _initialOptions = Object.create(null);
+  _isVisible = true;
   _uiManager = null;
   _focusEventsAllowed = true;
   _l10nPromise = null;
@@ -11433,6 +11962,7 @@ class AnnotationEditor {
   static _borderLineWidth = -1;
   static _colorManager = new tools.ColorManager();
   static _zIndex = 1;
+  static _telemetryTimeout = 1000;
   static get _resizerKeyboardManager() {
     const resize = AnnotationEditor.prototype._resizeWithKeyboard;
     const small = tools.AnnotationEditorUIManager.TRANSLATE_SMALL;
@@ -11505,7 +12035,7 @@ class AnnotationEditor {
     fakeEditor.deleted = true;
     fakeEditor._uiManager.addToAnnotationStorage(fakeEditor);
   }
-  static initialize(l10n, options = null) {
+  static initialize(l10n, _uiManager, options) {
     AnnotationEditor._l10nPromise ||= new Map(["pdfjs-editor-alt-text-button-label", "pdfjs-editor-alt-text-edit-button-label", "pdfjs-editor-alt-text-decorative-tooltip", "pdfjs-editor-resizer-label-topLeft", "pdfjs-editor-resizer-label-topMiddle", "pdfjs-editor-resizer-label-topRight", "pdfjs-editor-resizer-label-middleRight", "pdfjs-editor-resizer-label-bottomRight", "pdfjs-editor-resizer-label-bottomMiddle", "pdfjs-editor-resizer-label-bottomLeft", "pdfjs-editor-resizer-label-middleLeft"].map(str => [str, l10n.get(str.replaceAll(/([A-Z])/g, c => `-${c.toLowerCase()}`))]));
     if (options?.strings) {
       for (const str of options.strings) {
@@ -11640,12 +12170,14 @@ class AnnotationEditor {
     this.#translate(this.parentDimensions, x, y);
   }
   translateInPage(x, y) {
+    this.#initialPosition ||= [this.x, this.y];
     this.#translate(this.pageDimensions, x, y);
     this.div.scrollIntoView({
       block: "nearest"
     });
   }
   drag(tx, ty) {
+    this.#initialPosition ||= [this.x, this.y];
     const [parentWidth, parentHeight] = this.parentDimensions;
     this.x += tx / parentWidth;
     this.y += ty / parentHeight;
@@ -11663,7 +12195,7 @@ class AnnotationEditor {
       x,
       y
     } = this;
-    const [bx, by] = this.#getBaseTranslation();
+    const [bx, by] = this.getBaseTranslation();
     x += bx;
     y += by;
     this.div.style.left = `${(100 * x).toFixed(2)}%`;
@@ -11672,7 +12204,10 @@ class AnnotationEditor {
       block: "nearest"
     });
   }
-  #getBaseTranslation() {
+  get _hasBeenMoved() {
+    return !!this.#initialPosition && (this.#initialPosition[0] !== this.x || this.#initialPosition[1] !== this.y);
+  }
+  getBaseTranslation() {
     const [parentWidth, parentHeight] = this.parentDimensions;
     const {
       _borderLineWidth
@@ -11690,6 +12225,9 @@ class AnnotationEditor {
         return [-x, -y];
     }
   }
+  get _mustFixPosition() {
+    return true;
+  }
   fixAndSetPosition(rotation = this.rotation) {
     const [pageWidth, pageHeight] = this.pageDimensions;
     let {
@@ -11702,27 +12240,29 @@ class AnnotationEditor {
     height *= pageHeight;
     x *= pageWidth;
     y *= pageHeight;
-    switch (rotation) {
-      case 0:
-        x = Math.max(0, Math.min(pageWidth - width, x));
-        y = Math.max(0, Math.min(pageHeight - height, y));
-        break;
-      case 90:
-        x = Math.max(0, Math.min(pageWidth - height, x));
-        y = Math.min(pageHeight, Math.max(width, y));
-        break;
-      case 180:
-        x = Math.min(pageWidth, Math.max(width, x));
-        y = Math.min(pageHeight, Math.max(height, y));
-        break;
-      case 270:
-        x = Math.min(pageWidth, Math.max(height, x));
-        y = Math.max(0, Math.min(pageHeight - width, y));
-        break;
+    if (this._mustFixPosition) {
+      switch (rotation) {
+        case 0:
+          x = Math.max(0, Math.min(pageWidth - width, x));
+          y = Math.max(0, Math.min(pageHeight - height, y));
+          break;
+        case 90:
+          x = Math.max(0, Math.min(pageWidth - height, x));
+          y = Math.min(pageHeight, Math.max(width, y));
+          break;
+        case 180:
+          x = Math.min(pageWidth, Math.max(width, x));
+          y = Math.min(pageHeight, Math.max(height, y));
+          break;
+        case 270:
+          x = Math.min(pageWidth, Math.max(height, x));
+          y = Math.max(0, Math.min(pageHeight - width, y));
+          break;
+      }
     }
     this.x = x /= pageWidth;
     this.y = y /= pageHeight;
-    const [bx, by] = this.#getBaseTranslation();
+    const [bx, by] = this.getBaseTranslation();
     x += bx;
     y += by;
     const {
@@ -11850,6 +12390,7 @@ class AnnotationEditor {
     };
     this.parent.togglePointerEvents(false);
     window.addEventListener("pointermove", boundResizerPointermove, pointerMoveOptions);
+    window.addEventListener("contextmenu", display_utils.noContextMenu);
     const savedX = this.x;
     const savedY = this.y;
     const savedWidth = this.width;
@@ -11864,6 +12405,7 @@ class AnnotationEditor {
       window.removeEventListener("pointerup", pointerUpCallback);
       window.removeEventListener("blur", pointerUpCallback);
       window.removeEventListener("pointermove", boundResizerPointermove, pointerMoveOptions);
+      window.removeEventListener("contextmenu", display_utils.noContextMenu);
       this.parent.div.style.cursor = savedParentCursor;
       this.div.style.cursor = savedCursor;
       this.#addResizeToUndoStack(savedX, savedY, savedWidth, savedHeight);
@@ -11994,7 +12536,7 @@ class AnnotationEditor {
     if (this.#editToolbar || this.#isInEditMode) {
       return this.#editToolbar;
     }
-    this.#editToolbar = new EditorToolbar(this);
+    this.#editToolbar = new toolbar.EditorToolbar(this);
     this.div.append(this.#editToolbar.render());
     if (this.#altText) {
       this.#editToolbar.addAltTextButton(await this.#altText.render());
@@ -12029,12 +12571,18 @@ class AnnotationEditor {
     }
     this.#altText.data = data;
   }
+  hasAltText() {
+    return !this.#altText?.isEmpty();
+  }
   render() {
     this.div = document.createElement("div");
     this.div.setAttribute("data-editor-rotation", (360 - this.rotation) % 360);
     this.div.className = this.name;
     this.div.setAttribute("id", this.id);
-    this.div.setAttribute("tabIndex", 0);
+    this.div.tabIndex = this.#disabled ? -1 : 0;
+    if (!this._isVisible) {
+      this.div.classList.add("hidden");
+    }
     this.setInForeground();
     this.div.addEventListener("focusin", this.#boundFocusin);
     this.div.addEventListener("focusout", this.#boundFocusout);
@@ -12078,12 +12626,21 @@ class AnnotationEditor {
     this._uiManager.setUpDragSession();
     let pointerMoveOptions, pointerMoveCallback;
     if (isSelected) {
+      this.div.classList.add("moving");
       pointerMoveOptions = {
         passive: true,
         capture: true
       };
+      this.#prevDragX = event.clientX;
+      this.#prevDragY = event.clientY;
       pointerMoveCallback = e => {
-        const [tx, ty] = this.screenToPageTranslation(e.movementX, e.movementY);
+        const {
+          clientX: x,
+          clientY: y
+        } = e;
+        const [tx, ty] = this.screenToPageTranslation(x - this.#prevDragX, y - this.#prevDragY);
+        this.#prevDragX = x;
+        this.#prevDragY = y;
         this._uiManager.dragSelectedEditors(tx, ty);
       };
       window.addEventListener("pointermove", pointerMoveCallback, pointerMoveOptions);
@@ -12092,6 +12649,7 @@ class AnnotationEditor {
       window.removeEventListener("pointerup", pointerUpCallback);
       window.removeEventListener("blur", pointerUpCallback);
       if (isSelected) {
+        this.div.classList.remove("moving");
         window.removeEventListener("pointermove", pointerMoveCallback, pointerMoveOptions);
       }
       this.#hasBeenClicked = false;
@@ -12199,6 +12757,9 @@ class AnnotationEditor {
     editor.height = height / pageHeight;
     return editor;
   }
+  get hasBeenModified() {
+    return !!this.annotationElementId && (this.deleted || this.serialize() !== null);
+  }
   remove() {
     this.div.removeEventListener("focusin", this.#boundFocusin);
     this.div.removeEventListener("focusout", this.#boundFocusout);
@@ -12216,6 +12777,13 @@ class AnnotationEditor {
     }
     this.#stopResizing();
     this.removeEditToolbar();
+    if (this.#telemetryTimeouts) {
+      for (const timeout of this.#telemetryTimeouts.values()) {
+        clearTimeout(timeout);
+      }
+      this.#telemetryTimeouts = null;
+    }
+    this.parent = null;
   }
   get isResizable() {
     return false;
@@ -12352,7 +12920,9 @@ class AnnotationEditor {
     this.#resizersDiv?.classList.add("hidden");
     this.div?.classList.remove("selectedEditor");
     if (this.div?.contains(document.activeElement)) {
-      this._uiManager.currentLayer.div.focus();
+      this._uiManager.currentLayer.div.focus({
+        preventScroll: true
+      });
     }
     this.#editToolbar?.hide();
   }
@@ -12396,6 +12966,81 @@ class AnnotationEditor {
   static canCreateNewEmptyEditor() {
     return true;
   }
+  get telemetryInitialData() {
+    return {
+      action: "added"
+    };
+  }
+  get telemetryFinalData() {
+    return null;
+  }
+  _reportTelemetry(data, mustWait = false) {
+    if (mustWait) {
+      this.#telemetryTimeouts ||= new Map();
+      const {
+        action
+      } = data;
+      let timeout = this.#telemetryTimeouts.get(action);
+      if (timeout) {
+        clearTimeout(timeout);
+      }
+      timeout = setTimeout(() => {
+        this._reportTelemetry(data);
+        this.#telemetryTimeouts.delete(action);
+        if (this.#telemetryTimeouts.size === 0) {
+          this.#telemetryTimeouts = null;
+        }
+      }, AnnotationEditor._telemetryTimeout);
+      this.#telemetryTimeouts.set(action, timeout);
+      return;
+    }
+    data.type ||= this.editorType;
+    this._uiManager._eventBus.dispatch("reporttelemetry", {
+      source: this,
+      details: {
+        type: "editing",
+        data
+      }
+    });
+  }
+  show(visible = this._isVisible) {
+    this.div.classList.toggle("hidden", !visible);
+    this._isVisible = visible;
+  }
+  enable() {
+    if (this.div) {
+      this.div.tabIndex = 0;
+    }
+    this.#disabled = false;
+  }
+  disable() {
+    if (this.div) {
+      this.div.tabIndex = -1;
+    }
+    this.#disabled = true;
+  }
+  renderAnnotationElement(annotation) {
+    let content = annotation.container.querySelector(".annotationContent");
+    if (!content) {
+      content = document.createElement("div");
+      content.classList.add("annotationContent", this.editorType);
+      annotation.container.prepend(content);
+    } else if (content.nodeName === "CANVAS") {
+      const canvas = content;
+      content = document.createElement("div");
+      content.classList.add("annotationContent", this.editorType);
+      canvas.before(content);
+    }
+    return content;
+  }
+  resetAnnotationElement(annotation) {
+    const {
+      firstChild
+    } = annotation.container;
+    if (firstChild.nodeName === "DIV" && firstChild.classList.contains("annotationContent")) {
+      firstChild.remove();
+    }
+  }
 }
 class FakeEditor extends AnnotationEditor {
   constructor(params) {
@@ -12415,12 +13060,15 @@ class FakeEditor extends AnnotationEditor {
 
 /***/ }),
 
-/***/ 405:
+/***/ 61:
 /***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
 
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   FreeOutliner: () => (/* binding */ FreeOutliner),
 /* harmony export */   Outliner: () => (/* binding */ Outliner)
 /* harmony export */ });
+/* harmony import */ var _shared_util_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(292);
+
 class Outliner {
   #box;
   #verticalEdges = [];
@@ -12529,10 +13177,7 @@ class Outliner {
       }
       outline.push(lastPointX, lastPointY);
     }
-    return {
-      outlines,
-      box: this.#box
-    };
+    return new HighlightOutline(outlines, this.#box);
   }
   #binarySearch(y) {
     const array = this.#intervals;
@@ -12612,11 +13257,593 @@ class Outliner {
     return results;
   }
 }
+class Outline {
+  toSVGPath() {
+    throw new Error("Abstract method `toSVGPath` must be implemented.");
+  }
+  get box() {
+    throw new Error("Abstract getter `box` must be implemented.");
+  }
+  serialize(_bbox, _rotation) {
+    throw new Error("Abstract method `serialize` must be implemented.");
+  }
+  get free() {
+    return this instanceof FreeHighlightOutline;
+  }
+}
+class HighlightOutline extends Outline {
+  #box;
+  #outlines;
+  constructor(outlines, box) {
+    super();
+    this.#outlines = outlines;
+    this.#box = box;
+  }
+  toSVGPath() {
+    const buffer = [];
+    for (const polygon of this.#outlines) {
+      let [prevX, prevY] = polygon;
+      buffer.push(`M${prevX} ${prevY}`);
+      for (let i = 2; i < polygon.length; i += 2) {
+        const x = polygon[i];
+        const y = polygon[i + 1];
+        if (x === prevX) {
+          buffer.push(`V${y}`);
+          prevY = y;
+        } else if (y === prevY) {
+          buffer.push(`H${x}`);
+          prevX = x;
+        }
+      }
+      buffer.push("Z");
+    }
+    return buffer.join(" ");
+  }
+  serialize([blX, blY, trX, trY], _rotation) {
+    const outlines = [];
+    const width = trX - blX;
+    const height = trY - blY;
+    for (const outline of this.#outlines) {
+      const points = new Array(outline.length);
+      for (let i = 0; i < outline.length; i += 2) {
+        points[i] = blX + outline[i] * width;
+        points[i + 1] = trY - outline[i + 1] * height;
+      }
+      outlines.push(points);
+    }
+    return outlines;
+  }
+  get box() {
+    return this.#box;
+  }
+}
+class FreeOutliner {
+  #box;
+  #bottom = [];
+  #innerMargin;
+  #isLTR;
+  #top = [];
+  #last = new Float64Array(18);
+  #lastX;
+  #lastY;
+  #min;
+  #min_dist;
+  #scaleFactor;
+  #thickness;
+  #points = [];
+  static #MIN_DIST = 8;
+  static #MIN_DIFF = 2;
+  static #MIN = FreeOutliner.#MIN_DIST + FreeOutliner.#MIN_DIFF;
+  constructor({
+    x,
+    y
+  }, box, scaleFactor, thickness, isLTR, innerMargin = 0) {
+    this.#box = box;
+    this.#thickness = thickness * scaleFactor;
+    this.#isLTR = isLTR;
+    this.#last.set([NaN, NaN, NaN, NaN, x, y], 6);
+    this.#innerMargin = innerMargin;
+    this.#min_dist = FreeOutliner.#MIN_DIST * scaleFactor;
+    this.#min = FreeOutliner.#MIN * scaleFactor;
+    this.#scaleFactor = scaleFactor;
+    this.#points.push(x, y);
+  }
+  get free() {
+    return true;
+  }
+  isEmpty() {
+    return isNaN(this.#last[8]);
+  }
+  #getLastCoords() {
+    const lastTop = this.#last.subarray(4, 6);
+    const lastBottom = this.#last.subarray(16, 18);
+    const [x, y, width, height] = this.#box;
+    return [(this.#lastX + (lastTop[0] - lastBottom[0]) / 2 - x) / width, (this.#lastY + (lastTop[1] - lastBottom[1]) / 2 - y) / height, (this.#lastX + (lastBottom[0] - lastTop[0]) / 2 - x) / width, (this.#lastY + (lastBottom[1] - lastTop[1]) / 2 - y) / height];
+  }
+  add({
+    x,
+    y
+  }) {
+    this.#lastX = x;
+    this.#lastY = y;
+    const [layerX, layerY, layerWidth, layerHeight] = this.#box;
+    let [x1, y1, x2, y2] = this.#last.subarray(8, 12);
+    const diffX = x - x2;
+    const diffY = y - y2;
+    const d = Math.hypot(diffX, diffY);
+    if (d < this.#min) {
+      return false;
+    }
+    const diffD = d - this.#min_dist;
+    const K = diffD / d;
+    const shiftX = K * diffX;
+    const shiftY = K * diffY;
+    let x0 = x1;
+    let y0 = y1;
+    x1 = x2;
+    y1 = y2;
+    x2 += shiftX;
+    y2 += shiftY;
+    this.#points?.push(x, y);
+    const nX = -shiftY / diffD;
+    const nY = shiftX / diffD;
+    const thX = nX * this.#thickness;
+    const thY = nY * this.#thickness;
+    this.#last.set(this.#last.subarray(2, 8), 0);
+    this.#last.set([x2 + thX, y2 + thY], 4);
+    this.#last.set(this.#last.subarray(14, 18), 12);
+    this.#last.set([x2 - thX, y2 - thY], 16);
+    if (isNaN(this.#last[6])) {
+      if (this.#top.length === 0) {
+        this.#last.set([x1 + thX, y1 + thY], 2);
+        this.#top.push(NaN, NaN, NaN, NaN, (x1 + thX - layerX) / layerWidth, (y1 + thY - layerY) / layerHeight);
+        this.#last.set([x1 - thX, y1 - thY], 14);
+        this.#bottom.push(NaN, NaN, NaN, NaN, (x1 - thX - layerX) / layerWidth, (y1 - thY - layerY) / layerHeight);
+      }
+      this.#last.set([x0, y0, x1, y1, x2, y2], 6);
+      return !this.isEmpty();
+    }
+    this.#last.set([x0, y0, x1, y1, x2, y2], 6);
+    const angle = Math.abs(Math.atan2(y0 - y1, x0 - x1) - Math.atan2(shiftY, shiftX));
+    if (angle < Math.PI / 2) {
+      [x1, y1, x2, y2] = this.#last.subarray(2, 6);
+      this.#top.push(NaN, NaN, NaN, NaN, ((x1 + x2) / 2 - layerX) / layerWidth, ((y1 + y2) / 2 - layerY) / layerHeight);
+      [x1, y1, x0, y0] = this.#last.subarray(14, 18);
+      this.#bottom.push(NaN, NaN, NaN, NaN, ((x0 + x1) / 2 - layerX) / layerWidth, ((y0 + y1) / 2 - layerY) / layerHeight);
+      return true;
+    }
+    [x0, y0, x1, y1, x2, y2] = this.#last.subarray(0, 6);
+    this.#top.push(((x0 + 5 * x1) / 6 - layerX) / layerWidth, ((y0 + 5 * y1) / 6 - layerY) / layerHeight, ((5 * x1 + x2) / 6 - layerX) / layerWidth, ((5 * y1 + y2) / 6 - layerY) / layerHeight, ((x1 + x2) / 2 - layerX) / layerWidth, ((y1 + y2) / 2 - layerY) / layerHeight);
+    [x2, y2, x1, y1, x0, y0] = this.#last.subarray(12, 18);
+    this.#bottom.push(((x0 + 5 * x1) / 6 - layerX) / layerWidth, ((y0 + 5 * y1) / 6 - layerY) / layerHeight, ((5 * x1 + x2) / 6 - layerX) / layerWidth, ((5 * y1 + y2) / 6 - layerY) / layerHeight, ((x1 + x2) / 2 - layerX) / layerWidth, ((y1 + y2) / 2 - layerY) / layerHeight);
+    return true;
+  }
+  toSVGPath() {
+    if (this.isEmpty()) {
+      return "";
+    }
+    const top = this.#top;
+    const bottom = this.#bottom;
+    const lastTop = this.#last.subarray(4, 6);
+    const lastBottom = this.#last.subarray(16, 18);
+    const [x, y, width, height] = this.#box;
+    const [lastTopX, lastTopY, lastBottomX, lastBottomY] = this.#getLastCoords();
+    if (isNaN(this.#last[6]) && !this.isEmpty()) {
+      return `M${(this.#last[2] - x) / width} ${(this.#last[3] - y) / height} L${(this.#last[4] - x) / width} ${(this.#last[5] - y) / height} L${lastTopX} ${lastTopY} L${lastBottomX} ${lastBottomY} L${(this.#last[16] - x) / width} ${(this.#last[17] - y) / height} L${(this.#last[14] - x) / width} ${(this.#last[15] - y) / height} Z`;
+    }
+    const buffer = [];
+    buffer.push(`M${top[4]} ${top[5]}`);
+    for (let i = 6; i < top.length; i += 6) {
+      if (isNaN(top[i])) {
+        buffer.push(`L${top[i + 4]} ${top[i + 5]}`);
+      } else {
+        buffer.push(`C${top[i]} ${top[i + 1]} ${top[i + 2]} ${top[i + 3]} ${top[i + 4]} ${top[i + 5]}`);
+      }
+    }
+    buffer.push(`L${(lastTop[0] - x) / width} ${(lastTop[1] - y) / height} L${lastTopX} ${lastTopY} L${lastBottomX} ${lastBottomY} L${(lastBottom[0] - x) / width} ${(lastBottom[1] - y) / height}`);
+    for (let i = bottom.length - 6; i >= 6; i -= 6) {
+      if (isNaN(bottom[i])) {
+        buffer.push(`L${bottom[i + 4]} ${bottom[i + 5]}`);
+      } else {
+        buffer.push(`C${bottom[i]} ${bottom[i + 1]} ${bottom[i + 2]} ${bottom[i + 3]} ${bottom[i + 4]} ${bottom[i + 5]}`);
+      }
+    }
+    buffer.push(`L${bottom[4]} ${bottom[5]} Z`);
+    return buffer.join(" ");
+  }
+  getOutlines() {
+    const top = this.#top;
+    const bottom = this.#bottom;
+    const last = this.#last;
+    const lastTop = last.subarray(4, 6);
+    const lastBottom = last.subarray(16, 18);
+    const [layerX, layerY, layerWidth, layerHeight] = this.#box;
+    const points = new Float64Array((this.#points?.length ?? 0) + 2);
+    for (let i = 0, ii = points.length - 2; i < ii; i += 2) {
+      points[i] = (this.#points[i] - layerX) / layerWidth;
+      points[i + 1] = (this.#points[i + 1] - layerY) / layerHeight;
+    }
+    points[points.length - 2] = (this.#lastX - layerX) / layerWidth;
+    points[points.length - 1] = (this.#lastY - layerY) / layerHeight;
+    const [lastTopX, lastTopY, lastBottomX, lastBottomY] = this.#getLastCoords();
+    if (isNaN(last[6]) && !this.isEmpty()) {
+      const outline = new Float64Array(36);
+      outline.set([NaN, NaN, NaN, NaN, (last[2] - layerX) / layerWidth, (last[3] - layerY) / layerHeight, NaN, NaN, NaN, NaN, (last[4] - layerX) / layerWidth, (last[5] - layerY) / layerHeight, NaN, NaN, NaN, NaN, lastTopX, lastTopY, NaN, NaN, NaN, NaN, lastBottomX, lastBottomY, NaN, NaN, NaN, NaN, (last[16] - layerX) / layerWidth, (last[17] - layerY) / layerHeight, NaN, NaN, NaN, NaN, (last[14] - layerX) / layerWidth, (last[15] - layerY) / layerHeight], 0);
+      return new FreeHighlightOutline(outline, points, this.#box, this.#scaleFactor, this.#innerMargin, this.#isLTR);
+    }
+    const outline = new Float64Array(this.#top.length + 24 + this.#bottom.length);
+    let N = top.length;
+    for (let i = 0; i < N; i += 2) {
+      if (isNaN(top[i])) {
+        outline[i] = outline[i + 1] = NaN;
+        continue;
+      }
+      outline[i] = top[i];
+      outline[i + 1] = top[i + 1];
+    }
+    outline.set([NaN, NaN, NaN, NaN, (lastTop[0] - layerX) / layerWidth, (lastTop[1] - layerY) / layerHeight, NaN, NaN, NaN, NaN, lastTopX, lastTopY, NaN, NaN, NaN, NaN, lastBottomX, lastBottomY, NaN, NaN, NaN, NaN, (lastBottom[0] - layerX) / layerWidth, (lastBottom[1] - layerY) / layerHeight], N);
+    N += 24;
+    for (let i = bottom.length - 6; i >= 6; i -= 6) {
+      for (let j = 0; j < 6; j += 2) {
+        if (isNaN(bottom[i + j])) {
+          outline[N] = outline[N + 1] = NaN;
+          N += 2;
+          continue;
+        }
+        outline[N] = bottom[i + j];
+        outline[N + 1] = bottom[i + j + 1];
+        N += 2;
+      }
+    }
+    outline.set([NaN, NaN, NaN, NaN, bottom[4], bottom[5]], N);
+    return new FreeHighlightOutline(outline, points, this.#box, this.#scaleFactor, this.#innerMargin, this.#isLTR);
+  }
+}
+class FreeHighlightOutline extends Outline {
+  #box;
+  #bbox = null;
+  #innerMargin;
+  #isLTR;
+  #points;
+  #scaleFactor;
+  #outline;
+  constructor(outline, points, box, scaleFactor, innerMargin, isLTR) {
+    super();
+    this.#outline = outline;
+    this.#points = points;
+    this.#box = box;
+    this.#scaleFactor = scaleFactor;
+    this.#innerMargin = innerMargin;
+    this.#isLTR = isLTR;
+    this.#computeMinMax(isLTR);
+    const {
+      x,
+      y,
+      width,
+      height
+    } = this.#bbox;
+    for (let i = 0, ii = outline.length; i < ii; i += 2) {
+      outline[i] = (outline[i] - x) / width;
+      outline[i + 1] = (outline[i + 1] - y) / height;
+    }
+    for (let i = 0, ii = points.length; i < ii; i += 2) {
+      points[i] = (points[i] - x) / width;
+      points[i + 1] = (points[i + 1] - y) / height;
+    }
+  }
+  toSVGPath() {
+    const buffer = [`M${this.#outline[4]} ${this.#outline[5]}`];
+    for (let i = 6, ii = this.#outline.length; i < ii; i += 6) {
+      if (isNaN(this.#outline[i])) {
+        buffer.push(`L${this.#outline[i + 4]} ${this.#outline[i + 5]}`);
+        continue;
+      }
+      buffer.push(`C${this.#outline[i]} ${this.#outline[i + 1]} ${this.#outline[i + 2]} ${this.#outline[i + 3]} ${this.#outline[i + 4]} ${this.#outline[i + 5]}`);
+    }
+    buffer.push("Z");
+    return buffer.join(" ");
+  }
+  serialize([blX, blY, trX, trY], rotation) {
+    const width = trX - blX;
+    const height = trY - blY;
+    let outline;
+    let points;
+    switch (rotation) {
+      case 0:
+        outline = this.#rescale(this.#outline, blX, trY, width, -height);
+        points = this.#rescale(this.#points, blX, trY, width, -height);
+        break;
+      case 90:
+        outline = this.#rescaleAndSwap(this.#outline, blX, blY, width, height);
+        points = this.#rescaleAndSwap(this.#points, blX, blY, width, height);
+        break;
+      case 180:
+        outline = this.#rescale(this.#outline, trX, blY, -width, height);
+        points = this.#rescale(this.#points, trX, blY, -width, height);
+        break;
+      case 270:
+        outline = this.#rescaleAndSwap(this.#outline, trX, trY, -width, -height);
+        points = this.#rescaleAndSwap(this.#points, trX, trY, -width, -height);
+        break;
+    }
+    return {
+      outline: Array.from(outline),
+      points: [Array.from(points)]
+    };
+  }
+  #rescale(src, tx, ty, sx, sy) {
+    const dest = new Float64Array(src.length);
+    for (let i = 0, ii = src.length; i < ii; i += 2) {
+      dest[i] = tx + src[i] * sx;
+      dest[i + 1] = ty + src[i + 1] * sy;
+    }
+    return dest;
+  }
+  #rescaleAndSwap(src, tx, ty, sx, sy) {
+    const dest = new Float64Array(src.length);
+    for (let i = 0, ii = src.length; i < ii; i += 2) {
+      dest[i] = tx + src[i + 1] * sx;
+      dest[i + 1] = ty + src[i] * sy;
+    }
+    return dest;
+  }
+  #computeMinMax(isLTR) {
+    const outline = this.#outline;
+    let lastX = outline[4];
+    let lastY = outline[5];
+    let minX = lastX;
+    let minY = lastY;
+    let maxX = lastX;
+    let maxY = lastY;
+    let lastPointX = lastX;
+    let lastPointY = lastY;
+    const ltrCallback = isLTR ? Math.max : Math.min;
+    for (let i = 6, ii = outline.length; i < ii; i += 6) {
+      if (isNaN(outline[i])) {
+        minX = Math.min(minX, outline[i + 4]);
+        minY = Math.min(minY, outline[i + 5]);
+        maxX = Math.max(maxX, outline[i + 4]);
+        maxY = Math.max(maxY, outline[i + 5]);
+        if (lastPointY < outline[i + 5]) {
+          lastPointX = outline[i + 4];
+          lastPointY = outline[i + 5];
+        } else if (lastPointY === outline[i + 5]) {
+          lastPointX = ltrCallback(lastPointX, outline[i + 4]);
+        }
+      } else {
+        const bbox = _shared_util_js__WEBPACK_IMPORTED_MODULE_0__.Util.bezierBoundingBox(lastX, lastY, ...outline.slice(i, i + 6));
+        minX = Math.min(minX, bbox[0]);
+        minY = Math.min(minY, bbox[1]);
+        maxX = Math.max(maxX, bbox[2]);
+        maxY = Math.max(maxY, bbox[3]);
+        if (lastPointY < bbox[3]) {
+          lastPointX = bbox[2];
+          lastPointY = bbox[3];
+        } else if (lastPointY === bbox[3]) {
+          lastPointX = ltrCallback(lastPointX, bbox[2]);
+        }
+      }
+      lastX = outline[i + 4];
+      lastY = outline[i + 5];
+    }
+    const x = minX - this.#innerMargin,
+      y = minY - this.#innerMargin,
+      width = maxX - minX + 2 * this.#innerMargin,
+      height = maxY - minY + 2 * this.#innerMargin;
+    this.#bbox = {
+      x,
+      y,
+      width,
+      height,
+      lastPoint: [lastPointX, lastPointY]
+    };
+  }
+  get box() {
+    return this.#bbox;
+  }
+  getNewOutline(thickness, innerMargin) {
+    const {
+      x,
+      y,
+      width,
+      height
+    } = this.#bbox;
+    const [layerX, layerY, layerWidth, layerHeight] = this.#box;
+    const sx = width * layerWidth;
+    const sy = height * layerHeight;
+    const tx = x * layerWidth + layerX;
+    const ty = y * layerHeight + layerY;
+    const outliner = new FreeOutliner({
+      x: this.#points[0] * sx + tx,
+      y: this.#points[1] * sy + ty
+    }, this.#box, this.#scaleFactor, thickness, this.#isLTR, innerMargin ?? this.#innerMargin);
+    for (let i = 2; i < this.#points.length; i += 2) {
+      outliner.add({
+        x: this.#points[i] * sx + tx,
+        y: this.#points[i + 1] * sy + ty
+      });
+    }
+    return outliner.getOutlines();
+  }
+}
 
 
 /***/ }),
 
-/***/ 812:
+/***/ 362:
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   EditorToolbar: () => (/* binding */ EditorToolbar),
+/* harmony export */   HighlightToolbar: () => (/* binding */ HighlightToolbar)
+/* harmony export */ });
+/* harmony import */ var _display_utils_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(419);
+
+class EditorToolbar {
+  #toolbar = null;
+  #colorPicker = null;
+  #editor;
+  #buttons = null;
+  constructor(editor) {
+    this.#editor = editor;
+  }
+  render() {
+    const editToolbar = this.#toolbar = document.createElement("div");
+    editToolbar.className = "editToolbar";
+    editToolbar.setAttribute("role", "toolbar");
+    editToolbar.addEventListener("contextmenu", _display_utils_js__WEBPACK_IMPORTED_MODULE_0__.noContextMenu);
+    editToolbar.addEventListener("pointerdown", EditorToolbar.#pointerDown);
+    const buttons = this.#buttons = document.createElement("div");
+    buttons.className = "buttons";
+    editToolbar.append(buttons);
+    const position = this.#editor.toolbarPosition;
+    if (position) {
+      const {
+        style
+      } = editToolbar;
+      const x = this.#editor._uiManager.direction === "ltr" ? 1 - position[0] : position[0];
+      style.insetInlineEnd = `${100 * x}%`;
+      style.top = `calc(${100 * position[1]}% + var(--editor-toolbar-vert-offset))`;
+    }
+    this.#addDeleteButton();
+    return editToolbar;
+  }
+  static #pointerDown(e) {
+    e.stopPropagation();
+  }
+  #focusIn(e) {
+    this.#editor._focusEventsAllowed = false;
+    e.preventDefault();
+    e.stopPropagation();
+  }
+  #focusOut(e) {
+    this.#editor._focusEventsAllowed = true;
+    e.preventDefault();
+    e.stopPropagation();
+  }
+  #addListenersToElement(element) {
+    element.addEventListener("focusin", this.#focusIn.bind(this), {
+      capture: true
+    });
+    element.addEventListener("focusout", this.#focusOut.bind(this), {
+      capture: true
+    });
+    element.addEventListener("contextmenu", _display_utils_js__WEBPACK_IMPORTED_MODULE_0__.noContextMenu);
+  }
+  hide() {
+    this.#toolbar.classList.add("hidden");
+    this.#colorPicker?.hideDropdown();
+  }
+  show() {
+    this.#toolbar.classList.remove("hidden");
+  }
+  #addDeleteButton() {
+    const button = document.createElement("button");
+    button.className = "delete";
+    button.tabIndex = 0;
+    button.setAttribute("data-l10n-id", `pdfjs-editor-remove-${this.#editor.editorType}-button`);
+    this.#addListenersToElement(button);
+    button.addEventListener("click", e => {
+      this.#editor._uiManager.delete();
+    });
+    this.#buttons.append(button);
+  }
+  get #divider() {
+    const divider = document.createElement("div");
+    divider.className = "divider";
+    return divider;
+  }
+  addAltTextButton(button) {
+    this.#addListenersToElement(button);
+    this.#buttons.prepend(button, this.#divider);
+  }
+  addColorPicker(colorPicker) {
+    this.#colorPicker = colorPicker;
+    const button = colorPicker.renderButton();
+    this.#addListenersToElement(button);
+    this.#buttons.prepend(button, this.#divider);
+  }
+  remove() {
+    this.#toolbar.remove();
+    this.#colorPicker?.destroy();
+    this.#colorPicker = null;
+  }
+}
+class HighlightToolbar {
+  #buttons = null;
+  #toolbar = null;
+  #uiManager;
+  constructor(uiManager) {
+    this.#uiManager = uiManager;
+  }
+  #render() {
+    const editToolbar = this.#toolbar = document.createElement("div");
+    editToolbar.className = "editToolbar";
+    editToolbar.setAttribute("role", "toolbar");
+    editToolbar.addEventListener("contextmenu", _display_utils_js__WEBPACK_IMPORTED_MODULE_0__.noContextMenu);
+    const buttons = this.#buttons = document.createElement("div");
+    buttons.className = "buttons";
+    editToolbar.append(buttons);
+    this.#addHighlightButton();
+    return editToolbar;
+  }
+  #getLastPoint(boxes, isLTR) {
+    let lastY = 0;
+    let lastX = 0;
+    for (const box of boxes) {
+      const y = box.y + box.height;
+      if (y < lastY) {
+        continue;
+      }
+      const x = box.x + (isLTR ? box.width : 0);
+      if (y > lastY) {
+        lastX = x;
+        lastY = y;
+        continue;
+      }
+      if (isLTR) {
+        if (x > lastX) {
+          lastX = x;
+        }
+      } else if (x < lastX) {
+        lastX = x;
+      }
+    }
+    return [isLTR ? 1 - lastX : lastX, lastY];
+  }
+  show(parent, boxes, isLTR) {
+    const [x, y] = this.#getLastPoint(boxes, isLTR);
+    const {
+      style
+    } = this.#toolbar ||= this.#render();
+    parent.append(this.#toolbar);
+    style.insetInlineEnd = `${100 * x}%`;
+    style.top = `calc(${100 * y}% + var(--editor-toolbar-vert-offset))`;
+  }
+  hide() {
+    this.#toolbar.remove();
+  }
+  #addHighlightButton() {
+    const button = document.createElement("button");
+    button.className = "highlightButton";
+    button.tabIndex = 0;
+    button.setAttribute("data-l10n-id", `pdfjs-highlight-floating-button1`);
+    const span = document.createElement("span");
+    button.append(span);
+    span.className = "visuallyHidden";
+    span.setAttribute("data-l10n-id", "pdfjs-highlight-floating-button-label");
+    button.addEventListener("contextmenu", _display_utils_js__WEBPACK_IMPORTED_MODULE_0__.noContextMenu);
+    button.addEventListener("click", () => {
+      this.#uiManager.highlightSelection("floating_button");
+    });
+    this.#buttons.append(button);
+  }
+}
+
+
+/***/ }),
+
+/***/ 830:
 /***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
 
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -12627,8 +13854,10 @@ class Outliner {
 /* harmony export */   opacityToHex: () => (/* binding */ opacityToHex)
 /* harmony export */ });
 /* unused harmony export CommandManager */
-/* harmony import */ var _shared_util_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(266);
-/* harmony import */ var _display_utils_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(473);
+/* harmony import */ var _shared_util_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(292);
+/* harmony import */ var _display_utils_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(419);
+/* harmony import */ var _toolbar_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(362);
+
 
 
 function bindEvents(obj, element, names) {
@@ -12641,7 +13870,8 @@ function opacityToHex(opacity) {
 }
 class IdManager {
   #id = 0;
-  getId() {
+  constructor() {}
+  get id() {
     return `${_shared_util_js__WEBPACK_IMPORTED_MODULE_0__.AnnotationEditorPrefix}${this.#id++}`;
   }
 }
@@ -12778,6 +14008,7 @@ class CommandManager {
   add({
     cmd,
     undo,
+    post,
     mustExec,
     type = NaN,
     overwriteIfSameType = false,
@@ -12792,6 +14023,7 @@ class CommandManager {
     const save = {
       cmd,
       undo,
+      post,
       type
     };
     if (this.#position === -1) {
@@ -12825,7 +14057,12 @@ class CommandManager {
       return;
     }
     this.#locked = true;
-    this.#commands[this.#position].undo();
+    const {
+      undo,
+      post
+    } = this.#commands[this.#position];
+    undo();
+    post?.();
     this.#locked = false;
     this.#position -= 1;
   }
@@ -12833,7 +14070,12 @@ class CommandManager {
     if (this.#position < this.#commands.length - 1) {
       this.#position += 1;
       this.#locked = true;
-      this.#commands[this.#position].cmd();
+      const {
+        cmd,
+        post
+      } = this.#commands[this.#position];
+      cmd();
+      post?.();
       this.#locked = false;
     }
   }
@@ -12951,39 +14193,49 @@ class AnnotationEditorUIManager {
   #allLayers = new Map();
   #altTextManager = null;
   #annotationStorage = null;
+  #changedExistingAnnotations = null;
   #commandManager = new CommandManager();
   #currentPageIndex = 0;
   #deletedAnnotationsElementIds = new Set();
   #draggingEditors = null;
   #editorTypes = null;
   #editorsToRescale = new Set();
+  #enableHighlightFloatingButton = false;
   #filterFactory = null;
   #focusMainContainerTimeoutId = null;
   #highlightColors = null;
+  #highlightWhenShiftUp = false;
+  #highlightToolbar = null;
   #idManager = new IdManager();
   #isEnabled = false;
   #isWaiting = false;
   #lastActiveElement = null;
   #mainHighlightColorPicker = null;
+  #mlManager = null;
   #mode = _shared_util_js__WEBPACK_IMPORTED_MODULE_0__.AnnotationEditorType.NONE;
   #selectedEditors = new Set();
+  #selectedTextNode = null;
   #pageColors = null;
+  #showAllStates = null;
   #boundBlur = this.blur.bind(this);
   #boundFocus = this.focus.bind(this);
   #boundCopy = this.copy.bind(this);
   #boundCut = this.cut.bind(this);
   #boundPaste = this.paste.bind(this);
   #boundKeydown = this.keydown.bind(this);
+  #boundKeyup = this.keyup.bind(this);
   #boundOnEditingAction = this.onEditingAction.bind(this);
   #boundOnPageChanging = this.onPageChanging.bind(this);
   #boundOnScaleChanging = this.onScaleChanging.bind(this);
+  #boundSelectionChange = this.#selectionChange.bind(this);
   #boundOnRotationChanging = this.onRotationChanging.bind(this);
   #previousStates = {
     isEditing: false,
     isEmpty: true,
     hasSomethingToUndo: false,
     hasSomethingToRedo: false,
-    hasSelectedEditor: false
+    hasSelectedEditor: false,
+    hasSelectedText: false
   };
   #translation = [0, 0];
   #translationTimeoutId = null;
@@ -12993,9 +14245,7 @@ class AnnotationEditorUIManager {
   static TRANSLATE_BIG = 10;
   static get _keyboardManager() {
     const proto = AnnotationEditorUIManager.prototype;
-    const arrowChecker = self => {
-      return self.#container.contains(document.activeElement) && document.activeElement.tagName !== "BUTTON" && self.hasSomethingToControl();
-    };
+    const arrowChecker = self => self.#container.contains(document.activeElement) && document.activeElement.tagName !== "BUTTON" && self.hasSomethingToControl();
     const textInputChecker = (_self, {
       target: el
     }) => {
@@ -13022,7 +14272,9 @@ class AnnotationEditorUIManager {
         target: el
       }) => !(el instanceof HTMLButtonElement) && self.#container.contains(el) && !self.isEnterHandled
     }], [[" ", "mac+ "], proto.addNewEditorFromKeyboard, {
-      checker: self => self.#container.contains(document.activeElement)
+      checker: (self, {
+        target: el
+      }) => !(el instanceof HTMLButtonElement) && self.#container.contains(document.activeElement)
     }], [["Escape", "mac+Escape"], proto.unselectAll], [["ArrowLeft", "mac+ArrowLeft"], proto.translateSelectedEditors, {
       args: [-small, 0],
       checker: arrowChecker
@@ -13049,7 +14301,7 @@ class AnnotationEditorUIManager {
       checker: arrowChecker
     }]]));
   }
-  constructor(container, viewer, altTextManager, eventBus, pdfDocument, pageColors, highlightColors) {
+  constructor(container, viewer, altTextManager, eventBus, pdfDocument, pageColors, highlightColors, enableHighlightFloatingButton, mlManager) {
     this.#container = container;
     this.#viewer = viewer;
     this.#altTextManager = altTextManager;
@@ -13058,14 +14310,19 @@ class AnnotationEditorUIManager {
     this._eventBus._on("pagechanging", this.#boundOnPageChanging);
     this._eventBus._on("scalechanging", this.#boundOnScaleChanging);
     this._eventBus._on("rotationchanging", this.#boundOnRotationChanging);
+    this.#addSelectionListener();
+    this.#addKeyboardManager();
     this.#annotationStorage = pdfDocument.annotationStorage;
     this.#filterFactory = pdfDocument.filterFactory;
     this.#pageColors = pageColors;
     this.#highlightColors = highlightColors || null;
+    this.#enableHighlightFloatingButton = enableHighlightFloatingButton;
+    this.#mlManager = mlManager || null;
     this.viewParameters = {
       realScale: _display_utils_js__WEBPACK_IMPORTED_MODULE_1__.PixelsPerInch.PDF_TO_CSS_UNITS,
       rotation: 0
     };
+    this.isShiftKeyDown = false;
   }
   destroy() {
     this.#removeKeyboardManager();
@@ -13084,6 +14341,8 @@ class AnnotationEditorUIManager {
     this.#selectedEditors.clear();
     this.#commandManager.destroy();
     this.#altTextManager?.destroy();
+    this.#highlightToolbar?.hide();
+    this.#highlightToolbar = null;
     if (this.#focusMainContainerTimeoutId) {
       clearTimeout(this.#focusMainContainerTimeoutId);
       this.#focusMainContainerTimeoutId = null;
@@ -13092,6 +14351,13 @@ class AnnotationEditorUIManager {
       clearTimeout(this.#translationTimeoutId);
       this.#translationTimeoutId = null;
     }
+    this.#removeSelectionListener();
+  }
+  async mlGuess(data) {
+    return this.#mlManager?.guess(data) || null;
+  }
+  get hasMLManager() {
+    return !!this.#mlManager;
   }
   get hcmFilter() {
     return (0,_shared_util_js__WEBPACK_IMPORTED_MODULE_0__.shadow)(this, "hcmFilter", this.#pageColors ? this.#filterFactory.addHCMFilter(this.#pageColors.foreground, this.#pageColors.background) : "none");
@@ -13101,6 +14367,9 @@ class AnnotationEditorUIManager {
   }
   get highlightColors() {
     return (0,_shared_util_js__WEBPACK_IMPORTED_MODULE_0__.shadow)(this, "highlightColors", this.#highlightColors ? new Map(this.#highlightColors.split(",").map(pair => pair.split("=").map(x => x.trim()))) : null);
+  }
+  get highlightColorNames() {
+    return (0,_shared_util_js__WEBPACK_IMPORTED_MODULE_0__.shadow)(this, "highlightColorNames", this.highlightColors ? new Map(Array.from(this.highlightColors, e => e.reverse())) : null);
   }
   setMainHighlightColorPicker(colorPicker) {
     this.#mainHighlightColorPicker = colorPicker;
@@ -13154,10 +14423,143 @@ class AnnotationEditorUIManager {
     this.commitOrRemove();
     this.viewParameters.rotation = pagesRotation;
   }
+  #getAnchorElementForSelection({
+    anchorNode
+  }) {
+    return anchorNode.nodeType === Node.TEXT_NODE ? anchorNode.parentElement : anchorNode;
+  }
+  highlightSelection(methodOfCreation = "") {
+    const selection = document.getSelection();
+    if (!selection || selection.isCollapsed) {
+      return;
+    }
+    const {
+      anchorNode,
+      anchorOffset,
+      focusNode,
+      focusOffset
+    } = selection;
+    const text = selection.toString();
+    const anchorElement = this.#getAnchorElementForSelection(selection);
+    const textLayer = anchorElement.closest(".textLayer");
+    const boxes = this.getSelectionBoxes(textLayer);
+    if (!boxes) {
+      return;
+    }
+    selection.empty();
+    if (this.#mode === _shared_util_js__WEBPACK_IMPORTED_MODULE_0__.AnnotationEditorType.NONE) {
+      this._eventBus.dispatch("showannotationeditorui", {
+        source: this,
+        mode: _shared_util_js__WEBPACK_IMPORTED_MODULE_0__.AnnotationEditorType.HIGHLIGHT
+      });
+      this.showAllEditors("highlight", true, true);
+    }
+    for (const layer of this.#allLayers.values()) {
+      if (layer.hasTextLayer(textLayer)) {
+        layer.createAndAddNewEditor({
+          x: 0,
+          y: 0
+        }, false, {
+          methodOfCreation,
+          boxes,
+          anchorNode,
+          anchorOffset,
+          focusNode,
+          focusOffset,
+          text
+        });
+        break;
+      }
+    }
+  }
+  #displayHighlightToolbar() {
+    const selection = document.getSelection();
+    if (!selection || selection.isCollapsed) {
+      return;
+    }
+    const anchorElement = this.#getAnchorElementForSelection(selection);
+    const textLayer = anchorElement.closest(".textLayer");
+    const boxes = this.getSelectionBoxes(textLayer);
+    if (!boxes) {
+      return;
+    }
+    this.#highlightToolbar ||= new _toolbar_js__WEBPACK_IMPORTED_MODULE_2__.HighlightToolbar(this);
+    this.#highlightToolbar.show(textLayer, boxes, this.direction === "ltr");
+  }
   addToAnnotationStorage(editor) {
     if (!editor.isEmpty() && this.#annotationStorage && !this.#annotationStorage.has(editor.id)) {
       this.#annotationStorage.setValue(editor.id, editor);
     }
+  }
+  #selectionChange() {
+    const selection = document.getSelection();
+    if (!selection || selection.isCollapsed) {
+      if (this.#selectedTextNode) {
+        this.#highlightToolbar?.hide();
+        this.#selectedTextNode = null;
+        this.#dispatchUpdateStates({
+          hasSelectedText: false
+        });
+      }
+      return;
+    }
+    const {
+      anchorNode
+    } = selection;
+    if (anchorNode === this.#selectedTextNode) {
+      return;
+    }
+    const anchorElement = this.#getAnchorElementForSelection(selection);
+    const textLayer = anchorElement.closest(".textLayer");
+    if (!textLayer) {
+      if (this.#selectedTextNode) {
+        this.#highlightToolbar?.hide();
+        this.#selectedTextNode = null;
+        this.#dispatchUpdateStates({
+          hasSelectedText: false
+        });
+      }
+      return;
+    }
+    this.#highlightToolbar?.hide();
+    this.#selectedTextNode = anchorNode;
+    this.#dispatchUpdateStates({
+      hasSelectedText: true
+    });
+    if (this.#mode !== _shared_util_js__WEBPACK_IMPORTED_MODULE_0__.AnnotationEditorType.HIGHLIGHT && this.#mode !== _shared_util_js__WEBPACK_IMPORTED_MODULE_0__.AnnotationEditorType.NONE) {
+      return;
+    }
+    if (this.#mode === _shared_util_js__WEBPACK_IMPORTED_MODULE_0__.AnnotationEditorType.HIGHLIGHT) {
+      this.showAllEditors("highlight", true, true);
+    }
+    this.#highlightWhenShiftUp = this.isShiftKeyDown;
+    if (!this.isShiftKeyDown) {
+      const pointerup = e => {
+        if (e.type === "pointerup" && e.button !== 0) {
+          return;
+        }
+        window.removeEventListener("pointerup", pointerup);
+        window.removeEventListener("blur", pointerup);
+        if (e.type === "pointerup") {
+          this.#onSelectEnd("main_toolbar");
+        }
+      };
+      window.addEventListener("pointerup", pointerup);
+      window.addEventListener("blur", pointerup);
+    }
+  }
+  #onSelectEnd(methodOfCreation = "") {
+    if (this.#mode === _shared_util_js__WEBPACK_IMPORTED_MODULE_0__.AnnotationEditorType.HIGHLIGHT) {
+      this.highlightSelection(methodOfCreation);
+    } else if (this.#enableHighlightFloatingButton) {
+      this.#displayHighlightToolbar();
+    }
+  }
+  #addSelectionListener() {
+    document.addEventListener("selectionchange", this.#boundSelectionChange);
+  }
+  #removeSelectionListener() {
+    document.removeEventListener("selectionchange", this.#boundSelectionChange);
   }
   #addFocusManager() {
     window.addEventListener("focus", this.#boundFocus);
@@ -13168,6 +14570,11 @@ class AnnotationEditorUIManager {
     window.removeEventListener("blur", this.#boundBlur);
   }
   blur() {
+    this.isShiftKeyDown = false;
+    if (this.#highlightWhenShiftUp) {
+      this.#highlightWhenShiftUp = false;
+      this.#onSelectEnd("main_toolbar");
+    }
     if (!this.hasSelection) {
       return;
     }
@@ -13197,9 +14604,11 @@ class AnnotationEditorUIManager {
   }
   #addKeyboardManager() {
     window.addEventListener("keydown", this.#boundKeydown);
+    window.addEventListener("keyup", this.#boundKeyup);
   }
   #removeKeyboardManager() {
     window.removeEventListener("keydown", this.#boundKeydown);
+    window.removeEventListener("keyup", this.#boundKeyup);
   }
   #addCopyPasteListeners() {
     document.addEventListener("copy", this.#boundCopy);
@@ -13299,13 +14708,35 @@ class AnnotationEditorUIManager {
     }
   }
   keydown(event) {
-    if (!this.isEditorHandlingKeyboard) {
+    if (!this.isShiftKeyDown && event.key === "Shift") {
+      this.isShiftKeyDown = true;
+    }
+    if (this.#mode !== _shared_util_js__WEBPACK_IMPORTED_MODULE_0__.AnnotationEditorType.NONE && !this.isEditorHandlingKeyboard) {
       AnnotationEditorUIManager._keyboardManager.exec(this, event);
     }
   }
-  onEditingAction(details) {
-    if (["undo", "redo", "delete", "selectAll"].includes(details.name)) {
-      this[details.name]();
+  keyup(event) {
+    if (this.isShiftKeyDown && event.key === "Shift") {
+      this.isShiftKeyDown = false;
+      if (this.#highlightWhenShiftUp) {
+        this.#highlightWhenShiftUp = false;
+        this.#onSelectEnd("main_toolbar");
+      }
+    }
+  }
+  onEditingAction({
+    name
+  }) {
+    switch (name) {
+      case "undo":
+      case "redo":
+      case "delete":
+      case "selectAll":
+        this[name]();
+        break;
+      case "highlightSelection":
+        this.highlightSelection("context_menu");
+        break;
     }
   }
   #dispatchUpdateStates(details) {
@@ -13315,6 +14746,9 @@ class AnnotationEditorUIManager {
         source: this,
         details: Object.assign(this.#previousStates, details)
       });
+      if (this.#mode === _shared_util_js__WEBPACK_IMPORTED_MODULE_0__.AnnotationEditorType.HIGHLIGHT && details.hasSelectedEditor === false) {
+        this.#dispatchUpdateUI([[_shared_util_js__WEBPACK_IMPORTED_MODULE_0__.AnnotationEditorParamsType.HIGHLIGHT_FREE, true]]);
+      }
     }
   }
   #dispatchUpdateUI(details) {
@@ -13326,7 +14760,6 @@ class AnnotationEditorUIManager {
   setEditingState(isEditing) {
     if (isEditing) {
       this.#addFocusManager();
-      this.#addKeyboardManager();
       this.#addCopyPasteListeners();
       this.#dispatchUpdateStates({
         isEditing: this.#mode !== _shared_util_js__WEBPACK_IMPORTED_MODULE_0__.AnnotationEditorType.NONE,
@@ -13337,7 +14770,6 @@ class AnnotationEditorUIManager {
       });
     } else {
       this.#removeFocusManager();
-      this.#removeKeyboardManager();
       this.#removeCopyPasteListeners();
       this.#dispatchUpdateStates({
         isEditing: false
@@ -13355,7 +14787,7 @@ class AnnotationEditorUIManager {
     }
   }
   getId() {
-    return this.#idManager.getId();
+    return this.#idManager.id;
   }
   get currentLayer() {
     return this.#allLayers.get(this.#currentPageIndex);
@@ -13433,12 +14865,37 @@ class AnnotationEditorUIManager {
       case _shared_util_js__WEBPACK_IMPORTED_MODULE_0__.AnnotationEditorParamsType.HIGHLIGHT_DEFAULT_COLOR:
         this.#mainHighlightColorPicker?.updateColor(value);
         break;
+      case _shared_util_js__WEBPACK_IMPORTED_MODULE_0__.AnnotationEditorParamsType.HIGHLIGHT_SHOW_ALL:
+        this._eventBus.dispatch("reporttelemetry", {
+          source: this,
+          details: {
+            type: "editing",
+            data: {
+              type: "highlight",
+              action: "toggle_visibility"
+            }
+          }
+        });
+        (this.#showAllStates ||= new Map()).set(type, value);
+        this.showAllEditors("highlight", value);
+        break;
     }
     for (const editor of this.#selectedEditors) {
       editor.updateParams(type, value);
     }
     for (const editorType of this.#editorTypes) {
       editorType.updateDefaultParams(type, value);
+    }
+  }
+  showAllEditors(type, visible, updateButton = false) {
+    for (const editor of this.#allEditors.values()) {
+      if (editor.editorType === type) {
+        editor.show(visible);
+      }
+    }
+    const state = this.#showAllStates?.get(_shared_util_js__WEBPACK_IMPORTED_MODULE_0__.AnnotationEditorParamsType.HIGHLIGHT_SHOW_ALL) ?? true;
+    if (state !== visible) {
+      this.#dispatchUpdateUI([[_shared_util_js__WEBPACK_IMPORTED_MODULE_0__.AnnotationEditorParamsType.HIGHLIGHT_SHOW_ALL, visible]]);
     }
   }
   enableWaiting(mustWait = false) {
@@ -13461,6 +14918,9 @@ class AnnotationEditorUIManager {
       for (const layer of this.#allLayers.values()) {
         layer.enable();
       }
+      for (const editor of this.#allEditors.values()) {
+        editor.enable();
+      }
     }
   }
   #disableAll() {
@@ -13469,6 +14929,9 @@ class AnnotationEditorUIManager {
       this.#isEnabled = false;
       for (const layer of this.#allLayers.values()) {
         layer.disable();
+      }
+      for (const editor of this.#allEditors.values()) {
+        editor.disable();
       }
     }
   }
@@ -13505,6 +14968,7 @@ class AnnotationEditorUIManager {
   }
   addDeletedAnnotationElement(editor) {
     this.#deletedAnnotationsElementIds.add(editor.annotationElementId);
+    this.addChangedExistingAnnotation(editor);
     editor.deleted = true;
   }
   isDeletedAnnotationElement(annotationElementId) {
@@ -13512,6 +14976,7 @@ class AnnotationEditorUIManager {
   }
   removeDeletedAnnotationElement(editor) {
     this.#deletedAnnotationsElementIds.delete(editor.annotationElementId);
+    this.removeChangedExistingAnnotation(editor);
     editor.deleted = false;
   }
   #addEditorToLayer(editor) {
@@ -13520,6 +14985,7 @@ class AnnotationEditorUIManager {
       layer.addOrRebuild(editor);
     } else {
       this.addEditor(editor);
+      this.addToAnnotationStorage(editor);
     }
   }
   setActiveEditor(editor) {
@@ -13528,6 +14994,16 @@ class AnnotationEditorUIManager {
     }
     this.#activeEditor = editor;
     if (editor) {
+      this.#dispatchUpdateUI(editor.propertiesToUpdate);
+    }
+  }
+  get #lastSelectedEditor() {
+    let ed = null;
+    for (ed of this.#selectedEditors) {}
+    return ed;
+  }
+  updateUI(editor) {
+    if (this.#lastSelectedEditor === editor) {
       this.#dispatchUpdateUI(editor.propertiesToUpdate);
     }
   }
@@ -13644,6 +15120,9 @@ class AnnotationEditorUIManager {
     return this.#activeEditor || this.hasSelection;
   }
   #selectEditors(editors) {
+    for (const editor of this.#selectedEditors) {
+      editor.unselect();
+    }
     this.#selectedEditors.clear();
     for (const editor of editors) {
       if (editor.isEmpty()) {
@@ -13653,7 +15132,7 @@ class AnnotationEditorUIManager {
       editor.select();
     }
     this.#dispatchUpdateStates({
-      hasSelectedEditor: true
+      hasSelectedEditor: this.hasSelection
     });
   }
   selectAll() {
@@ -13831,22 +15310,117 @@ class AnnotationEditorUIManager {
   get imageManager() {
     return (0,_shared_util_js__WEBPACK_IMPORTED_MODULE_0__.shadow)(this, "imageManager", new ImageManager());
   }
+  getSelectionBoxes(textLayer) {
+    if (!textLayer) {
+      return null;
+    }
+    const selection = document.getSelection();
+    for (let i = 0, ii = selection.rangeCount; i < ii; i++) {
+      if (!textLayer.contains(selection.getRangeAt(i).commonAncestorContainer)) {
+        return null;
+      }
+    }
+    const {
+      x: layerX,
+      y: layerY,
+      width: parentWidth,
+      height: parentHeight
+    } = textLayer.getBoundingClientRect();
+    let rotator;
+    switch (textLayer.getAttribute("data-main-rotation")) {
+      case "90":
+        rotator = (x, y, w, h) => ({
+          x: (y - layerY) / parentHeight,
+          y: 1 - (x + w - layerX) / parentWidth,
+          width: h / parentHeight,
+          height: w / parentWidth
+        });
+        break;
+      case "180":
+        rotator = (x, y, w, h) => ({
+          x: 1 - (x + w - layerX) / parentWidth,
+          y: 1 - (y + h - layerY) / parentHeight,
+          width: w / parentWidth,
+          height: h / parentHeight
+        });
+        break;
+      case "270":
+        rotator = (x, y, w, h) => ({
+          x: 1 - (y + h - layerY) / parentHeight,
+          y: (x - layerX) / parentWidth,
+          width: h / parentHeight,
+          height: w / parentWidth
+        });
+        break;
+      default:
+        rotator = (x, y, w, h) => ({
+          x: (x - layerX) / parentWidth,
+          y: (y - layerY) / parentHeight,
+          width: w / parentWidth,
+          height: h / parentHeight
+        });
+        break;
+    }
+    const boxes = [];
+    for (let i = 0, ii = selection.rangeCount; i < ii; i++) {
+      const range = selection.getRangeAt(i);
+      if (range.collapsed) {
+        continue;
+      }
+      for (const {
+        x,
+        y,
+        width,
+        height
+      } of range.getClientRects()) {
+        if (width === 0 || height === 0) {
+          continue;
+        }
+        boxes.push(rotator(x, y, width, height));
+      }
+    }
+    return boxes.length === 0 ? null : boxes;
+  }
+  addChangedExistingAnnotation({
+    annotationElementId,
+    id
+  }) {
+    (this.#changedExistingAnnotations ||= new Map()).set(annotationElementId, id);
+  }
+  removeChangedExistingAnnotation({
+    annotationElementId
+  }) {
+    this.#changedExistingAnnotations?.delete(annotationElementId);
+  }
+  renderAnnotationElement(annotation) {
+    const editorId = this.#changedExistingAnnotations?.get(annotation.data.id);
+    if (!editorId) {
+      return;
+    }
+    const editor = this.#annotationStorage.getRawValue(editorId);
+    if (!editor) {
+      return;
+    }
+    if (this.#mode === _shared_util_js__WEBPACK_IMPORTED_MODULE_0__.AnnotationEditorType.NONE && !editor.hasBeenModified) {
+      return;
+    }
+    editor.renderAnnotationElement(annotation);
+  }
 }
 
 
 /***/ }),
 
-/***/ 171:
+/***/ 94:
 /***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
 
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   PDFFetchStream: () => (/* binding */ PDFFetchStream)
 /* harmony export */ });
-/* harmony import */ var _shared_util_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(266);
-/* harmony import */ var _network_utils_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(253);
+/* harmony import */ var _shared_util_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(292);
+/* harmony import */ var _network_utils_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(490);
 
 
-;
 function createFetchOptions(headers, withCredentials, abortController) {
   return {
     method: "GET",
@@ -13918,7 +15492,7 @@ class PDFFetchStreamReader {
     const source = stream.source;
     this._withCredentials = source.withCredentials || false;
     this._contentLength = source.length;
-    this._headersCapability = new _shared_util_js__WEBPACK_IMPORTED_MODULE_0__.PromiseCapability();
+    this._headersCapability = Promise.withResolvers();
     this._disableRange = source.disableRange || false;
     this._rangeChunkSize = source.rangeChunkSize;
     if (!this._rangeChunkSize && !this._disableRange) {
@@ -13935,9 +15509,7 @@ class PDFFetchStreamReader {
       }
       this._reader = response.body.getReader();
       this._headersCapability.resolve();
-      const getResponseHeader = name => {
-        return response.headers.get(name);
-      };
+      const getResponseHeader = name => response.headers.get(name);
       const {
         allowRangeRequests,
         suggestedLength
@@ -14005,7 +15577,7 @@ class PDFFetchStreamRangeReader {
     this._loaded = 0;
     const source = stream.source;
     this._withCredentials = source.withCredentials || false;
-    this._readCapability = new _shared_util_js__WEBPACK_IMPORTED_MODULE_0__.PromiseCapability();
+    this._readCapability = Promise.withResolvers();
     this._isStreamingSupported = !source.disableStream;
     this._abortController = new AbortController();
     this._headers = createHeaders(this._stream.httpHeaders);
@@ -14053,14 +15625,14 @@ class PDFFetchStreamRangeReader {
 
 /***/ }),
 
-/***/ 742:
+/***/ 10:
 /***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
 
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   FontFaceObject: () => (/* binding */ FontFaceObject),
 /* harmony export */   FontLoader: () => (/* binding */ FontLoader)
 /* harmony export */ });
-/* harmony import */ var _shared_util_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(266);
+/* harmony import */ var _shared_util_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(292);
 
 class FontLoader {
   #systemFonts = new Set();
@@ -14268,7 +15840,6 @@ class FontLoader {
 }
 class FontFaceObject {
   constructor(translatedData, {
-    isEvalSupported = true,
     disableFontFace = false,
     ignoreErrors = false,
     inspectFont = null
@@ -14277,7 +15848,6 @@ class FontFaceObject {
     for (const i in translatedData) {
       this[i] = translatedData[i];
     }
-    this.isEvalSupported = isEvalSupported !== false;
     this.disableFontFace = disableFontFace === true;
     this.ignoreErrors = ignoreErrors === true;
     this._inspectFont = inspectFont;
@@ -14332,22 +15902,72 @@ class FontFaceObject {
         throw ex;
       }
       (0,_shared_util_js__WEBPACK_IMPORTED_MODULE_0__.warn)(`getPathGenerator - ignoring character: "${ex}".`);
+    }
+    if (!Array.isArray(cmds) || cmds.length === 0) {
       return this.compiledGlyphs[character] = function (c, size) {};
     }
-    if (this.isEvalSupported && _shared_util_js__WEBPACK_IMPORTED_MODULE_0__.FeatureTest.isEvalSupported) {
-      const jsBuf = [];
-      for (const current of cmds) {
-        const args = current.args !== undefined ? current.args.join(",") : "";
-        jsBuf.push("c.", current.cmd, "(", args, ");\n");
+    const commands = [];
+    for (let i = 0, ii = cmds.length; i < ii;) {
+      switch (cmds[i++]) {
+        case _shared_util_js__WEBPACK_IMPORTED_MODULE_0__.FontRenderOps.BEZIER_CURVE_TO:
+          {
+            const [a, b, c, d, e, f] = cmds.slice(i, i + 6);
+            commands.push(ctx => ctx.bezierCurveTo(a, b, c, d, e, f));
+            i += 6;
+          }
+          break;
+        case _shared_util_js__WEBPACK_IMPORTED_MODULE_0__.FontRenderOps.MOVE_TO:
+          {
+            const [a, b] = cmds.slice(i, i + 2);
+            commands.push(ctx => ctx.moveTo(a, b));
+            i += 2;
+          }
+          break;
+        case _shared_util_js__WEBPACK_IMPORTED_MODULE_0__.FontRenderOps.LINE_TO:
+          {
+            const [a, b] = cmds.slice(i, i + 2);
+            commands.push(ctx => ctx.lineTo(a, b));
+            i += 2;
+          }
+          break;
+        case _shared_util_js__WEBPACK_IMPORTED_MODULE_0__.FontRenderOps.QUADRATIC_CURVE_TO:
+          {
+            const [a, b, c, d] = cmds.slice(i, i + 4);
+            commands.push(ctx => ctx.quadraticCurveTo(a, b, c, d));
+            i += 4;
+          }
+          break;
+        case _shared_util_js__WEBPACK_IMPORTED_MODULE_0__.FontRenderOps.RESTORE:
+          commands.push(ctx => ctx.restore());
+          break;
+        case _shared_util_js__WEBPACK_IMPORTED_MODULE_0__.FontRenderOps.SAVE:
+          commands.push(ctx => ctx.save());
+          break;
+        case _shared_util_js__WEBPACK_IMPORTED_MODULE_0__.FontRenderOps.SCALE:
+          (0,_shared_util_js__WEBPACK_IMPORTED_MODULE_0__.assert)(commands.length === 2, "Scale command is only valid at the third position.");
+          break;
+        case _shared_util_js__WEBPACK_IMPORTED_MODULE_0__.FontRenderOps.TRANSFORM:
+          {
+            const [a, b, c, d, e, f] = cmds.slice(i, i + 6);
+            commands.push(ctx => ctx.transform(a, b, c, d, e, f));
+            i += 6;
+          }
+          break;
+        case _shared_util_js__WEBPACK_IMPORTED_MODULE_0__.FontRenderOps.TRANSLATE:
+          {
+            const [a, b] = cmds.slice(i, i + 2);
+            commands.push(ctx => ctx.translate(a, b));
+            i += 2;
+          }
+          break;
       }
-      return this.compiledGlyphs[character] = new Function("c", "size", jsBuf.join(""));
     }
-    return this.compiledGlyphs[character] = function (c, size) {
-      for (const current of cmds) {
-        if (current.cmd === "scale") {
-          current.args = [size, -size];
-        }
-        c[current.cmd].apply(c, current.args);
+    return this.compiledGlyphs[character] = function glyphDrawer(ctx, size) {
+      commands[0](ctx);
+      commands[1](ctx);
+      ctx.scale(size, -size);
+      for (let i = 2, ii = commands.length; i < ii; i++) {
+        commands[i](ctx);
       }
     };
   }
@@ -14356,13 +15976,13 @@ class FontFaceObject {
 
 /***/ }),
 
-/***/ 472:
+/***/ 62:
 /***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
 
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   Metadata: () => (/* binding */ Metadata)
 /* harmony export */ });
-/* harmony import */ var _shared_util_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(266);
+/* harmony import */ var _shared_util_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(292);
 
 class Metadata {
   #metadataMap;
@@ -14391,17 +16011,16 @@ class Metadata {
 
 /***/ }),
 
-/***/ 474:
+/***/ 457:
 /***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
 
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   PDFNetworkStream: () => (/* binding */ PDFNetworkStream)
 /* harmony export */ });
-/* harmony import */ var _shared_util_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(266);
-/* harmony import */ var _network_utils_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(253);
+/* harmony import */ var _shared_util_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(292);
+/* harmony import */ var _network_utils_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(490);
 
 
-;
 const OK_RESPONSE = 200;
 const PARTIAL_CONTENT_RESPONSE = 206;
 function getArrayBuffer(xhr) {
@@ -14578,7 +16197,7 @@ class PDFNetworkStreamFullRequestReader {
     };
     this._url = source.url;
     this._fullRequestId = manager.requestFull(args);
-    this._headersReceivedCapability = new _shared_util_js__WEBPACK_IMPORTED_MODULE_0__.PromiseCapability();
+    this._headersReceivedCapability = Promise.withResolvers();
     this._disableRange = source.disableRange || false;
     this._contentLength = source.length;
     this._rangeChunkSize = source.rangeChunkSize;
@@ -14597,9 +16216,7 @@ class PDFNetworkStreamFullRequestReader {
   _onHeadersReceived() {
     const fullRequestXhrId = this._fullRequestId;
     const fullRequestXhr = this._manager.getRequestXhr(fullRequestXhrId);
-    const getResponseHeader = name => {
-      return fullRequestXhr.getResponseHeader(name);
-    };
+    const getResponseHeader = name => fullRequestXhr.getResponseHeader(name);
     const {
       allowRangeRequests,
       suggestedLength
@@ -14690,7 +16307,7 @@ class PDFNetworkStreamFullRequestReader {
         done: true
       };
     }
-    const requestCapability = new _shared_util_js__WEBPACK_IMPORTED_MODULE_0__.PromiseCapability();
+    const requestCapability = Promise.withResolvers();
     this._requests.push(requestCapability);
     return requestCapability.promise;
   }
@@ -14787,7 +16404,7 @@ class PDFNetworkStreamRangeRequestReader {
         done: true
       };
     }
-    const requestCapability = new _shared_util_js__WEBPACK_IMPORTED_MODULE_0__.PromiseCapability();
+    const requestCapability = Promise.withResolvers();
     this._requests.push(requestCapability);
     return requestCapability.promise;
   }
@@ -14810,7 +16427,7 @@ class PDFNetworkStreamRangeRequestReader {
 
 /***/ }),
 
-/***/ 253:
+/***/ 490:
 /***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
 
 
@@ -14823,7 +16440,7 @@ __webpack_require__.d(__webpack_exports__, {
 });
 
 // EXTERNAL MODULE: ./src/shared/util.js
-var util = __webpack_require__(266);
+var util = __webpack_require__(292);
 ;// CONCATENATED MODULE: ./src/display/content_disposition.js
 
 function getFilenameFromContentDispositionHeader(contentDisposition) {
@@ -14956,7 +16573,7 @@ function getFilenameFromContentDispositionHeader(contentDisposition) {
 }
 
 // EXTERNAL MODULE: ./src/display/display_utils.js
-var display_utils = __webpack_require__(473);
+var display_utils = __webpack_require__(419);
 ;// CONCATENATED MODULE: ./src/display/network_utils.js
 
 
@@ -15020,24 +16637,23 @@ function validateResponseStatus(status) {
 
 /***/ }),
 
-/***/ 498:
+/***/ 786:
 /***/ ((__webpack_module__, __webpack_exports__, __webpack_require__) => {
 
 __webpack_require__.a(__webpack_module__, async (__webpack_handle_async_dependencies__, __webpack_async_result__) => { try {
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   PDFNodeStream: () => (/* binding */ PDFNodeStream)
 /* harmony export */ });
-/* harmony import */ var _shared_util_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(266);
-/* harmony import */ var _network_utils_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(253);
+/* harmony import */ var _shared_util_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(292);
+/* harmony import */ var _network_utils_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(490);
 
 
-;
 let fs, http, https, url;
 if (_shared_util_js__WEBPACK_IMPORTED_MODULE_0__.isNodeJS) {
-  fs = await import(/* webpackIgnore: true */ "fs");
-  http = await import(/* webpackIgnore: true */ "http");
-  https = await import(/* webpackIgnore: true */ "https");
-  url = await import(/* webpackIgnore: true */ "url");
+  fs = await import( /*webpackIgnore: true*/"fs");
+  http = await import( /*webpackIgnore: true*/"http");
+  https = await import( /*webpackIgnore: true*/"https");
+  url = await import( /*webpackIgnore: true*/"url");
 }
 const fileUriRegex = /^file:\/\/\/[a-zA-Z]:\//;
 function parseUrl(sourceUrl) {
@@ -15104,8 +16720,8 @@ class BaseFullReader {
     this._isStreamingSupported = !source.disableStream;
     this._isRangeSupported = !source.disableRange;
     this._readableStream = null;
-    this._readCapability = new _shared_util_js__WEBPACK_IMPORTED_MODULE_0__.PromiseCapability();
-    this._headersCapability = new _shared_util_js__WEBPACK_IMPORTED_MODULE_0__.PromiseCapability();
+    this._readCapability = Promise.withResolvers();
+    this._headersCapability = Promise.withResolvers();
   }
   get headersReady() {
     return this._headersCapability.promise;
@@ -15135,7 +16751,7 @@ class BaseFullReader {
     }
     const chunk = this._readableStream.read();
     if (chunk === null) {
-      this._readCapability = new _shared_util_js__WEBPACK_IMPORTED_MODULE_0__.PromiseCapability();
+      this._readCapability = Promise.withResolvers();
       return this.read();
     }
     this._loaded += chunk.length;
@@ -15189,7 +16805,7 @@ class BaseRangeReader {
     this.onProgress = null;
     this._loaded = 0;
     this._readableStream = null;
-    this._readCapability = new _shared_util_js__WEBPACK_IMPORTED_MODULE_0__.PromiseCapability();
+    this._readCapability = Promise.withResolvers();
     const source = stream.source;
     this._isStreamingSupported = !source.disableStream;
   }
@@ -15209,7 +16825,7 @@ class BaseRangeReader {
     }
     const chunk = this._readableStream.read();
     if (chunk === null) {
-      this._readCapability = new _shared_util_js__WEBPACK_IMPORTED_MODULE_0__.PromiseCapability();
+      this._readCapability = Promise.withResolvers();
       return this.read();
     }
     this._loaded += chunk.length;
@@ -15274,9 +16890,7 @@ class PDFNodeStreamFullReader extends BaseFullReader {
       }
       this._headersCapability.resolve();
       this._setReadableStream(response);
-      const getResponseHeader = name => {
-        return this._readableStream.headers[name.toLowerCase()];
-      };
+      const getResponseHeader = name => this._readableStream.headers[name.toLowerCase()];
       const {
         allowRangeRequests,
         suggestedLength
@@ -15342,18 +16956,16 @@ class PDFNodeStreamFsFullReader extends BaseFullReader {
     if (fileUriRegex.test(this._url.href)) {
       path = path.replace(/^\//, "");
     }
-    fs.lstat(path, (error, stat) => {
-      if (error) {
-        if (error.code === "ENOENT") {
-          error = new _shared_util_js__WEBPACK_IMPORTED_MODULE_0__.MissingPDFException(`Missing PDF "${path}".`);
-        }
-        this._storedError = error;
-        this._headersCapability.reject(error);
-        return;
-      }
+    fs.promises.lstat(path).then(stat => {
       this._contentLength = stat.size;
       this._setReadableStream(fs.createReadStream(path));
       this._headersCapability.resolve();
+    }, error => {
+      if (error.code === "ENOENT") {
+        error = new _shared_util_js__WEBPACK_IMPORTED_MODULE_0__.MissingPDFException(`Missing PDF "${path}".`);
+      }
+      this._storedError = error;
+      this._headersCapability.reject(error);
     });
   }
 }
@@ -15376,7 +16988,7 @@ __webpack_async_result__();
 
 /***/ }),
 
-/***/ 738:
+/***/ 573:
 /***/ ((__webpack_module__, __webpack_exports__, __webpack_require__) => {
 
 __webpack_require__.a(__webpack_module__, async (__webpack_handle_async_dependencies__, __webpack_async_result__) => { try {
@@ -15386,32 +16998,22 @@ __webpack_require__.a(__webpack_module__, async (__webpack_handle_async_dependen
 /* harmony export */   NodeFilterFactory: () => (/* binding */ NodeFilterFactory),
 /* harmony export */   NodeStandardFontDataFactory: () => (/* binding */ NodeStandardFontDataFactory)
 /* harmony export */ });
-/* harmony import */ var _base_factory_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(822);
-/* harmony import */ var _shared_util_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(266);
+/* harmony import */ var _base_factory_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(583);
+/* harmony import */ var _shared_util_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(292);
 
 
-;
-let fs, canvas, path2d_polyfill;
+let fs, canvas, path2d;
 if (_shared_util_js__WEBPACK_IMPORTED_MODULE_1__.isNodeJS) {
-  fs = await import(/* webpackIgnore: true */ "fs");
+  fs = await import( /*webpackIgnore: true*/"fs");
   try {
-    canvas = await import(/* webpackIgnore: true */ "canvas");
+    canvas = await import( /*webpackIgnore: true*/"canvas");
   } catch {}
   try {
-    path2d_polyfill = await import(/* webpackIgnore: true */ "path2d-polyfill");
+    path2d = await import( /*webpackIgnore: true*/"path2d");
   } catch {}
 }
-;
 const fetchData = function (url) {
-  return new Promise((resolve, reject) => {
-    fs.readFile(url, (error, data) => {
-      if (error || !data) {
-        reject(new Error(error));
-        return;
-      }
-      resolve(new Uint8Array(data));
-    });
-  });
+  return fs.promises.readFile(url).then(data => new Uint8Array(data));
 };
 class NodeFilterFactory extends _base_factory_js__WEBPACK_IMPORTED_MODULE_0__.BaseFilterFactory {}
 class NodeCanvasFactory extends _base_factory_js__WEBPACK_IMPORTED_MODULE_0__.BaseCanvasFactory {
@@ -15421,12 +17023,10 @@ class NodeCanvasFactory extends _base_factory_js__WEBPACK_IMPORTED_MODULE_0__.Ba
 }
 class NodeCMapReaderFactory extends _base_factory_js__WEBPACK_IMPORTED_MODULE_0__.BaseCMapReaderFactory {
   _fetchData(url, compressionType) {
-    return fetchData(url).then(data => {
-      return {
-        cMapData: data,
-        compressionType
-      };
-    });
+    return fetchData(url).then(data => ({
+      cMapData: data,
+      compressionType
+    }));
   }
 }
 class NodeStandardFontDataFactory extends _base_factory_js__WEBPACK_IMPORTED_MODULE_0__.BaseStandardFontDataFactory {
@@ -15440,30 +17040,56 @@ __webpack_async_result__();
 
 /***/ }),
 
-/***/ 890:
+/***/ 626:
 /***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
 
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   OptionalContentConfig: () => (/* binding */ OptionalContentConfig)
 /* harmony export */ });
-/* harmony import */ var _shared_util_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(266);
-/* harmony import */ var _shared_murmurhash3_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(825);
+/* harmony import */ var _shared_util_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(292);
+/* harmony import */ var _shared_murmurhash3_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(651);
 
 
 const INTERNAL = Symbol("INTERNAL");
 class OptionalContentGroup {
+  #isDisplay = false;
+  #isPrint = false;
+  #userSet = false;
   #visible = true;
-  constructor(name, intent) {
+  constructor(renderingIntent, {
+    name,
+    intent,
+    usage
+  }) {
+    this.#isDisplay = !!(renderingIntent & _shared_util_js__WEBPACK_IMPORTED_MODULE_0__.RenderingIntentFlag.DISPLAY);
+    this.#isPrint = !!(renderingIntent & _shared_util_js__WEBPACK_IMPORTED_MODULE_0__.RenderingIntentFlag.PRINT);
     this.name = name;
     this.intent = intent;
+    this.usage = usage;
   }
   get visible() {
-    return this.#visible;
+    if (this.#userSet) {
+      return this.#visible;
+    }
+    if (!this.#visible) {
+      return false;
+    }
+    const {
+      print,
+      view
+    } = this.usage;
+    if (this.#isDisplay) {
+      return view?.viewState !== "OFF";
+    } else if (this.#isPrint) {
+      return print?.printState !== "OFF";
+    }
+    return true;
   }
-  _setVisible(internal, visible) {
+  _setVisible(internal, visible, userSet = false) {
     if (internal !== INTERNAL) {
       (0,_shared_util_js__WEBPACK_IMPORTED_MODULE_0__.unreachable)("Internal method `_setVisible` called.");
     }
+    this.#userSet = userSet;
     this.#visible = visible;
   }
 }
@@ -15472,7 +17098,8 @@ class OptionalContentConfig {
   #groups = new Map();
   #initialHash = null;
   #order = null;
-  constructor(data) {
+  constructor(data, renderingIntent = _shared_util_js__WEBPACK_IMPORTED_MODULE_0__.RenderingIntentFlag.DISPLAY) {
+    this.renderingIntent = renderingIntent;
     this.name = null;
     this.creator = null;
     if (data === null) {
@@ -15482,7 +17109,7 @@ class OptionalContentConfig {
     this.creator = data.creator;
     this.#order = data.order;
     for (const group of data.groups) {
-      this.#groups.set(group.id, new OptionalContentGroup(group.name, group.intent));
+      this.#groups.set(group.id, new OptionalContentGroup(renderingIntent, group));
     }
     if (data.baseState === "OFF") {
       for (const group of this.#groups.values()) {
@@ -15538,7 +17165,7 @@ class OptionalContentConfig {
       return true;
     }
     if (!group) {
-      (0,_shared_util_js__WEBPACK_IMPORTED_MODULE_0__.warn)("Optional content group not defined.");
+      (0,_shared_util_js__WEBPACK_IMPORTED_MODULE_0__.info)("Optional content group not defined.");
       return true;
     }
     if (group.type === "OCG") {
@@ -15603,11 +17230,43 @@ class OptionalContentConfig {
     return true;
   }
   setVisibility(id, visible = true) {
-    if (!this.#groups.has(id)) {
+    const group = this.#groups.get(id);
+    if (!group) {
       (0,_shared_util_js__WEBPACK_IMPORTED_MODULE_0__.warn)(`Optional content group not found: ${id}`);
       return;
     }
-    this.#groups.get(id)._setVisible(INTERNAL, !!visible);
+    group._setVisible(INTERNAL, !!visible, true);
+    this.#cachedGetHash = null;
+  }
+  setOCGState({
+    state,
+    preserveRB
+  }) {
+    let operator;
+    for (const elem of state) {
+      switch (elem) {
+        case "ON":
+        case "OFF":
+        case "Toggle":
+          operator = elem;
+          continue;
+      }
+      const group = this.#groups.get(elem);
+      if (!group) {
+        continue;
+      }
+      switch (operator) {
+        case "ON":
+          group._setVisible(INTERNAL, true);
+          break;
+        case "OFF":
+          group._setVisible(INTERNAL, false);
+          break;
+        case "Toggle":
+          group._setVisible(INTERNAL, !group.visible);
+          break;
+      }
+    }
     this.#cachedGetHash = null;
   }
   get hasInitialVisibility() {
@@ -15643,43 +17302,47 @@ class OptionalContentConfig {
 
 /***/ }),
 
-/***/ 739:
+/***/ 814:
 /***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
 
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   cleanupTextLayer: () => (/* binding */ cleanupTextLayer),
 /* harmony export */   renderTextLayer: () => (/* binding */ renderTextLayer),
 /* harmony export */   updateTextLayer: () => (/* binding */ updateTextLayer)
 /* harmony export */ });
 /* unused harmony export TextLayerRenderTask */
-/* harmony import */ var _shared_util_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(266);
-/* harmony import */ var _display_utils_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(473);
+/* harmony import */ var _shared_util_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(292);
+/* harmony import */ var _display_utils_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(419);
 
 
 const MAX_TEXT_DIVS_TO_RENDER = 100000;
 const DEFAULT_FONT_SIZE = 30;
 const DEFAULT_FONT_ASCENT = 0.8;
 const ascentCache = new Map();
-function getCtx(size, isOffscreenCanvasSupported) {
-  let ctx;
-  if (isOffscreenCanvasSupported && _shared_util_js__WEBPACK_IMPORTED_MODULE_0__.FeatureTest.isOffscreenCanvasSupported) {
-    ctx = new OffscreenCanvas(size, size).getContext("2d", {
-      alpha: false
-    });
-  } else {
+let _canvasContext = null;
+function getCtx() {
+  if (!_canvasContext) {
     const canvas = document.createElement("canvas");
-    canvas.width = canvas.height = size;
-    ctx = canvas.getContext("2d", {
+    canvas.className = "hiddenCanvasElement";
+    document.body.append(canvas);
+    _canvasContext = canvas.getContext("2d", {
       alpha: false
     });
   }
-  return ctx;
+  return _canvasContext;
 }
-function getAscent(fontFamily, isOffscreenCanvasSupported) {
+function cleanupTextLayer() {
+  _canvasContext?.canvas.remove();
+  _canvasContext = null;
+}
+function getAscent(fontFamily) {
   const cachedAscent = ascentCache.get(fontFamily);
   if (cachedAscent) {
     return cachedAscent;
   }
-  const ctx = getCtx(DEFAULT_FONT_SIZE, isOffscreenCanvasSupported);
+  const ctx = getCtx();
+  const savedFont = ctx.font;
+  ctx.canvas.width = ctx.canvas.height = DEFAULT_FONT_SIZE;
   ctx.font = `${DEFAULT_FONT_SIZE}px ${fontFamily}`;
   const metrics = ctx.measureText("");
   let ascent = metrics.fontBoundingBoxAscent;
@@ -15688,6 +17351,7 @@ function getAscent(fontFamily, isOffscreenCanvasSupported) {
     const ratio = ascent / (ascent + descent);
     ascentCache.set(fontFamily, ratio);
     ctx.canvas.width = ctx.canvas.height = 0;
+    ctx.font = savedFont;
     return ratio;
   }
   ctx.strokeStyle = "red";
@@ -15712,6 +17376,7 @@ function getAscent(fontFamily, isOffscreenCanvasSupported) {
     }
   }
   ctx.canvas.width = ctx.canvas.height = 0;
+  ctx.font = savedFont;
   if (ascent) {
     const ratio = ascent / (ascent + descent);
     ascentCache.set(fontFamily, ratio);
@@ -15738,7 +17403,7 @@ function appendText(task, geom, styles) {
   }
   const fontFamily = task._fontInspectorEnabled && style.fontSubstitution || style.fontFamily;
   const fontHeight = Math.hypot(tx[2], tx[3]);
-  const fontAscent = fontHeight * getAscent(fontFamily, task._isOffscreenCanvasSupported);
+  const fontAscent = fontHeight * getAscent(fontFamily);
   let left, top;
   if (angle === 0) {
     left = tx[4];
@@ -15851,27 +17516,25 @@ class TextLayerRenderTask {
     viewport,
     textDivs,
     textDivProperties,
-    textContentItemsStr,
-    isOffscreenCanvasSupported
+    textContentItemsStr
   }) {
     this._textContentSource = textContentSource;
     this._isReadableStream = textContentSource instanceof ReadableStream;
     this._container = this._rootContainer = container;
     this._textDivs = textDivs || [];
     this._textContentItemsStr = textContentItemsStr || [];
-    this._isOffscreenCanvasSupported = isOffscreenCanvasSupported;
     this._fontInspectorEnabled = !!globalThis.FontInspector?.enabled;
     this._reader = null;
     this._textDivProperties = textDivProperties || new WeakMap();
     this._canceled = false;
-    this._capability = new _shared_util_js__WEBPACK_IMPORTED_MODULE_0__.PromiseCapability();
+    this._capability = Promise.withResolvers();
     this._layoutTextParams = {
       prevFontSize: null,
       prevFontFamily: null,
       div: null,
       scale: viewport.scale * (globalThis.devicePixelRatio || 1),
       properties: null,
-      ctx: getCtx(0, isOffscreenCanvasSupported)
+      ctx: getCtx()
     };
     const {
       pageWidth,
@@ -15932,7 +17595,11 @@ class TextLayerRenderTask {
     }
   }
   _render() {
-    const capability = new _shared_util_js__WEBPACK_IMPORTED_MODULE_0__.PromiseCapability();
+    const {
+      promise,
+      resolve,
+      reject
+    } = Promise.withResolvers();
     let styleCache = Object.create(null);
     if (this._isReadableStream) {
       const pump = () => {
@@ -15941,13 +17608,13 @@ class TextLayerRenderTask {
           done
         }) => {
           if (done) {
-            capability.resolve();
+            resolve();
             return;
           }
           Object.assign(styleCache, value.styles);
           this._processItems(value.items, styleCache);
           pump();
-        }, capability.reject);
+        }, reject);
       };
       this._reader = this._textContentSource.getReader();
       pump();
@@ -15957,11 +17624,11 @@ class TextLayerRenderTask {
         styles
       } = this._textContentSource;
       this._processItems(items, styles);
-      capability.resolve();
+      resolve();
     } else {
       throw new Error('No "textContentSource" parameter specified.');
     }
-    capability.promise.then(() => {
+    promise.then(() => {
       styleCache = null;
       render(this);
     }, this._capability.reject);
@@ -15977,7 +17644,6 @@ function updateTextLayer({
   viewport,
   textDivs,
   textDivProperties,
-  isOffscreenCanvasSupported,
   mustRotate = true,
   mustRescale = true
 }) {
@@ -15987,7 +17653,7 @@ function updateTextLayer({
     });
   }
   if (mustRescale) {
-    const ctx = getCtx(0, isOffscreenCanvasSupported);
+    const ctx = getCtx();
     const scale = viewport.scale * (globalThis.devicePixelRatio || 1);
     const params = {
       prevFontSize: null,
@@ -16008,26 +17674,28 @@ function updateTextLayer({
 
 /***/ }),
 
-/***/ 92:
+/***/ 585:
 /***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
 
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   PDFDataTransportStream: () => (/* binding */ PDFDataTransportStream)
 /* harmony export */ });
-/* harmony import */ var _shared_util_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(266);
-/* harmony import */ var _display_utils_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(473);
+/* harmony import */ var _shared_util_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(292);
+/* harmony import */ var _display_utils_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(419);
 
 
 class PDFDataTransportStream {
-  constructor({
-    length,
-    initialData,
-    progressiveDone = false,
-    contentDispositionFilename = null,
+  constructor(pdfDataRangeTransport, {
     disableRange = false,
     disableStream = false
-  }, pdfDataRangeTransport) {
+  }) {
     (0,_shared_util_js__WEBPACK_IMPORTED_MODULE_0__.assert)(pdfDataRangeTransport, 'PDFDataTransportStream - missing required "pdfDataRangeTransport" argument.');
+    const {
+      length,
+      initialData,
+      progressiveDone,
+      contentDispositionFilename
+    } = pdfDataRangeTransport;
     this._queuedChunks = [];
     this._progressiveDone = progressiveDone;
     this._contentDispositionFilename = contentDispositionFilename;
@@ -16041,27 +17709,27 @@ class PDFDataTransportStream {
     this._contentLength = length;
     this._fullRequestReader = null;
     this._rangeReaders = [];
-    this._pdfDataRangeTransport.addRangeListener((begin, chunk) => {
+    pdfDataRangeTransport.addRangeListener((begin, chunk) => {
       this._onReceiveData({
         begin,
         chunk
       });
     });
-    this._pdfDataRangeTransport.addProgressListener((loaded, total) => {
+    pdfDataRangeTransport.addProgressListener((loaded, total) => {
       this._onProgress({
         loaded,
         total
       });
     });
-    this._pdfDataRangeTransport.addProgressiveReadListener(chunk => {
+    pdfDataRangeTransport.addProgressiveReadListener(chunk => {
       this._onReceiveData({
         chunk
       });
     });
-    this._pdfDataRangeTransport.addProgressiveDoneListener(() => {
+    pdfDataRangeTransport.addProgressiveDoneListener(() => {
       this._onProgressiveDone();
     });
-    this._pdfDataRangeTransport.transportReady();
+    pdfDataRangeTransport.transportReady();
   }
   _onReceiveData({
     begin,
@@ -16192,7 +17860,7 @@ class PDFDataTransportStreamReader {
         done: true
       };
     }
-    const requestCapability = new _shared_util_js__WEBPACK_IMPORTED_MODULE_0__.PromiseCapability();
+    const requestCapability = Promise.withResolvers();
     this._requests.push(requestCapability);
     return requestCapability.promise;
   }
@@ -16264,7 +17932,7 @@ class PDFDataTransportStreamRangeReader {
         done: true
       };
     }
-    const requestCapability = new _shared_util_js__WEBPACK_IMPORTED_MODULE_0__.PromiseCapability();
+    const requestCapability = Promise.withResolvers();
     this._requests.push(requestCapability);
     return requestCapability.promise;
   }
@@ -16284,26 +17952,45 @@ class PDFDataTransportStreamRangeReader {
 
 /***/ }),
 
-/***/ 368:
+/***/ 164:
 /***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
 
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   GlobalWorkerOptions: () => (/* binding */ GlobalWorkerOptions)
 /* harmony export */ });
-const GlobalWorkerOptions = Object.create(null);
-GlobalWorkerOptions.workerPort = null;
-GlobalWorkerOptions.workerSrc = "";
+class GlobalWorkerOptions {
+  static #port = null;
+  static #src = "";
+  static get workerPort() {
+    return this.#port;
+  }
+  static set workerPort(val) {
+    if (!(typeof Worker !== "undefined" && val instanceof Worker) && val !== null) {
+      throw new Error("Invalid `workerPort` type.");
+    }
+    this.#port = val;
+  }
+  static get workerSrc() {
+    return this.#src;
+  }
+  static set workerSrc(val) {
+    if (typeof val !== "string") {
+      throw new Error("Invalid `workerSrc` type.");
+    }
+    this.#src = val;
+  }
+}
 
 
 /***/ }),
 
-/***/ 160:
+/***/ 284:
 /***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
 
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   XfaLayer: () => (/* binding */ XfaLayer)
 /* harmony export */ });
-/* harmony import */ var _xfa_text_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(521);
+/* harmony import */ var _xfa_text_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(50);
 
 class XfaLayer {
   static setupStorage(html, id, element, storage, intent) {
@@ -16517,7 +18204,7 @@ class XfaLayer {
 
 /***/ }),
 
-/***/ 521:
+/***/ 50:
 /***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
 
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -16568,7 +18255,7 @@ class XfaText {
 
 /***/ }),
 
-/***/ 907:
+/***/ 228:
 /***/ ((__webpack_module__, __webpack_exports__, __webpack_require__) => {
 
 __webpack_require__.a(__webpack_module__, async (__webpack_handle_async_dependencies__, __webpack_async_result__) => { try {
@@ -16585,19 +18272,18 @@ __webpack_require__.a(__webpack_module__, async (__webpack_handle_async_dependen
 /* harmony export */   DOMSVGFactory: () => (/* reexport safe */ _display_display_utils_js__WEBPACK_IMPORTED_MODULE_2__.DOMSVGFactory),
 /* harmony export */   DrawLayer: () => (/* reexport safe */ _display_draw_layer_js__WEBPACK_IMPORTED_MODULE_8__.DrawLayer),
 /* harmony export */   FeatureTest: () => (/* reexport safe */ _shared_util_js__WEBPACK_IMPORTED_MODULE_0__.FeatureTest),
-/* harmony export */   GlobalWorkerOptions: () => (/* reexport safe */ _display_worker_options_js__WEBPACK_IMPORTED_MODULE_9__.GlobalWorkerOptions),
+/* harmony export */   GlobalWorkerOptions: () => (/* reexport safe */ _display_worker_options_js__WEBPACK_IMPORTED_MODULE_10__.GlobalWorkerOptions),
 /* harmony export */   ImageKind: () => (/* reexport safe */ _shared_util_js__WEBPACK_IMPORTED_MODULE_0__.ImageKind),
 /* harmony export */   InvalidPDFException: () => (/* reexport safe */ _shared_util_js__WEBPACK_IMPORTED_MODULE_0__.InvalidPDFException),
 /* harmony export */   MissingPDFException: () => (/* reexport safe */ _shared_util_js__WEBPACK_IMPORTED_MODULE_0__.MissingPDFException),
 /* harmony export */   OPS: () => (/* reexport safe */ _shared_util_js__WEBPACK_IMPORTED_MODULE_0__.OPS),
-/* harmony export */   Outliner: () => (/* reexport safe */ _display_editor_outliner_js__WEBPACK_IMPORTED_MODULE_10__.Outliner),
+/* harmony export */   Outliner: () => (/* reexport safe */ _display_editor_outliner_js__WEBPACK_IMPORTED_MODULE_9__.Outliner),
 /* harmony export */   PDFDataRangeTransport: () => (/* reexport safe */ _display_api_js__WEBPACK_IMPORTED_MODULE_1__.PDFDataRangeTransport),
 /* harmony export */   PDFDateString: () => (/* reexport safe */ _display_display_utils_js__WEBPACK_IMPORTED_MODULE_2__.PDFDateString),
 /* harmony export */   PDFWorker: () => (/* reexport safe */ _display_api_js__WEBPACK_IMPORTED_MODULE_1__.PDFWorker),
 /* harmony export */   PasswordResponses: () => (/* reexport safe */ _shared_util_js__WEBPACK_IMPORTED_MODULE_0__.PasswordResponses),
 /* harmony export */   PermissionFlag: () => (/* reexport safe */ _shared_util_js__WEBPACK_IMPORTED_MODULE_0__.PermissionFlag),
 /* harmony export */   PixelsPerInch: () => (/* reexport safe */ _display_display_utils_js__WEBPACK_IMPORTED_MODULE_2__.PixelsPerInch),
-/* harmony export */   PromiseCapability: () => (/* reexport safe */ _shared_util_js__WEBPACK_IMPORTED_MODULE_0__.PromiseCapability),
 /* harmony export */   RenderingCancelledException: () => (/* reexport safe */ _display_display_utils_js__WEBPACK_IMPORTED_MODULE_2__.RenderingCancelledException),
 /* harmony export */   UnexpectedResponseException: () => (/* reexport safe */ _shared_util_js__WEBPACK_IMPORTED_MODULE_0__.UnexpectedResponseException),
 /* harmony export */   Util: () => (/* reexport safe */ _shared_util_js__WEBPACK_IMPORTED_MODULE_0__.Util),
@@ -16620,18 +18306,18 @@ __webpack_require__.a(__webpack_module__, async (__webpack_handle_async_dependen
 /* harmony export */   updateTextLayer: () => (/* reexport safe */ _display_text_layer_js__WEBPACK_IMPORTED_MODULE_3__.updateTextLayer),
 /* harmony export */   version: () => (/* reexport safe */ _display_api_js__WEBPACK_IMPORTED_MODULE_1__.version)
 /* harmony export */ });
-/* harmony import */ var _shared_util_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(266);
-/* harmony import */ var _display_api_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(406);
-/* harmony import */ var _display_display_utils_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(473);
-/* harmony import */ var _display_text_layer_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(739);
-/* harmony import */ var _display_editor_annotation_editor_layer_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(629);
-/* harmony import */ var _display_editor_tools_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(812);
-/* harmony import */ var _display_annotation_layer_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(640);
-/* harmony import */ var _display_editor_color_picker_js__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(97);
-/* harmony import */ var _display_draw_layer_js__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(423);
-/* harmony import */ var _display_worker_options_js__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(368);
-/* harmony import */ var _display_editor_outliner_js__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(405);
-/* harmony import */ var _display_xfa_layer_js__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(160);
+/* harmony import */ var _shared_util_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(292);
+/* harmony import */ var _display_api_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(831);
+/* harmony import */ var _display_display_utils_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(419);
+/* harmony import */ var _display_text_layer_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(814);
+/* harmony import */ var _display_editor_annotation_editor_layer_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(731);
+/* harmony import */ var _display_editor_tools_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(830);
+/* harmony import */ var _display_annotation_layer_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(976);
+/* harmony import */ var _display_editor_color_picker_js__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(259);
+/* harmony import */ var _display_draw_layer_js__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(47);
+/* harmony import */ var _display_worker_options_js__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(164);
+/* harmony import */ var _display_editor_outliner_js__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(61);
+/* harmony import */ var _display_xfa_layer_js__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(284);
 var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([_display_api_js__WEBPACK_IMPORTED_MODULE_1__]);
 _display_api_js__WEBPACK_IMPORTED_MODULE_1__ = (__webpack_async_dependencies__.then ? (await __webpack_async_dependencies__)() : __webpack_async_dependencies__)[0];
 
@@ -16646,21 +18332,21 @@ _display_api_js__WEBPACK_IMPORTED_MODULE_1__ = (__webpack_async_dependencies__.t
 
 
 
-const pdfjsVersion = '4.0.379';
-const pdfjsBuild = '9e14d04fd';
+const pdfjsVersion = "4.2.67";
+const pdfjsBuild = "49b388101";
 
 __webpack_async_result__();
 } catch(e) { __webpack_async_result__(e); } });
 
 /***/ }),
 
-/***/ 694:
+/***/ 178:
 /***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
 
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   MessageHandler: () => (/* binding */ MessageHandler)
 /* harmony export */ });
-/* harmony import */ var _util_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(266);
+/* harmony import */ var _util_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(292);
 
 const CallbackKind = {
   UNKNOWN: 0,
@@ -16786,7 +18472,7 @@ class MessageHandler {
   }
   sendWithPromise(actionName, data, transfers) {
     const callbackId = this.callbackId++;
-    const capability = new _util_js__WEBPACK_IMPORTED_MODULE_0__.PromiseCapability();
+    const capability = Promise.withResolvers();
     this.callbackCapabilities[callbackId] = capability;
     try {
       this.comObj.postMessage({
@@ -16808,7 +18494,7 @@ class MessageHandler {
       comObj = this.comObj;
     return new ReadableStream({
       start: controller => {
-        const startCapability = new _util_js__WEBPACK_IMPORTED_MODULE_0__.PromiseCapability();
+        const startCapability = Promise.withResolvers();
         this.streamControllers[streamId] = {
           controller,
           startCall: startCapability,
@@ -16827,7 +18513,7 @@ class MessageHandler {
         return startCapability.promise;
       },
       pull: controller => {
-        const pullCapability = new _util_js__WEBPACK_IMPORTED_MODULE_0__.PromiseCapability();
+        const pullCapability = Promise.withResolvers();
         this.streamControllers[streamId].pullCall = pullCapability;
         comObj.postMessage({
           sourceName,
@@ -16840,7 +18526,7 @@ class MessageHandler {
       },
       cancel: reason => {
         (0,_util_js__WEBPACK_IMPORTED_MODULE_0__.assert)(reason instanceof Error, "cancel must have a valid reason");
-        const cancelCapability = new _util_js__WEBPACK_IMPORTED_MODULE_0__.PromiseCapability();
+        const cancelCapability = Promise.withResolvers();
         this.streamControllers[streamId].cancelCall = cancelCapability;
         this.streamControllers[streamId].isClosed = true;
         comObj.postMessage({
@@ -16869,7 +18555,7 @@ class MessageHandler {
         const lastDesiredSize = this.desiredSize;
         this.desiredSize -= size;
         if (lastDesiredSize > 0 && this.desiredSize <= 0) {
-          this.sinkCapability = new _util_js__WEBPACK_IMPORTED_MODULE_0__.PromiseCapability();
+          this.sinkCapability = Promise.withResolvers();
           this.ready = this.sinkCapability.promise;
         }
         comObj.postMessage({
@@ -16907,7 +18593,7 @@ class MessageHandler {
           reason: wrapReason(reason)
         });
       },
-      sinkCapability: new _util_js__WEBPACK_IMPORTED_MODULE_0__.PromiseCapability(),
+      sinkCapability: Promise.withResolvers(),
       onPull: null,
       onCancel: null,
       isCancelled: false,
@@ -17066,14 +18752,12 @@ class MessageHandler {
 
 /***/ }),
 
-/***/ 825:
+/***/ 651:
 /***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
 
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   MurmurHash3_64: () => (/* binding */ MurmurHash3_64)
 /* harmony export */ });
-/* harmony import */ var _util_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(266);
-
 const SEED = 0xc3d2e1f0;
 const MASK_HIGH = 0xffff0000;
 const MASK_LOW = 0xffff;
@@ -17096,11 +18780,11 @@ class MurmurHash3_64 {
           data[length++] = code & 0xff;
         }
       }
-    } else if ((0,_util_js__WEBPACK_IMPORTED_MODULE_0__.isArrayBuffer)(input)) {
+    } else if (ArrayBuffer.isView(input)) {
       data = input.slice();
       length = data.byteLength;
     } else {
-      throw new Error("Wrong data format in MurmurHash3_64_update. " + "Input must be a string or array.");
+      throw new Error("Invalid data format, must be a string or TypedArray.");
     }
     const blockCounts = length >> 2;
     const tailLength = length - blockCounts * 4;
@@ -17169,7 +18853,7 @@ class MurmurHash3_64 {
 
 /***/ }),
 
-/***/ 266:
+/***/ 292:
 /***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
 
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -17185,6 +18869,7 @@ class MurmurHash3_64 {
 /* harmony export */   CMapCompressionType: () => (/* binding */ CMapCompressionType),
 /* harmony export */   FONT_IDENTITY_MATRIX: () => (/* binding */ FONT_IDENTITY_MATRIX),
 /* harmony export */   FeatureTest: () => (/* binding */ FeatureTest),
+/* harmony export */   FontRenderOps: () => (/* binding */ FontRenderOps),
 /* harmony export */   FormatError: () => (/* binding */ FormatError),
 /* harmony export */   IDENTITY_MATRIX: () => (/* binding */ IDENTITY_MATRIX),
 /* harmony export */   ImageKind: () => (/* binding */ ImageKind),
@@ -17196,7 +18881,6 @@ class MurmurHash3_64 {
 /* harmony export */   PasswordException: () => (/* binding */ PasswordException),
 /* harmony export */   PasswordResponses: () => (/* binding */ PasswordResponses),
 /* harmony export */   PermissionFlag: () => (/* binding */ PermissionFlag),
-/* harmony export */   PromiseCapability: () => (/* binding */ PromiseCapability),
 /* harmony export */   RenderingIntentFlag: () => (/* binding */ RenderingIntentFlag),
 /* harmony export */   TextRenderingMode: () => (/* binding */ TextRenderingMode),
 /* harmony export */   UnexpectedResponseException: () => (/* binding */ UnexpectedResponseException),
@@ -17209,7 +18893,6 @@ class MurmurHash3_64 {
 /* harmony export */   getUuid: () => (/* binding */ getUuid),
 /* harmony export */   getVerbosityLevel: () => (/* binding */ getVerbosityLevel),
 /* harmony export */   info: () => (/* binding */ info),
-/* harmony export */   isArrayBuffer: () => (/* binding */ isArrayBuffer),
 /* harmony export */   isNodeJS: () => (/* binding */ isNodeJS),
 /* harmony export */   normalizeUnicode: () => (/* binding */ normalizeUnicode),
 /* harmony export */   objectFromMap: () => (/* binding */ objectFromMap),
@@ -17263,7 +18946,10 @@ const AnnotationEditorParamsType = {
   INK_THICKNESS: 22,
   INK_OPACITY: 23,
   HIGHLIGHT_COLOR: 31,
-  HIGHLIGHT_DEFAULT_COLOR: 32
+  HIGHLIGHT_DEFAULT_COLOR: 32,
+  HIGHLIGHT_THICKNESS: 33,
+  HIGHLIGHT_FREE: 34,
+  HIGHLIGHT_SHOW_ALL: 35
 };
 const PermissionFlag = {
   PRINT: 0x04,
@@ -17696,7 +19382,7 @@ class FeatureTest {
     return shadow(this, "isCSSRoundSupported", globalThis.CSS?.supports?.("width: round(1.5px, 1px)"));
   }
 }
-const hexNumbers = [...Array(256).keys()].map(n => n.toString(16).padStart(2, "0"));
+const hexNumbers = Array.from(Array(256).keys(), n => n.toString(16).padStart(2, "0"));
 class Util {
   static makeHexColor(r, g, b) {
     return `#${hexNumbers[r]}${hexNumbers[g]}${hexNumbers[b]}`;
@@ -17706,43 +19392,43 @@ class Util {
     if (transform[0]) {
       if (transform[0] < 0) {
         temp = minMax[0];
-        minMax[0] = minMax[1];
-        minMax[1] = temp;
+        minMax[0] = minMax[2];
+        minMax[2] = temp;
       }
       minMax[0] *= transform[0];
-      minMax[1] *= transform[0];
+      minMax[2] *= transform[0];
       if (transform[3] < 0) {
-        temp = minMax[2];
-        minMax[2] = minMax[3];
+        temp = minMax[1];
+        minMax[1] = minMax[3];
         minMax[3] = temp;
       }
-      minMax[2] *= transform[3];
+      minMax[1] *= transform[3];
       minMax[3] *= transform[3];
     } else {
       temp = minMax[0];
-      minMax[0] = minMax[2];
-      minMax[2] = temp;
-      temp = minMax[1];
-      minMax[1] = minMax[3];
+      minMax[0] = minMax[1];
+      minMax[1] = temp;
+      temp = minMax[2];
+      minMax[2] = minMax[3];
       minMax[3] = temp;
       if (transform[1] < 0) {
-        temp = minMax[2];
-        minMax[2] = minMax[3];
+        temp = minMax[1];
+        minMax[1] = minMax[3];
         minMax[3] = temp;
       }
-      minMax[2] *= transform[1];
+      minMax[1] *= transform[1];
       minMax[3] *= transform[1];
       if (transform[2] < 0) {
         temp = minMax[0];
-        minMax[0] = minMax[1];
-        minMax[1] = temp;
+        minMax[0] = minMax[2];
+        minMax[2] = temp;
       }
       minMax[0] *= transform[2];
-      minMax[1] *= transform[2];
+      minMax[2] *= transform[2];
     }
     minMax[0] += transform[4];
-    minMax[1] += transform[4];
-    minMax[2] += transform[5];
+    minMax[1] += transform[5];
+    minMax[2] += transform[4];
     minMax[3] += transform[5];
   }
   static transform(m1, m2) {
@@ -17807,59 +19493,48 @@ class Util {
     }
     return [xLow, yLow, xHigh, yHigh];
   }
-  static bezierBoundingBox(x0, y0, x1, y1, x2, y2, x3, y3) {
-    const tvalues = [],
-      bounds = [[], []];
-    let a, b, c, t, t1, t2, b2ac, sqrtb2ac;
-    for (let i = 0; i < 2; ++i) {
-      if (i === 0) {
-        b = 6 * x0 - 12 * x1 + 6 * x2;
-        a = -3 * x0 + 9 * x1 - 9 * x2 + 3 * x3;
-        c = 3 * x1 - 3 * x0;
-      } else {
-        b = 6 * y0 - 12 * y1 + 6 * y2;
-        a = -3 * y0 + 9 * y1 - 9 * y2 + 3 * y3;
-        c = 3 * y1 - 3 * y0;
-      }
-      if (Math.abs(a) < 1e-12) {
-        if (Math.abs(b) < 1e-12) {
-          continue;
-        }
-        t = -c / b;
-        if (0 < t && t < 1) {
-          tvalues.push(t);
-        }
-        continue;
-      }
-      b2ac = b * b - 4 * c * a;
-      sqrtb2ac = Math.sqrt(b2ac);
-      if (b2ac < 0) {
-        continue;
-      }
-      t1 = (-b + sqrtb2ac) / (2 * a);
-      if (0 < t1 && t1 < 1) {
-        tvalues.push(t1);
-      }
-      t2 = (-b - sqrtb2ac) / (2 * a);
-      if (0 < t2 && t2 < 1) {
-        tvalues.push(t2);
-      }
+  static #getExtremumOnCurve(x0, x1, x2, x3, y0, y1, y2, y3, t, minMax) {
+    if (t <= 0 || t >= 1) {
+      return;
     }
-    let j = tvalues.length,
-      mt;
-    const jlen = j;
-    while (j--) {
-      t = tvalues[j];
-      mt = 1 - t;
-      bounds[0][j] = mt * mt * mt * x0 + 3 * mt * mt * t * x1 + 3 * mt * t * t * x2 + t * t * t * x3;
-      bounds[1][j] = mt * mt * mt * y0 + 3 * mt * mt * t * y1 + 3 * mt * t * t * y2 + t * t * t * y3;
+    const mt = 1 - t;
+    const tt = t * t;
+    const ttt = tt * t;
+    const x = mt * (mt * (mt * x0 + 3 * t * x1) + 3 * tt * x2) + ttt * x3;
+    const y = mt * (mt * (mt * y0 + 3 * t * y1) + 3 * tt * y2) + ttt * y3;
+    minMax[0] = Math.min(minMax[0], x);
+    minMax[1] = Math.min(minMax[1], y);
+    minMax[2] = Math.max(minMax[2], x);
+    minMax[3] = Math.max(minMax[3], y);
+  }
+  static #getExtremum(x0, x1, x2, x3, y0, y1, y2, y3, a, b, c, minMax) {
+    if (Math.abs(a) < 1e-12) {
+      if (Math.abs(b) >= 1e-12) {
+        this.#getExtremumOnCurve(x0, x1, x2, x3, y0, y1, y2, y3, -c / b, minMax);
+      }
+      return;
     }
-    bounds[0][jlen] = x0;
-    bounds[1][jlen] = y0;
-    bounds[0][jlen + 1] = x3;
-    bounds[1][jlen + 1] = y3;
-    bounds[0].length = bounds[1].length = jlen + 2;
-    return [Math.min(...bounds[0]), Math.min(...bounds[1]), Math.max(...bounds[0]), Math.max(...bounds[1])];
+    const delta = b ** 2 - 4 * c * a;
+    if (delta < 0) {
+      return;
+    }
+    const sqrtDelta = Math.sqrt(delta);
+    const a2 = 2 * a;
+    this.#getExtremumOnCurve(x0, x1, x2, x3, y0, y1, y2, y3, (-b + sqrtDelta) / a2, minMax);
+    this.#getExtremumOnCurve(x0, x1, x2, x3, y0, y1, y2, y3, (-b - sqrtDelta) / a2, minMax);
+  }
+  static bezierBoundingBox(x0, y0, x1, y1, x2, y2, x3, y3, minMax) {
+    if (minMax) {
+      minMax[0] = Math.min(minMax[0], x0, x3);
+      minMax[1] = Math.min(minMax[1], y0, y3);
+      minMax[2] = Math.max(minMax[2], x0, x3);
+      minMax[3] = Math.max(minMax[3], y0, y3);
+    } else {
+      minMax = [Math.min(x0, x3), Math.min(y0, y3), Math.max(x0, x3), Math.max(y0, y3)];
+    }
+    this.#getExtremum(x0, x1, x2, x3, y0, y1, y2, y3, 3 * (-x0 + 3 * (x1 - x2) + x3), 6 * (x0 - 2 * x1 + x2), 3 * (x1 - x0), minMax);
+    this.#getExtremum(x0, x1, x2, x3, y0, y1, y2, y3, 3 * (-y0 + 3 * (y1 - y2) + y3), 6 * (y0 - 2 * y1 + y2), 3 * (y1 - y0), minMax);
+    return minMax;
   }
 }
 const PDFStringTranslateTable = (/* unused pure expression or super */ null && ([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x2d8, 0x2c7, 0x2c6, 0x2d9, 0x2dd, 0x2db, 0x2da, 0x2dc, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0x2022, 0x2020, 0x2021, 0x2026, 0x2014, 0x2013, 0x192, 0x2044, 0x2039, 0x203a, 0x2212, 0x2030, 0x201e, 0x201c, 0x201d, 0x2018, 0x2019, 0x201a, 0x2122, 0xfb01, 0xfb02, 0x141, 0x152, 0x160, 0x178, 0x17d, 0x131, 0x142, 0x153, 0x161, 0x17e, 0, 0x20ac]));
@@ -17913,9 +19588,6 @@ function stringToUTF8String(str) {
 function utf8StringToString(str) {
   return unescape(encodeURIComponent(str));
 }
-function isArrayBuffer(v) {
-  return typeof v === "object" && v?.byteLength !== undefined;
-}
 function isArrayEqual(arr1, arr2) {
   if (arr1.length !== arr2.length) {
     return false;
@@ -17931,24 +19603,6 @@ function getModificationDate(date = new Date()) {
   const buffer = [date.getUTCFullYear().toString(), (date.getUTCMonth() + 1).toString().padStart(2, "0"), date.getUTCDate().toString().padStart(2, "0"), date.getUTCHours().toString().padStart(2, "0"), date.getUTCMinutes().toString().padStart(2, "0"), date.getUTCSeconds().toString().padStart(2, "0")];
   return buffer.join("");
 }
-class PromiseCapability {
-  #settled = false;
-  constructor() {
-    this.promise = new Promise((resolve, reject) => {
-      this.resolve = data => {
-        this.#settled = true;
-        resolve(data);
-      };
-      this.reject = reason => {
-        this.#settled = true;
-        reject(reason);
-      };
-    });
-  }
-  get settled() {
-    return this.#settled;
-  }
-}
 let NormalizeRegex = null;
 let NormalizationMap = null;
 function normalizeUnicode(str) {
@@ -17956,9 +19610,7 @@ function normalizeUnicode(str) {
     NormalizeRegex = /([\u00a0\u00b5\u037e\u0eb3\u2000-\u200a\u202f\u2126\ufb00-\ufb04\ufb06\ufb20-\ufb36\ufb38-\ufb3c\ufb3e\ufb40-\ufb41\ufb43-\ufb44\ufb46-\ufba1\ufba4-\ufba9\ufbae-\ufbb1\ufbd3-\ufbdc\ufbde-\ufbe7\ufbea-\ufbf8\ufbfc-\ufbfd\ufc00-\ufc5d\ufc64-\ufcf1\ufcf5-\ufd3d\ufd88\ufdf4\ufdfa-\ufdfb\ufe71\ufe77\ufe79\ufe7b\ufe7d]+)|(\ufb05+)/gu;
     NormalizationMap = new Map([["ﬅ", "ſt"]]);
   }
-  return str.replaceAll(NormalizeRegex, (_, p1, p2) => {
-    return p1 ? p1.normalize("NFKC") : NormalizationMap.get(p2);
-  });
+  return str.replaceAll(NormalizeRegex, (_, p1, p2) => p1 ? p1.normalize("NFKC") : NormalizationMap.get(p2));
 }
 function getUuid() {
   if (typeof crypto !== "undefined" && typeof crypto?.randomUUID === "function") {
@@ -17975,6 +19627,17 @@ function getUuid() {
   return bytesToString(buf);
 }
 const AnnotationPrefix = "pdfjs_internal_id_";
+const FontRenderOps = {
+  BEZIER_CURVE_TO: 0,
+  MOVE_TO: 1,
+  LINE_TO: 2,
+  QUADRATIC_CURVE_TO: 3,
+  RESTORE: 4,
+  SAVE: 5,
+  SCALE: 6,
+  TRANSFORM: 7,
+  TRANSLATE: 8
+};
 
 
 /***/ })
@@ -18097,7 +19760,7 @@ const AnnotationPrefix = "pdfjs_internal_id_";
 /******/ // startup
 /******/ // Load entry module and return exports
 /******/ // This entry module used 'module' so it can't be inlined
-/******/ var __webpack_exports__ = __webpack_require__(907);
+/******/ var __webpack_exports__ = __webpack_require__(228);
 /******/ __webpack_exports__ = globalThis.pdfjsLib = await (globalThis.pdfjsLibPromise = __webpack_exports__);
 /******/ var __webpack_exports__AbortException = __webpack_exports__.AbortException;
 /******/ var __webpack_exports__AnnotationEditorLayer = __webpack_exports__.AnnotationEditorLayer;
@@ -18123,7 +19786,6 @@ const AnnotationPrefix = "pdfjs_internal_id_";
 /******/ var __webpack_exports__PasswordResponses = __webpack_exports__.PasswordResponses;
 /******/ var __webpack_exports__PermissionFlag = __webpack_exports__.PermissionFlag;
 /******/ var __webpack_exports__PixelsPerInch = __webpack_exports__.PixelsPerInch;
-/******/ var __webpack_exports__PromiseCapability = __webpack_exports__.PromiseCapability;
 /******/ var __webpack_exports__RenderingCancelledException = __webpack_exports__.RenderingCancelledException;
 /******/ var __webpack_exports__UnexpectedResponseException = __webpack_exports__.UnexpectedResponseException;
 /******/ var __webpack_exports__Util = __webpack_exports__.Util;
@@ -18145,7 +19807,7 @@ const AnnotationPrefix = "pdfjs_internal_id_";
 /******/ var __webpack_exports__shadow = __webpack_exports__.shadow;
 /******/ var __webpack_exports__updateTextLayer = __webpack_exports__.updateTextLayer;
 /******/ var __webpack_exports__version = __webpack_exports__.version;
-/******/ export { __webpack_exports__AbortException as AbortException, __webpack_exports__AnnotationEditorLayer as AnnotationEditorLayer, __webpack_exports__AnnotationEditorParamsType as AnnotationEditorParamsType, __webpack_exports__AnnotationEditorType as AnnotationEditorType, __webpack_exports__AnnotationEditorUIManager as AnnotationEditorUIManager, __webpack_exports__AnnotationLayer as AnnotationLayer, __webpack_exports__AnnotationMode as AnnotationMode, __webpack_exports__CMapCompressionType as CMapCompressionType, __webpack_exports__ColorPicker as ColorPicker, __webpack_exports__DOMSVGFactory as DOMSVGFactory, __webpack_exports__DrawLayer as DrawLayer, __webpack_exports__FeatureTest as FeatureTest, __webpack_exports__GlobalWorkerOptions as GlobalWorkerOptions, __webpack_exports__ImageKind as ImageKind, __webpack_exports__InvalidPDFException as InvalidPDFException, __webpack_exports__MissingPDFException as MissingPDFException, __webpack_exports__OPS as OPS, __webpack_exports__Outliner as Outliner, __webpack_exports__PDFDataRangeTransport as PDFDataRangeTransport, __webpack_exports__PDFDateString as PDFDateString, __webpack_exports__PDFWorker as PDFWorker, __webpack_exports__PasswordResponses as PasswordResponses, __webpack_exports__PermissionFlag as PermissionFlag, __webpack_exports__PixelsPerInch as PixelsPerInch, __webpack_exports__PromiseCapability as PromiseCapability, __webpack_exports__RenderingCancelledException as RenderingCancelledException, __webpack_exports__UnexpectedResponseException as UnexpectedResponseException, __webpack_exports__Util as Util, __webpack_exports__VerbosityLevel as VerbosityLevel, __webpack_exports__XfaLayer as XfaLayer, __webpack_exports__build as build, __webpack_exports__createValidAbsoluteUrl as createValidAbsoluteUrl, __webpack_exports__fetchData as fetchData, __webpack_exports__getDocument as getDocument, __webpack_exports__getFilenameFromUrl as getFilenameFromUrl, __webpack_exports__getPdfFilenameFromUrl as getPdfFilenameFromUrl, __webpack_exports__getXfaPageViewport as getXfaPageViewport, __webpack_exports__isDataScheme as isDataScheme, __webpack_exports__isPdfFile as isPdfFile, __webpack_exports__noContextMenu as noContextMenu, __webpack_exports__normalizeUnicode as normalizeUnicode, __webpack_exports__renderTextLayer as renderTextLayer, __webpack_exports__setLayerDimensions as setLayerDimensions, __webpack_exports__shadow as shadow, __webpack_exports__updateTextLayer as updateTextLayer, __webpack_exports__version as version };
+/******/ export { __webpack_exports__AbortException as AbortException, __webpack_exports__AnnotationEditorLayer as AnnotationEditorLayer, __webpack_exports__AnnotationEditorParamsType as AnnotationEditorParamsType, __webpack_exports__AnnotationEditorType as AnnotationEditorType, __webpack_exports__AnnotationEditorUIManager as AnnotationEditorUIManager, __webpack_exports__AnnotationLayer as AnnotationLayer, __webpack_exports__AnnotationMode as AnnotationMode, __webpack_exports__CMapCompressionType as CMapCompressionType, __webpack_exports__ColorPicker as ColorPicker, __webpack_exports__DOMSVGFactory as DOMSVGFactory, __webpack_exports__DrawLayer as DrawLayer, __webpack_exports__FeatureTest as FeatureTest, __webpack_exports__GlobalWorkerOptions as GlobalWorkerOptions, __webpack_exports__ImageKind as ImageKind, __webpack_exports__InvalidPDFException as InvalidPDFException, __webpack_exports__MissingPDFException as MissingPDFException, __webpack_exports__OPS as OPS, __webpack_exports__Outliner as Outliner, __webpack_exports__PDFDataRangeTransport as PDFDataRangeTransport, __webpack_exports__PDFDateString as PDFDateString, __webpack_exports__PDFWorker as PDFWorker, __webpack_exports__PasswordResponses as PasswordResponses, __webpack_exports__PermissionFlag as PermissionFlag, __webpack_exports__PixelsPerInch as PixelsPerInch, __webpack_exports__RenderingCancelledException as RenderingCancelledException, __webpack_exports__UnexpectedResponseException as UnexpectedResponseException, __webpack_exports__Util as Util, __webpack_exports__VerbosityLevel as VerbosityLevel, __webpack_exports__XfaLayer as XfaLayer, __webpack_exports__build as build, __webpack_exports__createValidAbsoluteUrl as createValidAbsoluteUrl, __webpack_exports__fetchData as fetchData, __webpack_exports__getDocument as getDocument, __webpack_exports__getFilenameFromUrl as getFilenameFromUrl, __webpack_exports__getPdfFilenameFromUrl as getPdfFilenameFromUrl, __webpack_exports__getXfaPageViewport as getXfaPageViewport, __webpack_exports__isDataScheme as isDataScheme, __webpack_exports__isPdfFile as isPdfFile, __webpack_exports__noContextMenu as noContextMenu, __webpack_exports__normalizeUnicode as normalizeUnicode, __webpack_exports__renderTextLayer as renderTextLayer, __webpack_exports__setLayerDimensions as setLayerDimensions, __webpack_exports__shadow as shadow, __webpack_exports__updateTextLayer as updateTextLayer, __webpack_exports__version as version };
 /******/ 
 
 //# sourceMappingURL=pdf.mjs.map
