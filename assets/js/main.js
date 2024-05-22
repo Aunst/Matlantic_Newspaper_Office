@@ -1,19 +1,9 @@
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => {
-    initializeClipboard();
-    setDarkmodeSwitch();
-    setThemeFAB()
-    document.body.classList.add('client-js');
-    document.body.classList.remove('client-nojs');
-    document.body.setAttribute('data-javascript-status', 'ready');
+    docReadyFunction();
   });
 } else {
-  initializeClipboard();
-  setDarkmodeSwitch();
-  setThemeFAB()
-  document.body.classList.add('client-js');
-  document.body.classList.remove('client-nojs');
-  document.body.setAttribute('data-javascript-status', 'ready');
+  docReadyFunction();
 }
 document.addEventListener('pjax:send', () => {
   NProgress.start();
@@ -141,4 +131,16 @@ function setThemeFAB() {
     popup.classList.remove('open');
     popup.style.display = null;
   }
+}
+
+/**
+ * @description docReadyFunction
+ */
+function docReadyFunction() {
+  initializeClipboard();
+  setDarkmodeSwitch();
+  setThemeFAB()
+  document.body.classList.add('client-js');
+  document.body.classList.remove('client-nojs');
+  document.body.setAttribute('data-javascript-status', 'ready');
 }
