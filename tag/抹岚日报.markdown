@@ -4,4 +4,4 @@ title: "标签:抹岚日报"
 tag: 抹岚日报
 ---
 
-在 2022 年 7 月 27 日更名为[《莉亚晚报》]({% link tag/莉亚晚报.markdown %})。
+在 2022 年 7 月 27 日更名为[《莉亚晚报》]({{ site.baseurl }}{% link tag/莉亚晚报.markdown %})。
