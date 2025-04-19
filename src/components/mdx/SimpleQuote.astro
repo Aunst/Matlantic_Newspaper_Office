@@ -1,0 +1,15 @@
+---
+const { align = "left", qsource, qsourcet } = Astro.props;
+---
+
+<figure class={`border-x-2 border-x-[oklch(var(--p))] px-3 text-${align} not-prose`}>
+  <figcaption class="mb-4 text-sm text-[--tw-prose-captions]">
+    <slot name="qsourcet" />
+  </figcaption>
+  <blockquote class="border-none">
+    <slot />
+  </blockquote>
+  <figcaption class="mt-4 text-sm text-[--tw-prose-captions]">
+    <slot name="qsource" />
+  </figcaption>
+</figure>

@@ -1,0 +1,59 @@
+---
+import BaseLayout from "@layouts/BaseLayout.astro";
+import License from "@components/widgets/License.astro";
+import PostInfo from "@components/widgets/PostInfo.astro";
+import PostFilter from "@components/widgets/PostFilter.astro";
+import { type CollectionEntry, getCollection } from "astro:content";
+import dayjs from "@utils/dayjs";
+import { DATE_FORMAT } from "@config";
+import MainCard from "@/components/MainCard.astro";
+
+export async function getStaticPaths() {
+  const posts = await getCollection("blog");
+  return posts.map((blog: { slug: any }) => ({
+    params: { slug: blog.slug },
+    props: { blog },
+  }));
+}
+interface Props {
+  blog: CollectionEntry<"blog">;
+}
+
+const { blog } = Astro.props;
+const { Content, remarkPluginFrontmatter, headings } = await blog.render();
+const displayDate = blog.data.pubDate ? dayjs(blog.data.pubDate).format(DATE_FORMAT) : "";
+---
+
+<BaseLayout title={blog.data.title} image={blog.data.image} headings={headings} showTOC={true}>
+  <MainCard title={blog.data.title} description={blog.data.description} image={blog.data.image} infoIcon="lucide:info">
+    <!-- Article info using PostInfo component -->
+    <PostInfo
+      pubDate={displayDate}
+      badge={blog.data.badge}
+      word={remarkPluginFrontmatter.totalCharCount}
+      time={remarkPluginFrontmatter.readingTime}
+    />
+
+    <!-- Categories and tags using PostFilter component -->
+    <div class="mb-6">
+      <PostFilter categories={blog.data.categories} tags={blog.data.tags} />
+    </div>
+
+    <!-- Article Content -->
+    <div class="mt-8">
+      <div id="content" class="prose max-w-none prose-headings:scroll-mt-20 prose-img:rounded-xl prose-img:mx-auto">
+        <Content />
+        <License
+          title={blog.data.title}
+          image={blog.data.image}
+          pubDate={blog.data.pubDate}
+          badge={blog.data.badge}
+          categories={blog.data.categories}
+          tags={blog.data.tags}
+          word={remarkPluginFrontmatter.totalCharCount}
+          time={remarkPluginFrontmatter.readingTime}
+        />
+      </div>
+    </div>
+  </MainCard>
+</BaseLayout>

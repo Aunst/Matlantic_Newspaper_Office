@@ -1,0 +1,24 @@
+---
+import { Icon } from "astro-icon/components";
+
+const { link } = Astro.props;
+---
+
+<aside class={`not-prose card bg-base-100 shadow-md hover:shadow-xl transition-all duration-300 ease-in-out hover:-translate-y-1.5 border border-primary/30 overflow-hidden animate-fade-in-up`}>
+  <div class="card-body">
+    <header class="relative">
+      <h2 class="my-0 py-0 text-base font-normal">PDF文件</h2>
+      <p class="my-0 py-0 text-2xl font-bold"><slot /></p>
+    </header>
+    <div class="card-actions md:justify-end mt-2">
+      <a href={`/pdfjs/web/viewer.html?file=/pdf/${link}`} class="btn btn-primary btn-sm">
+        <Icon name="lucide:book-open" class="inline-block w-5 h-5"></Icon>
+        <span>在线阅读</span>
+      </a>
+      <a href={`/pdf/${link}`} class="btn btn-secondary btn-sm">
+        <Icon name="lucide:arrow-down-to-line" class="inline-block w-5 h-5"></Icon>
+        <span>下载</span>
+      </a>
+    </div>
+  </div>
+</aside>
