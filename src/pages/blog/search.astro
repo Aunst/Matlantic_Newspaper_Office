@@ -22,7 +22,6 @@ import { Icon } from "astro-icon/components";
   </BaseCard>
 
   <BaseCard>
-    <p class="my-3 text-primary font-bold">很抱歉，搜索功能暂不可用</p>
     <div id="search-container" class="w-full">
       <div id="pagefind-search" transition:persist></div>
     </div>
@@ -49,7 +48,7 @@ import { Icon } from "astro-icon/components";
         // Initialize pagefind UI
         const search = new PagefindUI({
           element: "#pagefind-search",
-          baseUrl: "/Matlantic_Newspaper_Office",
+          bundlePath: "/Matlantic_Newspaper_Office/pagefind/",
           showImages: false,
           processTerm: function (term: string): string {
             params.set("q", term);

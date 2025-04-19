@@ -32,7 +32,7 @@ import { Icon } from "astro-icon/components";
     href={url}
     target={target}
     class="card-body p-4 md:p-6"
-    aria-label={`Visit ${title}: ${desc}`}
+    aria-label={`访问${title}：${desc}`}
     rel={target === "_blank" ? "noopener noreferrer" : undefined}
   >
     <div class="flex flex-col md:flex-row gap-4 items-center">
@@ -74,7 +74,7 @@ import { Icon } from "astro-icon/components";
         <p class="text-base-content/80 line-clamp-2 text-sm">{desc}</p>
         <div class="card-actions justify-end mt-2">
           <div class="flex items-center gap-1 text-primary hover:text-primary-focus transition-colors">
-            <span class="text-sm font-medium">Visit {title}</span>
+            <span class="text-sm font-medium">访问{title}</span>
             <Icon name="lucide:external-link" class="w-3.5 h-3.5" aria-hidden="true" />
           </div>
         </div>

@@ -5,7 +5,7 @@ site:
   description: 储存抹岚报社所有刊物的网站 # 网站的描述，用于SEO等
   base: /Matlantic_Newspaper_Office
   language: zh # 网站的语言，例如 "en" 是英文
-  favicon: /Matlantic_Newspaper_Office/favicon.ico # 网站的图标，用于浏览器标签栏和其他地方显示
+  favicon: /Matlantic_Newspaper_Office/favicon.png # 网站的图标，用于浏览器标签栏和其他地方显示
   theme: # 更多主题 https://daisyui.com/docs/themes/
     light: winter # 主题的浅色模式
     dark: sunset # 主题的深色模式
@@ -66,7 +66,7 @@ site:
 user:
   name: 抹岚报社 # 用户名
   site: "https://aunst.github.io" # 用户的网站链接
-  avatar: /Matlantic_Newspaper_Office/profile.png # 用户头像路径
+  avatar: /Matlantic_Newspaper_Office/profile.svg # 用户头像路径
   sidebar: # 侧边栏配置
     social:
       - href: "https://github.com/Aunst/Matlantic_Newspaper_Office"
