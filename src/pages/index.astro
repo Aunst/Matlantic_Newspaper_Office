@@ -1,4 +1,5 @@
 ---
+import { USER_SITE_BASE } from "@/config";
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import { Icon } from "astro-icon/components";
 import MainCard from "@/components/MainCard.astro";
@@ -24,7 +25,7 @@ import GitHubStats from "@/components/mdx/GitHubStats.astro";
             储存抹岚报社所有刊物的网站
           </p>
           <div class="flex flex-wrap gap-4 justify-center">
-            <a href="/blog" class="btn btn-primary gap-2 btn-shine-effect">
+            <a href={`${USER_SITE_BASE}/blog`} class="btn btn-primary gap-2 btn-shine-effect">
               <Icon name="lucide:book-open" class="w-5 h-5" />
               <span>浏览文章</span>
             </a>

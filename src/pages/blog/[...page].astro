@@ -5,7 +5,7 @@ import BaseLayout from "@layouts/BaseLayout.astro";
 import Pagination from "@components/widgets/Pagination.astro";
 import CardGroup from "@components/temple/CardGroup.astro";
 import { Icon } from "astro-icon/components";
-import { t } from "@config";
+import { t, USER_SITE_BASE } from "@config";
 import { generatePageLinks } from "@utils/blogUtils";
 import { getMainBlogPaginationPaths } from "@utils/paginationUtils";
 
@@ -24,7 +24,7 @@ const pageLinks = generatePageLinks(totalPages);
   <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
     <!-- Archives Card -->
     <a
-      href="/blog/archives"
+      href={`${USER_SITE_BASE}/blog/archives`}
       class="card bg-base-100 shadow-lg hover:shadow-xl transition-transform duration-300 ease-in-out hover:-translate-y-1"
     >
       <div class="card-body p-4">
@@ -42,7 +42,7 @@ const pageLinks = generatePageLinks(totalPages);
 
     <!-- Categories Card -->
     <a
-      href="/blog/categories"
+      href={`${USER_SITE_BASE}/blog/categories`}
       class="card bg-base-100 shadow-lg hover:shadow-xl transition-transform duration-300 ease-in-out hover:-translate-y-1"
     >
       <div class="card-body p-4">
@@ -60,7 +60,7 @@ const pageLinks = generatePageLinks(totalPages);
 
     <!-- Tags Card -->
     <a
-      href="/blog/tags"
+      href={`${USER_SITE_BASE}/blog/tags`}
       class="card bg-base-100 shadow-lg hover:shadow-xl transition-transform duration-300 ease-in-out hover:-translate-y-1"
     >
       <div class="card-body p-4">
@@ -78,7 +78,7 @@ const pageLinks = generatePageLinks(totalPages);
 
     <!-- Search Card -->
     <a
-      href="/blog/search"
+      href={`${USER_SITE_BASE}/blog/search`}
       class="card bg-base-100 shadow-lg hover:shadow-xl transition-transform duration-300 ease-in-out hover:-translate-y-1"
     >
       <div class="card-body p-4">
@@ -103,7 +103,7 @@ const pageLinks = generatePageLinks(totalPages);
           title={blog.data.title}
           image={blog.data.image}
           description={blog.data.description}
-          url={"/blog/" + blog.slug}
+          url={USER_SITE_BASE + "/blog/" + blog.slug}
           pubDate={blog.data.pubDate}
           badge={blog.data.badge}
           categories={blog.data.categories}

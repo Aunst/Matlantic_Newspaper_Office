@@ -9,14 +9,14 @@ import rehypeExternalLinks from "rehype-external-links";
 import rehypeKatex from "rehype-katex";
 import remarkMath from "remark-math";
 
-import { CODE_THEME, USER_SITE } from "./src/config.ts";
+import { CODE_THEME, USER_SITE, USER_SITE_BASE } from "./src/config.ts";
 
 import { remarkReadingTime } from "./src/plugins/remark-reading-time.mjs";
 
 // https://astro.build/config
 export default defineConfig({
   site: USER_SITE,
-  base: "Matlantic_Newspaper_Office",
+  base: USER_SITE_BASE,
   output: "static",
   style: {
     scss: {

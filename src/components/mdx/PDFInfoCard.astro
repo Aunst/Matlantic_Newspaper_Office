@@ -1,4 +1,5 @@
 ---
+import { USER_SITE_BASE } from "@/config";
 import { Icon } from "astro-icon/components";
 
 const { link } = Astro.props;
@@ -11,11 +12,11 @@ const { link } = Astro.props;
       <p class="my-0 py-0 text-2xl font-bold"><slot /></p>
     </header>
     <div class="card-actions md:justify-end mt-2">
-      <a href={`/pdfjs/web/viewer.html?file=/pdf/${link}`} class="btn btn-primary btn-sm">
+      <a href={`${USER_SITE_BASE}/pdfjs/web/viewer.html?file=${USER_SITE_BASE}/pdf/${link}`} class="btn btn-primary btn-sm">
         <Icon name="lucide:book-open" class="inline-block w-5 h-5"></Icon>
         <span>在线阅读</span>
       </a>
-      <a href={`/pdf/${link}`} class="btn btn-secondary btn-sm">
+      <a href={`${USER_SITE_BASE}/pdf/${link}`} class="btn btn-secondary btn-sm">
         <Icon name="lucide:arrow-down-to-line" class="inline-block w-5 h-5"></Icon>
         <span>下载</span>
       </a>

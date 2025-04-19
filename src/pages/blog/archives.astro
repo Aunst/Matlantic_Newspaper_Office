@@ -1,7 +1,7 @@
 ---
 import BaseLayout from "@layouts/BaseLayout.astro";
 import BaseCard from "@components/BaseCard.astro";
-import { t } from "@config";
+import { t, USER_SITE_BASE } from "@config";
 import { Icon } from "astro-icon/components";
 import dayjs from "@utils/dayjs";
 import { DATE_FORMAT } from "@config";
@@ -38,7 +38,7 @@ const totalPosts = allPosts.length;
         <h1 id="h1" class="text-2xl md:text-3xl font-bold">{t("label.archivePage")}</h1>
         <div class="badge badge-accent">{totalPosts} {totalPosts === 1 ? t("label.post") : t("label.posts")}</div>
       </div>
-      <a href="/blog" class="btn btn-outline btn-sm gap-2">
+      <a href={`${USER_SITE_BASE}/blog`} class="btn btn-outline btn-sm gap-2">
         <Icon name="lucide:book-open" class="w-4 h-4" />
         <span>{t("label.backToBlog")}</span>
       </a>
@@ -73,7 +73,7 @@ const totalPosts = allPosts.length;
                         <ul class="archive-posts">
                           {posts.map((post) => (
                             <li class="archive-item">
-                              <a href={`/blog/${post.slug}`} class="archive-card">
+                              <a href={`/${USER_SITE_BASE}/blog/${post.slug}`} class="archive-card">
                                 <time class="archive-date">{dayjs(post.data.pubDate).format(DATE_FORMAT)}</time>
                                 <h4 class="archive-title">{post.data.title}</h4>
                                 {post.data.description && <p class="archive-description">{post.data.description}</p>}

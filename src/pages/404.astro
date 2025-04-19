@@ -1,6 +1,6 @@
 ---
 import BaseLayout from "@layouts/BaseLayout.astro";
-import { t } from "@config";
+import { t, USER_SITE_BASE } from "@config";
 import { Icon } from "astro-icon/components";
 import MainCard from "@/components/MainCard.astro";
 ---
@@ -14,7 +14,7 @@ import MainCard from "@/components/MainCard.astro";
     infoIcon="lucide:help-circle"
   >
     <div class="flex flex-col sm:flex-row gap-4 justify-center my-8">
-      <a href="/" class="btn btn-primary gap-2 btn-shine-effect">
+      <a href={`${USER_SITE_BASE}/`} class="btn btn-primary gap-2 btn-shine-effect">
         <Icon name="lucide:home" class="w-5 h-5" />
         <span>{t("label.404backHome") || "Back to Home"}</span>
       </a>
@@ -29,21 +29,21 @@ import MainCard from "@/components/MainCard.astro";
     </div>
 
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-      <a href="/blog" class="card bg-base-200 p-4 hover-lift text-center transition-all duration-300">
+      <a href={`${USER_SITE_BASE}/blog`} class="card bg-base-200 p-4 hover-lift text-center transition-all duration-300">
         <div class="text-info mb-2">
           <Icon name="lucide:book-open" class="w-8 h-8 mx-auto" />
         </div>
         <h3 class="font-semibold">{t("label.404exploreBlog") || "Explore our blog"}</h3>
       </a>
 
-      <a href="/blog/archives" class="card bg-base-200 p-4 hover-lift text-center transition-all duration-300">
+      <a href={`${USER_SITE_BASE}/blog/archives`} class="card bg-base-200 p-4 hover-lift text-center transition-all duration-300">
         <div class="text-info mb-2">
           <Icon name="lucide:archive" class="w-8 h-8 mx-auto" />
         </div>
         <h3 class="font-semibold">{t("label.404browseArchives") || "Browse archives"}</h3>
       </a>
 
-      <a href="/blog/search" class="card bg-base-200 p-4 hover-lift text-center transition-all duration-300">
+      <a href={`${USER_SITE_BASE}/blog/search`} class="card bg-base-200 p-4 hover-lift text-center transition-all duration-300">
         <div class="text-info mb-2">
           <Icon name="lucide:search" class="w-8 h-8 mx-auto" />
         </div>

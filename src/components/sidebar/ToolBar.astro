@@ -3,7 +3,7 @@ import Card from "../temple/Card.astro";
 import ScrollToTop from "../widgets/ScrollToTop.astro";
 import ThemeToggle from "../widgets/ThemeToggle.astro";
 import { Icon } from "astro-icon/components";
-import { t } from "@config";
+import { t, USER_SITE_BASE } from "@config";
 ---
 
 <Card>
@@ -11,7 +11,7 @@ import { t } from "@config";
     <div class="grid grid-cols-4 md:grid-cols-2 lg:grid-cols-4 justify-center items-center gap-4 flex-wrap">
       <!-- Navigation Buttons -->
       <a
-        href="/blog/tags"
+        href={`${USER_SITE_BASE}/blog/tags`}
         class="btn btn-circle btn-sm md:btn-md bg-base-100 shadow-sm hover:scale-110"
         aria-label={t("label.tagPage")}
         title={t("label.tagPage")}
@@ -20,7 +20,7 @@ import { t } from "@config";
       </a>
 
       <a
-        href="/blog/categories"
+        href={`${USER_SITE_BASE}/blog/categories`}
         class="btn btn-circle btn-sm md:btn-md bg-base-100 shadow-sm hover:scale-110"
         aria-label={t("label.categoryPage")}
         title={t("label.categoryPage")}
@@ -29,7 +29,7 @@ import { t } from "@config";
       </a>
 
       <a
-        href="/blog/archives"
+        href={`${USER_SITE_BASE}/blog/archives`}
         class="btn btn-circle btn-sm md:btn-md bg-base-100 shadow-sm hover:scale-110"
         aria-label={t("label.archivePage")}
         title={t("label.archivePage")}

@@ -31,6 +31,7 @@ export const CODE_THEME = config.site.theme.code;
 // 用户个人信息
 export const USER_NAME = config.user.name;
 export const USER_SITE = config.user.site;
+export const USER_SITE_BASE = config.site.base;
 export const USER_AVATAR = config.user.avatar;
 
 // 社交图标配置（侧边栏和页脚）

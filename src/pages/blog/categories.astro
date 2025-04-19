@@ -1,7 +1,7 @@
 ---
 import BaseLayout from "@layouts/BaseLayout.astro";
 import BaseCard from "@components/BaseCard.astro";
-import { t } from "@config";
+import { t, USER_SITE_BASE } from "@config";
 import { Icon } from "astro-icon/components";
 import dayjs from "@utils/dayjs";
 import { DATE_FORMAT } from "@config";
@@ -38,7 +38,7 @@ const totalCategories = categoryMap.size;
         <h1 id="h1" class="text-2xl md:text-3xl font-bold">{t("label.categoryPage")}</h1>
         <div class="badge badge-primary">{totalCategories} {t("label.totalCategories")}</div>
       </div>
-      <a href="/blog" class="btn btn-outline btn-sm gap-2">
+      <a href={`${USER_SITE_BASE}/blog`} class="btn btn-outline btn-sm gap-2">
         <Icon name="lucide:book-open" class="w-4 h-4" />
         <span>{t("label.backToBlog")}</span>
       </a>
@@ -71,7 +71,7 @@ const totalCategories = categoryMap.size;
                     <ul class="post-list">
                       {posts.map((post) => (
                         <li class="post-item">
-                          <a href={`/blog/${post.slug}`} class="post-link">
+                          <a href={`${USER_SITE_BASE}/blog/${post.slug}`} class="post-link">
                             <span class="post-title">{post.data.title}</span>
                             <span class="post-date">{dayjs(post.data.pubDate).format(DATE_FORMAT)}</span>
                           </a>

@@ -1,5 +1,5 @@
 ---
-import { t } from "@config";
+import { t, USER_SITE_BASE } from "@config";
 import type { PostData } from "@interfaces/data";
 import { Icon } from "astro-icon/components";
 const { categories = [], tags = [] } = Astro.props as PostData;
@@ -8,7 +8,7 @@ const { categories = [], tags = [] } = Astro.props as PostData;
 <div class="flex flex-wrap items-center gap-2">
   {
     categories.map((category) => (
-      <a href={`/blog/category/${category}`} class="btn btn-xs btn-category">
+      <a href={`${USER_SITE_BASE}/blog/category/${category}`} class="btn btn-xs btn-category">
         <Icon name="lucide:folder" class="w-4 h-4" />
         <span>{category}</span>
       </a>
@@ -16,7 +16,7 @@ const { categories = [], tags = [] } = Astro.props as PostData;
   }
   {
     tags.map((tag) => (
-      <a href={`/blog/tag/${tag}`} class="btn btn-xs btn-tag">
+      <a href={`${USER_SITE_BASE}/blog/tag/${tag}`} class="btn btn-xs btn-tag">
         <Icon name="lucide:tag" class="w-4 h-4" />
         <span>{tag}</span>
       </a>
