@@ -1,5 +1,6 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
+import { USER_SITE_BASE } from "@/config";
 import { Icon } from "astro-icon/components";
 import MainCard from "@/components/MainCard.astro";
 import LinkCard from "@/components/mdx/LinkCard.astro";
@@ -8,43 +9,29 @@ import FriendCard from "@/components/mdx/FriendCard.astro";
 
 <BaseLayout title="Friends">
   <MainCard
-    title="Friends & Resources"
-    description="A collection of links to friends, technologies, and contributors to the Frosti project."
+    title="友人"
+    description="友人、朋友组织（？）和友情链接！还有点资料网站"
     textOverlay="FRIENDS"
     infoIcon="lucide:link"
   >
     <div class="space-y-10">
       <!-- Friends Section -->
-      <!--<section>
+      <section>
         <h2 class="text-2xl font-bold mb-6 flex items-center gap-2">
           <Icon name="lucide:users" class="w-6 h-6 text-primary" />
-          <span>Friends</span>
+          <span>友人和朋友组织</span>
         </h2>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
           <FriendCard
-            name="Lyme Blurred"
-            avatar="https://github.com/lymeblurred.png"
-            description="Building, breaking, and learning daily | A copy of EveSunMaple"
-            url="https://github.com/lymeblurred"
-            type="friend"
-          />
-          <FriendCard
-            name="梦凌汐"
-            avatar="https://github.com/MeowLynxSea.png"
-            description="来自星辰边缘的猫猫~爱好是睡觉awa"
-            url="https://github.com/MeowLynxSea"
-            type="friend"
-          />
-          <FriendCard
-            name="颜涂楷睿"
-            avatar="https://github.com/SnowFoxqwq.png"
-            description="你好，我是雪狐~"
-            url="https://github.com/SnowFoxqwq"
+            name="RIA 莉亚"
+            avatar={`${USER_SITE_BASE}/image/ria_avatar.jpg`}
+            description="创作与分享，一群Minecraft玩家的游戏社群"
+            url="https://ria.red"
             type="friend"
           />
         </div>
-      </section>-->
+      </section>
 
       <!-- Contributors Section -->
       <!--<section>
@@ -100,32 +87,32 @@ import FriendCard from "@/components/mdx/FriendCard.astro";
       </section>-->
 
       <!-- Useful Resources Section -->
-      <!--<section>
+      <section>
         <h2 class="text-2xl font-bold mb-6 flex items-center gap-2">
           <Icon name="lucide:bookmark" class="w-6 h-6 text-primary" />
-          <span>Useful Resources</span>
+          <span>实用资源</span>
         </h2>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <LinkCard
-            title="Astro Documentation"
-            desc="The official documentation for Astro, covering everything from getting started to advanced techniques."
+            title="Astro文档"
+            desc="Astro官方文档, 囊括了从入门到高级技术的一切。"
             url="https://docs.astro.build"
             icon="simple-icons:astro"
             categories={["Docs", "Learning", "Reference"]}
           />
 
           <LinkCard
-            title="Tailwind CSS Documentation"
-            desc="Learn how to use Tailwind's utility classes to style your website without writing CSS."
+            title="Tailwind CSS文档"
+            desc="学习使用Tailwind实用类装饰网站，不用写CSS了。"
             url="https://tailwindcss.com/docs"
             icon="simple-icons:tailwindcss"
             categories={["Docs", "CSS", "Reference"]}
           />
 
           <LinkCard
-            title="DaisyUI Components"
-            desc="Browse DaisyUI's component library and learn how to use them in your project."
+            title="DaisyUI组件"
+            desc="浏览DaisyUI组件库，学习在网站中使用。"
             url="https://daisyui.com/components/"
             icon="simple-icons:daisyui"
             categories={["Components", "UI", "Reference"]}
@@ -133,13 +120,13 @@ import FriendCard from "@/components/mdx/FriendCard.astro";
 
           <LinkCard
             title="TypeScript Handbook"
-            desc="The TypeScript Handbook is a comprehensive guide to the TypeScript language."
+            desc="TypeScript Handbook是TypeScript语言的完全指南。"
             url="https://www.typescriptlang.org/docs/handbook/intro.html"
             icon="simple-icons:typescript"
             categories={["Docs", "TypeScript", "Reference"]}
           />
         </div>
-      </section>-->
+      </section>
 
       <!--<div class="divider my-8">
         <Icon name="lucide:heart" class="w-10 h-10 text-primary" />
