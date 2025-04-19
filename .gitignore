@@ -25,3 +25,5 @@ pnpm-debug.log*
 
 # pagefind
 public/pagefind/
+public/*.pf-meta
+public/fragment
