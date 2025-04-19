@@ -1,12 +1,12 @@
 ---
 import Card from "../temple/Card.astro";
 import { Icon } from "astro-icon/components";
-import { t } from "@config";
+import { t, USER_SITE_BASE } from "@config";
 ---
 
 <Card>
   <div class="p-4">
-    <form action="/blog/search" method="get" class="relative w-full">
+    <form action={`${USER_SITE_BASE}/blog/search`} method="get" class="relative w-full">
       <div class="search-container w-full relative">
         <input
           type="text"
