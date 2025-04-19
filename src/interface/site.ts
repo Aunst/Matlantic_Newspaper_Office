@@ -30,6 +30,7 @@ export interface SiteConfig {
   tab: string;
   title: string;
   description: string;
+  base: string;
   language: string;
   favicon: string;
   theme: {
