@@ -16,7 +16,7 @@ import { remarkReadingTime } from "./src/plugins/remark-reading-time.mjs";
 // https://astro.build/config
 export default defineConfig({
   site: USER_SITE,
-  base: "Matlantic-Newspaper-Office",
+  base: "Matlantic_Newspaper_Office",
   output: "static",
   style: {
     scss: {
