@@ -1,0 +1,10 @@
+---
+import { USER_SITE_BASE } from "@/config";
+
+const {src, alt} = Astro.props 
+---
+
+<figure>
+  <img alt={alt} src={`${USER_SITE_BASE}/${src}`} />
+  <figcaption><slot /></figcaption>
+</figure>

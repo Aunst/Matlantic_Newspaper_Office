@@ -1,7 +1,7 @@
 ---
 import { Icon } from "astro-icon/components";
 import ThemeToggle from "./widgets/ThemeToggle.astro";
-import { SITE_TITLE, SITE_MENU } from "../config";
+import { SITE_TITLE, USER_SITE_BASE, SITE_MENU } from "../config";
 
 // Get current path to determine active link
 const currentPath = Astro.url.pathname;
@@ -41,7 +41,7 @@ const typedMenu = SITE_MENU as MenuItem[];
   </div>
 
   <div class="navbar-center">
-    <a class="btn btn-ghost text-xl hover:scale-105 transition-transform duration-300" href="/">
+    <a class="btn btn-ghost text-xl hover:scale-105 transition-transform duration-300" href={`${USER_SITE_BASE}/`}>
       {SITE_TITLE}
     </a>
   </div>

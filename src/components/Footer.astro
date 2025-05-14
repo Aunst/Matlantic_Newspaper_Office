@@ -1,6 +1,6 @@
 ---
 import { Icon } from "astro-icon/components";
-import { USER_NAME, USER_SITE, USER_FOOTER_SOCIAL_ICONS } from "@config";
+import { USER_NAME, USER_SITE, USER_FOOTER_SOCIAL_ICONS, USER_SITE_BASE } from "@config";
 ---
 
 <div class="bg-transparent order-5" transition:name="footer">
@@ -39,7 +39,7 @@ import { USER_NAME, USER_SITE, USER_FOOTER_SOCIAL_ICONS } from "@config";
           ))
         }
         <div class="tooltip" data-tip="RSS Feed">
-          <a tabindex="0" href="/rss.xml" aria-label="RSS Feed">
+          <a tabindex="0" href={`${USER_SITE_BASE}/rss.xml`} aria-label="RSS Feed">
             <Icon name="ri:rss-line" class="text-2xl md:text-xl" />
           </a>
         </div>
