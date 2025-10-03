@@ -29,38 +29,11 @@ site:
       href: /Matlantic_Newspaper_Office/blog
       svg: "material-symbols:book-2-outline-rounded"
       target: _self
-      #subItems:
-      #  - id: all
-      #    text: 全部
-      #    href: /blog
-      #    svg: "material-symbols:ink-pen-outline-rounded"
-      #    target: _self
-      #  - id: tech
-      #    text: 科技
-      #    href: /blog/category/tech
-      #    svg: "material-symbols:deployed-code-outline"
-      #    target: _self
-      #  - id: life
-      #    text: 生活
-      #    href: /blog/category/life
-      #    svg: "material-symbols:earthquake-rounded"
-      #    target: _self
-      #  # 子菜单项配置
-    # - id: project
-    #   text: 项目
-    #   href: /project
-    #   svg: "material-symbols:code-blocks-outline"
-    #   target: _self
     - id: friend
       text: 友人
       href: /Matlantic_Newspaper_Office/friend
       svg: "material-symbols:supervisor-account-outline-rounded"
       target: _self
-    # - id: contact
-    #   text: 联络
-    #   href: "mailto:contact.evesunmaple@outlook.com"
-    #   target: _blank # 在新标签页打开
-    #   svg: "material-symbols:attach-email-outline-rounded"
 
 # 用户的个人信息
 user:
@@ -73,10 +46,6 @@ user:
         ariaLabel: GitHub
         title: GitHub
         svg: "ri:github-line"
-      # - href: "javascript:void(0)"
-      #   ariaLabel: bilibili
-      #   title: bilibili
-      #   svg: "ri:bilibili-line"
   footer:
     social:
       - href: "https://github.com/Aunst/Matlantic_Newspaper_Office"

@@ -5,7 +5,7 @@ import PostInfo from "@components/widgets/PostInfo.astro";
 import PostFilter from "@components/widgets/PostFilter.astro";
 import { type CollectionEntry, getCollection } from "astro:content";
 import dayjs from "@utils/dayjs";
-import { DATE_FORMAT } from "@config";
+import { USER_SITE_BASE, DATE_FORMAT } from "@config";
 import MainCard from "@/components/MainCard.astro";
 
 export async function getStaticPaths() {
@@ -22,11 +22,18 @@ interface Props {
 const { blog } = Astro.props;
 const { Content, remarkPluginFrontmatter, headings } = await blog.render();
 const displayDate = blog.data.pubDate ? dayjs(blog.data.pubDate).format(DATE_FORMAT) : "";
+const image = new URL(`${USER_SITE_BASE}/og/${blog.slug}.png`, Astro.site).toString();
+const url = new URL(`${USER_SITE_BASE}/blog/${blog.slug}`, Astro.url.origin);
 ---
 
-<BaseLayout title={blog.data.title} image={blog.data.image} headings={headings} showTOC={true}>
+<BaseLayout
+  title={blog.data.title}
+  description={blog.data.description}
+  image={image}
+  headings={headings}
+  showTOC={true}
+>
   <MainCard title={blog.data.title} description={blog.data.description} image={blog.data.image} infoIcon="lucide:info">
-    <!-- Article info using PostInfo component -->
     <PostInfo
       pubDate={displayDate}
       badge={blog.data.badge}
@@ -34,16 +41,15 @@ const displayDate = blog.data.pubDate ? dayjs(blog.data.pubDate).format(DATE_FOR
       time={remarkPluginFrontmatter.readingTime}
     />
 
-    <!-- Categories and tags using PostFilter component -->
     <div class="mb-6">
       <PostFilter categories={blog.data.categories} tags={blog.data.tags} />
     </div>
 
-    <!-- Article Content -->
     <div class="mt-8">
       <div id="content" class="prose max-w-none prose-headings:scroll-mt-20 prose-img:rounded-xl prose-img:mx-auto">
         <Content />
         <License
+          url={url}
           title={blog.data.title}
           image={blog.data.image}
           pubDate={blog.data.pubDate}

@@ -22,7 +22,6 @@ const years = Array.from(postsByDate.keys()).sort((a, b) => parseInt(b) - parseI
 // 从翻译获取月份名称
 const getMonthName = (month: string): string => {
   const monthIndex = parseInt(month);
-  // return t(`months.${monthIndex}`);
   return `${monthIndex}`;
 };
 

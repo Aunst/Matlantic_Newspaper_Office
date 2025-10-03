@@ -12,7 +12,7 @@ const { link } = Astro.props;
       <p class="my-0 py-0 text-2xl font-bold"><slot /></p>
     </header>
     <div class="card-actions md:justify-end mt-2">
-      <a href={`${USER_SITE_BASE}/pdfjs/web/viewer.html?file=${USER_SITE_BASE}/pdf/${link}`} class="btn btn-primary btn-sm">
+      <a href={`${USER_SITE_BASE}/pdfjs/web/viewer.html?file=${USER_SITE_BASE}/pdf/${link}`} class="btn btn-primary btn-sm" target="_blank" rel="noreferrer">
         <Icon name="lucide:book-open" class="inline-block w-5 h-5"></Icon>
         <span>在线阅读</span>
       </a>

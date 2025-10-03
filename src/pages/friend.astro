@@ -5,147 +5,82 @@ import { Icon } from "astro-icon/components";
 import MainCard from "@/components/MainCard.astro";
 import LinkCard from "@/components/mdx/LinkCard.astro";
 import FriendCard from "@/components/mdx/FriendCard.astro";
+import Card from "@/components/temple/Card.astro";
+import CardGroup from "@/components/temple/CardGroup.astro";
+import Showcase from "@/components/mdx/Showcase.astro";
+
+const sites = [{ name: "Frosti Demo", url: "https://frosti.saroprock.com/" }];
 ---
 
 <BaseLayout title="友人">
-  <MainCard
-    title="友人"
-    description="友人、朋友组织（？）和友情链接！还有点资料网站"
-    textOverlay="FRIENDS"
-    infoIcon="lucide:link"
-  >
-    <div class="space-y-10">
-      <!-- Friends Section -->
-      <section>
-        <h2 class="text-2xl font-bold mb-6 flex items-center gap-2">
-          <Icon name="lucide:users" class="w-6 h-6 text-primary" />
-          <span>友人和朋友组织</span>
-        </h2>
+  <CardGroup cols="1">
+    <MainCard
+      title="友人"
+      description="友人、朋友组织（？）和友情链接！还有点资料网站"
+      textOverlay="FRIENDS"
+      infoIcon="lucide:link"
+    >
+      <div class="space-y-10">
+        <!-- Friends Section -->
+        <section>
+          <h2 class="text-2xl font-bold mb-6 flex items-center gap-2">
+            <Icon name="lucide:users" class="w-6 h-6 text-primary" />
+            <span>友人和朋友组织</span>
+          </h2>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-          <FriendCard
-            name="RIA 莉亚"
-            avatar={`${USER_SITE_BASE}/image/ria_avatar.jpg`}
-            description="创作与分享，一群Minecraft玩家的游戏社群"
-            url="https://ria.red"
-            type="friend"
-          />
-        </div>
-      </section>
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+            <FriendCard
+              name="RIA 莉亚"
+              avatar={`${USER_SITE_BASE}/image/ria_avatar.jpg`}
+              description="创作与分享，一群Minecraft玩家的游戏社群"
+              url="https://ria.red"
+              type="friend"
+            />
+          </div>
+        </section>
 
-      <!-- Contributors Section -->
-      <!--<section>
-        <h2 class="text-2xl font-bold mb-6 flex items-center gap-2">
-          <Icon name="lucide:git-pull-request" class="w-6 h-6 text-primary" />
-          <span>Contributors</span>
-        </h2>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-          <FriendCard
-            name="SunMaple"
-            avatar="https://github.com/EveSunMaple.png"
-            description=""
-            url="https://github.com/EveSunMaple"
-            type="contributor"
-          />
-          <FriendCard
-            name="Loping151"
-            avatar="https://github.com/Loping151.png"
-            description=""
-            url="https://github.com/Loping151"
-            type="contributor"
-          />
-          <FriendCard
-            name="Tianxiang Roxiyater"
-            avatar="https://github.com/TNXG.png"
-            description="明日尚未到来，希望凝于心上"
-            url="https://github.com/TNXG"
-            type="contributor"
-          />
-          <FriendCard
-            name="Yaoqx"
-            avatar="https://github.com/YaoqxCN.png"
-            description="A lazy junior high school student who likes coding!"
-            url="https://github.com/YaoqxCN"
-            type="contributor"
-          />
-          <FriendCard
-            name="Yao Tutu"
-            avatar="https://github.com/yaotutu.png"
-            description="Graduated student of SHMTU, CS major."
-            url="https://github.com/yaotutu"
-            type="contributor"
-          />
-          <FriendCard
-            name="WRXinYue"
-            avatar="https://github.com/WRXinYue.png"
-            description="Technology is not just a tool; it is a joy and an art."
-            url="https://github.com/WRXinYue"
-            type="contributor"
-          />
-        </div>
-      </section>-->
+        <!-- Useful Resources Section -->
+        <section>
+          <h2 class="text-2xl font-bold mb-6 flex items-center gap-2">
+            <Icon name="lucide:bookmark" class="w-6 h-6 text-primary" />
+            <span>实用资源</span>
+          </h2>
 
-      <!-- Useful Resources Section -->
-      <section>
-        <h2 class="text-2xl font-bold mb-6 flex items-center gap-2">
-          <Icon name="lucide:bookmark" class="w-6 h-6 text-primary" />
-          <span>实用资源</span>
-        </h2>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <LinkCard
+              title="Astro文档"
+              desc="Astro官方文档, 从入门到高级技术。"
+              url="https://docs.astro.build"
+              icon="simple-icons:astro"
+              categories={["Docs", "Learning", "Reference"]}
+            />
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <LinkCard
-            title="Astro文档"
-            desc="Astro官方文档, 囊括了从入门到高级技术的一切。"
-            url="https://docs.astro.build"
-            icon="simple-icons:astro"
-            categories={["Docs", "Learning", "Reference"]}
-          />
+            <LinkCard
+              title="Tailwind CSS文档"
+              desc="学习使用Tailwind实用类装饰网站，不用写CSS了。"
+              url="https://tailwindcss.com/docs"
+              icon="simple-icons:tailwindcss"
+              categories={["Docs", "CSS", "Reference"]}
+            />
 
-          <LinkCard
-            title="Tailwind CSS文档"
-            desc="学习使用Tailwind实用类装饰网站，不用写CSS了。"
-            url="https://tailwindcss.com/docs"
-            icon="simple-icons:tailwindcss"
-            categories={["Docs", "CSS", "Reference"]}
-          />
+            <LinkCard
+              title="DaisyUI组件"
+              desc="浏览DaisyUI组件库，学习在网站中使用。"
+              url="https://daisyui.com/components/"
+              icon="simple-icons:daisyui"
+              categories={["Components", "UI", "Reference"]}
+            />
 
-          <LinkCard
-            title="DaisyUI组件"
-            desc="浏览DaisyUI组件库，学习在网站中使用。"
-            url="https://daisyui.com/components/"
-            icon="simple-icons:daisyui"
-            categories={["Components", "UI", "Reference"]}
-          />
-
-          <LinkCard
-            title="TypeScript Handbook"
-            desc="TypeScript Handbook是TypeScript语言的完全指南。"
-            url="https://www.typescriptlang.org/docs/handbook/intro.html"
-            icon="simple-icons:typescript"
-            categories={["Docs", "TypeScript", "Reference"]}
-          />
-        </div>
-      </section>
-
-      <!--<div class="divider my-8">
-        <Icon name="lucide:heart" class="w-10 h-10 text-primary" />
-      </div>-->
-
-      <!--<div class="text-center">
-        <p class="text-base-content/80 mb-4">
-          Want to be featured on this page? Feel free to reach out or contribute to the project!
-        </p>
-        <a
-          href="https://github.com/EveSunMaple/Frosti"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="btn btn-primary gap-2"
-        >
-          <Icon name="lucide:github" class="w-5 h-5" />
-          <span>Contribute on GitHub</span>
-        </a>
-      </div>-->
-    </div>
-  </MainCard>
+            <LinkCard
+              title="TypeScript Handbook"
+              desc="TypeScript Handbook是TypeScript语言的完全指南。"
+              url="https://www.typescriptlang.org/docs/handbook/intro.html"
+              icon="simple-icons:typescript"
+              categories={["Docs", "TypeScript", "Reference"]}
+            />
+          </div>
+        </section>
+    </MainCard>
+  </CardGroup>
 </BaseLayout>

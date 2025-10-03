@@ -21,12 +21,9 @@ const pageLinks = generatePageLinks(totalPages);
 
 <BaseLayout title="博客">
   <!-- Blog Navigation Cards -->
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+  <CardGroup cols="2">
     <!-- Archives Card -->
-    <a
-      href={`${USER_SITE_BASE}/blog/archives`}
-      class="card bg-base-100 shadow-lg hover:shadow-xl transition-transform duration-300 ease-in-out hover:-translate-y-1"
-    >
+    <a href={`${USER_SITE_BASE}/blog/archives`} class="card bg-base-100 shadow-lg">
       <div class="card-body p-4">
         <div class="flex items-center gap-3">
           <div class="rounded-full bg-accent/10 p-3">
@@ -41,10 +38,7 @@ const pageLinks = generatePageLinks(totalPages);
     </a>
 
     <!-- Categories Card -->
-    <a
-      href={`${USER_SITE_BASE}/blog/categories`}
-      class="card bg-base-100 shadow-lg hover:shadow-xl transition-transform duration-300 ease-in-out hover:-translate-y-1"
-    >
+    <a href={`${USER_SITE_BASE}/blog/categories`} class="card bg-base-100 shadow-lg">
       <div class="card-body p-4">
         <div class="flex items-center gap-3">
           <div class="rounded-full bg-primary/10 p-3">
@@ -59,10 +53,7 @@ const pageLinks = generatePageLinks(totalPages);
     </a>
 
     <!-- Tags Card -->
-    <a
-      href={`${USER_SITE_BASE}/blog/tags`}
-      class="card bg-base-100 shadow-lg hover:shadow-xl transition-transform duration-300 ease-in-out hover:-translate-y-1"
-    >
+    <a href={`${USER_SITE_BASE}/blog/tags`} class="card bg-base-100 shadow-lg">
       <div class="card-body p-4">
         <div class="flex items-center gap-3">
           <div class="rounded-full bg-secondary/10 p-3">
@@ -77,10 +68,7 @@ const pageLinks = generatePageLinks(totalPages);
     </a>
 
     <!-- Search Card -->
-    <a
-      href={`${USER_SITE_BASE}/blog/search`}
-      class="card bg-base-100 shadow-lg hover:shadow-xl transition-transform duration-300 ease-in-out hover:-translate-y-1"
-    >
+    <a href={`${USER_SITE_BASE}/blog/search`} class="card bg-base-100 shadow-lg">
       <div class="card-body p-4">
         <div class="flex items-center gap-3">
           <div class="rounded-full bg-info/10 p-3">
@@ -93,10 +81,10 @@ const pageLinks = generatePageLinks(totalPages);
         </div>
       </div>
     </a>
-  </div>
+  </CardGroup>
 
   <!-- Blog Post List -->
-  <CardGroup cols="1" gap="6">
+  <CardGroup cols="1">
     {
       page.data.map((blog: Post) => (
         <PostCard
