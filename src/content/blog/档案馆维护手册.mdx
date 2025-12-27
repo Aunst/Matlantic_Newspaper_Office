@@ -1,0 +1,79 @@
+---
+title: "档案馆维护手册"
+description: "档案馆（本网站）日常维护的一些方法。"
+pubDate: 2025-12-27
+---
+import Info from "../../components/mdx/Info.astro";
+
+<Info>本文仍在编写中。</Info>
+
+档案馆应持续维护，保证所有刊物都放进来了。本文将介绍日常维护的一些方法。
+
+本文假设你有基本的计算机与HTML知识。
+
+档案馆托管在GitHub Pages上，[GitHub仓库](github.com/Aunst/Matlantic_Newspapaer_Office)。
+
+## 事前准备
+如果不是仓库所有者，那你需要创建一个[仓库](github.com/Aunst/Matlantic_Newspapaer_Office)分支，请参考[为存储库创建分支 - GitHub文档](https://docs.github.com/zh/pull-requests/collaborating-with-pull-requests/working-with-forks/fork-a-repo)。可能需要将仓库克隆到本地，为此需要[安装Git](https://git-scm.com/book/zh/v2/%E8%B5%B7%E6%AD%A5-%E5%AE%89%E8%A3%85-Git)，Git相关操作不在此列出。在完成更改后，创建一个拉取请求（pull request）。审查通过后，更改就会同步到主仓库，参考[从复刻创建拉取请求](https://docs.github.com/zh/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request-from-a-fork)。
+
+## 项目结构
+下面是值得注意的文件（夹）：
+```text
+.github
+docs
+public
+├ image
+├ pdf
+└ pdfjs
+src
+├ components
+│ ├ mdx
+│ └ ……
+├ content
+│ └ blog
+├ i18n
+├ pages
+│ └ ……
+└ ……
+frosti.config.yaml
+```
+* “.github”文件夹内有将网站发布在GitHub Pages上的工作流（.github/workflows/deploy.yml）。
+* “public”文件夹是网站上使用的资源，包括图片和PDF文档等。
+  * “image”文件夹存放图像。
+  * “pdf”文件夹存放PDF文件。《方圆》PDF发行版就在这里。
+  * “pdfjs”文件夹是在线PDF阅读器。
+  * “favicon.png”与“profile.svg”是网站图标。
+* “src”文件夹是网站的主要内容。
+  * “components”文件夹是网站的可复用组件。如果需要添加使用在页面内的模板，可在“components/mdx”文件夹内添加。
+  * **“content/blog”文件夹存放网站所有文章。**《方圆》与《莉亚晚报》页面都在这里。
+  * “i18n”存放网站本体的翻译。
+  * “pages”文件夹内存放非文章页面，值得注意的有“about.astro”（关于网站）、“friend.astro”（友链）与“index.astro”（网站首页）。
+* “frosti.config.yaml”是网站配置文件。
+
+## 创建新文章
+在“src/content/blog”文件夹里可以看见一堆“.md”与“.mdx”后缀文件，这些文件用于生成文章页面。
+
+### Frontmatter
+文件的开头几行长这样：
+```yaml
+---
+title: "方圆 2025年4月刊"
+description: ""
+pubDate: 2025-04-22
+categories:
+  - 方圆
+tags:
+  - 月刊
+---
+```
+这些是文章的frontmatter，可以理解为文章基本信息。网站利用这些信息来对文章进行基本处理，如生成标题与描述，设置发布时间，设置分类等。常用参数有：
+* title：文章标题。显示在文章顶部与导航卡片。
+* description：文章简单描述。显示在导航卡片。可以比标题略长，让人了解本文在讲什么。
+* pubDate：文章发布日期。
+* categories：文章分类。
+* tags：文章标签。
+
+分类与标签的区别我还没搞太懂，但分类应该尽量少。如果文章属于某一系列，那分类就是这一系列（比如《方圆》）。标签就随意。
+
+### 内容
+无论是“.md”还是“.mdx”文件，使用的都是Markdown语法。
