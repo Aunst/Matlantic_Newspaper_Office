@@ -55,5 +55,5 @@ const pageLinks = generatePageLinks(totalPages);
       ))
     }
   </CardGroup>
-  <Pagination page={page} totalPages={totalPages} pageLinks={pageLinks} baseUrl={`/blog/tag/${params.tag}`} />
+  <Pagination page={page} totalPages={totalPages} pageLinks={pageLinks} baseUrl={`${USER_SITE_BASE}/blog/tag/${params.tag}`} />
 </BaseLayout>
