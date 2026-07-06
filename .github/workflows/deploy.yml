@@ -20,14 +20,29 @@ jobs:
     steps:
       - name: Checkout your repository using git
         uses: actions/checkout@v6
-      - name: Install, build, and upload your site output
-        uses: withastro/action@v6
-        # with:
-            # path: . # The root location of your Astro project inside the repository. (optional)
-            # node-version: 24 # The specific version of Node that should be used to build your site. Defaults to 24. (optional)
-            # package-manager: pnpm@latest # The Node package manager that should be used to install dependencies and build your site. Automatically detected based on your lockfile. (optional)
-            # build-cmd: pnpm run build # The command to run to build your site. Runs the package build script/task by default. (optional)
-            # out-dir: dist # The output directory created by the build command. Defaults to dist. (optional)
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@41ff72655975bd51cab0327fa583b6e92b6d3061
+        with:
+          version: 9
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Astro typecheck
+        run: pnpm astro-check
+
+      - name: Biome check (lint + formatting) on src
+        run: pnpm biome:check
+
+      - name: Biome formatting check on src (no write)
+        run: pnpm biome:format -- ./src --write=false
 
   deploy:
     needs: build
