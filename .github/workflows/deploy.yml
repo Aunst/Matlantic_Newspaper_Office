@@ -44,6 +44,9 @@ jobs:
       - name: Biome formatting check on src (no write)
         run: pnpm biome:format -- ./src --write=false
 
+      - name: Build
+        run: pnpm astro build
+
   deploy:
     needs: build
     runs-on: ubuntu-latest
