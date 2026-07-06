@@ -1,6 +1,6 @@
 ---
-import BaseLayout from "@layouts/BaseLayout.astro";
 import { t, USER_SITE_BASE } from "@config";
+import BaseLayout from "@layouts/BaseLayout.astro";
 import { Icon } from "astro-icon/components";
 import MainCard from "@/components/MainCard.astro";
 
@@ -75,7 +75,7 @@ if (pathname.startsWith(`${USER_SITE_BASE}/blog/tag/`)) {
         <h3 class="font-semibold">{t("label.404browseArchives")}</h3>
       </a>
 
-      <a href={`${USER_SITE_BASE}/blog/search`} class="card bg-base-200 p-4 hover-lift text-center transition-all duration-300">
+      <a href="/blog/search" class="card bg-base-200 p-4 hover-lift text-center transition-all duration-300">
         <div class="text-info mb-2">
           <Icon name="lucide:search" class="w-8 h-8 mx-auto" />
         </div>
